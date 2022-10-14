@@ -1,20 +1,18 @@
 .Navbar .navbar {
+    display: flex;
+    justify-content: space-between;
     padding: 15px;
-    width: 100%;
     background-color: #363636;
     height: 5vh;
 }
 
 .Navbar .logo {
-    position: relative;
-    float: left;
+    font-weight: bold;
+    font-size: 1.5em;
     color: white;
 }
 
 .Navbar .pageLink {
-    position: fixed;
-    left: 190vh;
-    float: left;
     list-style: none;
 }
 
@@ -27,7 +25,9 @@
 
 .Navbar .superTag {
     display: inline;
-    color: rgb(46, 226, 202);
+    color: #26A7DE;
+    font-weight: 100;
+    font-size: 0.7em;
 }
 
 .Navbar .video {

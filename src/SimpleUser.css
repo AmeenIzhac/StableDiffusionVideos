@@ -1,43 +1,32 @@
-.SimpleUser {
-    background-color:  #363636;
-    height: 100vh;
+.mainDiv {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    margin-top: 10vh;
 }
 
-.SimpleUser .mainDiv {
-    position: relative;
-    width: 40%; 
-    margin: auto;
-    top: 15vh;
-}
-
-.SimpleUser .promptDiv {
-    position: relative;
-    margin: auto;
-}
-
-.SimpleUser .videoDiv {
-    position: relative;
-    height: auto;
-    margin: auto;
-}
-
-.SimpleUser .prompt {
-    position: relative;
-    width: 98.5%;
+.prompt {
+    width: 80vw;
     border-radius: 5px;
-    height: 32px;
-    background-color: rgb(128, 128, 128);
-    caret-color: rgb(46, 226, 202);
-    font-family: cursive;
-    font-size: 16px;
+    border: none;
+    padding: 12px;
+    background-color: #646669;
+    caret-color: #26A7DE; 
+    font-size: 20px;
+    overflow: auto;
 }
 
-.SimpleUser .prompt::placeholder {
+.prompt::placeholder {
     color: white;
 }
 
-.SimpleUser .video {
+.prompt:focus {
+    outline-width: 0;
+}
+
+.video {
     position: relative;
-    top: 5vh;
-    width: 100%;
+    margin-top: 5vh;
+    width: 600px;
 }
