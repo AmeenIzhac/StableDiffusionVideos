@@ -1,4 +1,3 @@
-import './SimpleUser.css'
 import Navbar from './Navbar'
 
 export default function SimpleUser() {

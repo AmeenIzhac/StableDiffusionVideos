@@ -10,3 +10,36 @@ body {
 body {
   background-color: #363636;
 }
+
+.mainDiv {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    margin-top: 10vh;
+}
+
+.prompt {
+    width: 80vw;
+    border-radius: 5px;
+    border: none;
+    padding: 12px;
+    background-color: #646669;
+    caret-color: #26A7DE; 
+    font-size: 20px;
+    overflow: auto;
+}
+
+.prompt::placeholder {
+    color: white;
+}
+
+.prompt:focus {
+    outline-width: 0;
+}
+
+.video {
+    position: relative;
+    margin-top: 5vh;
+    width: 600px;
+}
