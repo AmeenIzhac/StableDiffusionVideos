@@ -1,0 +1,14 @@
+.controls_container {
+  background-color: #646669;
+  color: white;
+  margin-top: 2em;
+  border-radius: 5px;
+  width: 35vw;
+  margin-right: 10px;
+  padding: 10px;
+}
+
+.output_container {
+  display: flex;
+
+}
