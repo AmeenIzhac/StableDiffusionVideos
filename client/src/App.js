@@ -5,14 +5,14 @@ import SuperUser from './SuperUser'
 
 function App() {
   return (
-    <>
-      <Router>
-        <Routes>
-          <Route path="" exact element={<SimpleUser />} />
-          <Route path="/superUser" exact element={<SuperUser />} />
-        </Routes>
-      </Router>
-    </>
+  <>
+    <Router>
+      <Routes>
+        <Route path="/" exact element={<SimpleUser />} />
+        <Route path="/superUser" exact element={<SuperUser />} />
+      </Routes>
+    </Router>
+  </>
   );
 }
 
