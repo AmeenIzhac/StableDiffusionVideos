@@ -9,7 +9,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" exact element={<SimpleUser />} />
-        <Route path="/superUser" exact element={<SuperUser />} />
+        <Route path="/superUser" element={<SuperUser />} />
       </Routes>
     </Router>
   </>
