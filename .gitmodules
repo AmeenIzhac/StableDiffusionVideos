@@ -1,3 +1,6 @@
 [submodule "stable-diffusion"]
 	path = stable-diffusion
 	url = https://github.com/CompVis/stable-diffusion.git
+[submodule "stable-diffusion-2"]
+	path = stable-diffusion-2
+	url = https://github.com/basujindal/stable-diffusion.git
