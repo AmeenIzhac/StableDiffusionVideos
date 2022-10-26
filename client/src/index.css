@@ -11,6 +11,10 @@ body {
   background-color: #363636;
 }
 
+input:focus::placeholder {
+  color: transparent;
+}
+
 .mainDiv {
     display: flex;
     justify-content: center;
@@ -20,10 +24,11 @@ body {
 }
 
 .prompt {
-    width: 80vw;
-    border-radius: 5px;
-    border: none;
-    padding: 12px;
+    width: 70vw;
+    border:1px solid black;
+    border-bottom-left-radius: 10px;
+    border-top-left-radius: 10px;
+    padding: 12px 20px;
     background-color: #646669;
     caret-color: #26A7DE; 
     font-size: 20px;
@@ -36,6 +41,18 @@ body {
 
 .prompt:focus {
     outline-width: 0;
+    color: #98c5d8;
+}
+.promptButton {
+  background-color: #26A7DE;
+  padding: 12px;
+  font-size: 20px;
+  color: white;
+  border: 1px solid black;
+  border-bottom-right-radius: 10px;
+  border-top-right-radius: 10px;
+  /* border-radius: 10px 10px 0 0; */
+
 }
 
 .video {
