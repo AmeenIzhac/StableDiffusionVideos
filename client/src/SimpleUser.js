@@ -3,36 +3,39 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 
 export default function SimpleUser() {
+    const [src, setSrc] = useState("");
 
-    const [test, setTest] = useState("Hello World");
-
-    useEffect(() => { 
-        console.log("axios call");
-        axios.get('http://109.158.65.154:8080/api').then((response) => {
-            console.log(response.data[0].prompt); 
+    useEffect(() => {
+        axios({
+            method: 'get',
+            url: 'http://109.158.65.154:8080/api',
+            responseType: 'blob'
+        })
+        .then((response) => {
+            setSrc(URL.createObjectURL(response.data));
+        })
+        .catch((error) => {
+            console.log(error);
         });
-        console.log("axios call end");
     }, []);
-
-    return (
-        <div className='SimpleUser'>
-            <Navbar isSuper={false} link="Super User" href="superUser"/>
-            <div className="mainDiv">
-                <div  className='promptDiv'>
-                    <input className='prompt' placeholder='Enter Text Prompt...'></input>
-                </div>
-                <div className='videoDiv'>
-                    <video className="video" controls>
-                        <source src="vid.mp4" type="video/mp4"/>
-                        Your browser does not support the video tag.
-                    </video>
-                </div>
-                <div>
-                    <p>{test}</p>
+    
+    if (src !== "")  {
+        return (
+            <div className='SimpleUser'>
+                <Navbar isSuper={false} link="Super User" href="superUser"/>
+                <div className="mainDiv">
+                    <div  className='promptDiv'>
+                        <input className='prompt' placeholder='Enter Text Prompt...'></input>
+                    </div>
+                    <div className='videoDiv'>
+                        <video id="vidObj" width="500" height="360" controls loop muted autoPlay>
+                            <source src={src} type="video/mp4"/>
+                        </video>
+                    </div>
                 </div>
             </div>
-        </div>
-    );
+        );
+    }
   }
 
   
