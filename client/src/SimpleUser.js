@@ -10,14 +10,20 @@ export default function SimpleUser() {
         setPrompt(e.target.value);
     }
 
+    var extension  =  (prompt==="") ? '' : `?prompt=${prompt}`;
+    var url = 'http://109.158.65.154:8080/api' + extension;
+
     function getVideo() {
         axios({
             method: 'get',
-            url: `http://109.158.65.154:8080/api?prompt=${prompt}`,
+            url: url,
             responseType: 'blob',
+	    accessControlAllowOrigin: '*',
+            timeout: 300000
         })
         .then((response) => {
             setSrc(URL.createObjectURL(response.data));
+            console.log(src);
         })
         .catch((error) => {
             console.log(error);
@@ -42,6 +48,9 @@ export default function SimpleUser() {
                         <video id="vidObj" width="500" height="360" controls loop muted autoPlay>
                             <source src={src} type="video/mp4"/>
                         </video>
+                    </div>
+                    <div>
+                        <p> ${src} </p>
                     </div>
                 </div>
             </div>
