@@ -394,6 +394,8 @@ def main():
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
     model = model.to(device)
 
+    model.half() ##to remove probably
+
     print("\n\n=========================\n second bench : \n")
     os.system("nvidia-smi")
     print("=========================\n\n")
