@@ -4,3 +4,6 @@
 [submodule "stable-diffusion-2"]
 	path = stable-diffusion-2
 	url = https://github.com/basujindal/stable-diffusion.git
+[submodule "StableDiffusionVideosWebServer"]
+	path = StableDiffusionVideosWebServer
+	url = https://github.com/raaifhadadi/StableDiffusionVideosWebServer
