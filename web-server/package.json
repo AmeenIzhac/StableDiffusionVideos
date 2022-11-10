@@ -4,7 +4,8 @@
   "description": "web server for the stable diffusion videos project",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "node index.js"
   },
   "author": "raaif",
   "license": "MIT",
