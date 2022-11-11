@@ -103,13 +103,11 @@ def load_model(model_state, config_path, ckpt_path, optimized=False):
         modelCS.eval()
         modelCS.cond_stage_model.device = device
         modelCS.half()
-        modelCS.to(device)
 
         modelFS = instantiate_from_config(config.modelFirstStage)
         _, _ = modelFS.load_state_dict(sd, strict=False)
         modelFS.eval()
         modelFS.half()
-        modelFS.to(device)
         del sd
         model_state.FS = modelFS
         model_state.CS = modelCS
@@ -158,8 +156,11 @@ def generate_image (
     if x is None:
         shape = [1, ia.C, ia.H // ia.f, ia.W // ia.f]
         x = torch.randn(shape, device=ms.device)
-    samples_ddim, _ = ms.sampler.sample(S=ia.steps, conditioning=c, unconditional_guidance_scale=ia.scale,
-                            unconditional_conditioning=uc, x_T=x)
+        samples_ddim, _ = ms.sampler.sample(S=ia.steps, conditioning=c, unconditional_guidance_scale=ia.scale,
+                                unconditional_conditioning=uc, x_T=x)
+    else:
+        samples_ddim, _ = ms.sampler.sample(S=ia.steps, conditioning=c, unconditional_guidance_scale=ia.scale,
+                                unconditional_conditioning=uc, x_T=x, img2img=True, t_enc=t_enc)
     return samples_ddim
 
 
@@ -201,11 +202,18 @@ def generate_video (
             # 
             # Generate the text embeddings with the language model
             # #
+            model_state.CS.to(model_state.device)
             uc = model_state.CS.get_learned_conditioning([""])
             C = []
             for prompt in video_args.prompts:
                 C.append(model_state.CS.get_learned_conditioning([prompt])) #look if it can be done in parallel by handing a list of prompts
+            if model_state.device != "cpu":
+                mem = torch.cuda.memory_allocated() / 1e6
+                model_state.CS.to("cpu")
+                while torch.cuda.memory_allocated() / 1e6 >= mem:
+                    time.sleep(1)
 
+            model_state.FS.to(model_state.device)
 
 
             #=====================FIRST_IMAGE_GENERATION=========================#
@@ -276,8 +284,10 @@ image_args = ImageArgs()
 video_args = VideoArgs()
 video_args.prompts = ["A 19th century dreamy colored drawing for a child book, surrealist, clouds, yellow glowing stars, moon with a face, sun with a face, paper perspective, art station"]
 video_args.fps = 20
-video_args.zoom = 1.02
-video_args.frames = 2
-image_args.steps = 10
+video_args.zoom = 1.015
+video_args.x = -3
+video_args.frames = 120
+image_args.steps = 40
+image_args.W = 768
 
 generate_video(image_args, video_args, model_state)

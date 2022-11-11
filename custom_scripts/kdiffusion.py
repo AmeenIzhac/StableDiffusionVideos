@@ -10,17 +10,45 @@ class KDiffusionSampler:
         self.generation_callback = callback
     def get_sampler_name(self):
         return self.schedule
-    def sample(self, S, conditioning, unconditional_guidance_scale, unconditional_conditioning, x_T):
-        sigmas = self.model_wrap.get_sigmas(S)
-        x = x_T * sigmas[0]
-        model_wrap_cfg = CFGDenoiser(self.model_wrap)
-        samples_ddim = None
-        samples_ddim = K.sampling.__dict__[f'sample_{self.schedule}'](
-            model_wrap_cfg, x, sigmas,
-            extra_args={'cond': conditioning, 'uncond': unconditional_conditioning,'cond_scale': unconditional_guidance_scale},
-            disable=False, callback=self.generation_callback)
-        #
-        return samples_ddim, None
+    def sample(self, S, conditioning, unconditional_guidance_scale, unconditional_conditioning, x_T, img2img=False, t_enc=None):
+        print('\n\n\n')
+        print(f'img2img is {img2img}')
+        print(f'x_T shape = {x_T.shape}')
+        if img2img:
+            assert t_enc is not None
+            sigmas = self.model_wrap.get_sigmas(S)
+            sigmas = sigmas[len(sigmas) - t_enc - 1 :]
+            noise = torch.randn(*x_T.shape, device=torch.device("cuda"))
+            print(f'noise shape is {noise.shape}')
+            x = (x_T + noise * sigmas[0])
+            print(f'x_shape = {x.shape}')
+            model_wrap_cfg = CFGDenoiser(self.model_wrap)
+            extra_args = {
+                        "cond": conditioning,
+                        "uncond": unconditional_conditioning,
+                        "cond_scale": unconditional_guidance_scale,
+                    }
+            samples_ddim = K.sampling.__dict__[f'sample_{self.schedule}'](
+                model_wrap_cfg, x, sigmas,
+                extra_args=extra_args,
+                disable=False, callback=self.generation_callback)
+            return samples_ddim, None
+
+
+        else:
+            sigmas = self.model_wrap.get_sigmas(S)
+            x = x_T * sigmas[0]
+            print(f'x_shape = {x.shape}')
+            model_wrap_cfg = CFGDenoiser(self.model_wrap)
+            samples_ddim = None
+            samples_ddim = K.sampling.__dict__[f'sample_{self.schedule}'](
+                model_wrap_cfg, x, sigmas,
+                extra_args={'cond': conditioning, 'uncond': unconditional_conditioning,'cond_scale': unconditional_guidance_scale},
+                disable=False, callback=self.generation_callback)
+            #
+            return samples_ddim, None
+
+
 class CFGMaskedDenoiser(nn.Module):
     def __init__(self, model):
         super().__init__()
