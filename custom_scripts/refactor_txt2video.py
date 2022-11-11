@@ -94,31 +94,22 @@ def load_model(model_state, config_path, ckpt_path, optimized=False):
         model.eval()
         model.unet_bs = 1
         model.cdevice = device
-<<<<<<< HEAD
         model.half()
         model.to(device)
-=======
->>>>>>> 8e246df2803102c3736ed48ac7a52e0113ffa1f3
         model.turbo = True
 
         modelCS = instantiate_from_config(config.modelCondStage)
         _, _ = modelCS.load_state_dict(sd, strict=False)
         modelCS.eval()
         modelCS.cond_stage_model.device = device
-<<<<<<< HEAD
         modelCS.half()
         modelCS.to(device)
-=======
->>>>>>> 8e246df2803102c3736ed48ac7a52e0113ffa1f3
 
         modelFS = instantiate_from_config(config.modelFirstStage)
         _, _ = modelFS.load_state_dict(sd, strict=False)
         modelFS.eval()
-<<<<<<< HEAD
         modelFS.half()
         modelFS.to(device)
-=======
->>>>>>> 8e246df2803102c3736ed48ac7a52e0113ffa1f3
         del sd
         model_state.FS = modelFS
         model_state.CS = modelCS
@@ -164,57 +155,12 @@ def generate_image (
     ms = None,
     t_enc = None
 ) :
-<<<<<<< HEAD
     if x is None:
         shape = [1, ia.C, ia.H // ia.f, ia.W // ia.f]
         x = torch.randn(shape, device=ms.device)
     samples_ddim, _ = ms.sampler.sample(S=ia.steps, conditioning=c, unconditional_guidance_scale=ia.scale,
                             unconditional_conditioning=uc, x_T=x)
     return samples_ddim
-=======
-    if True:
-        #samples_ddim, _ = sampler.sample(S=ddim_steps, conditioning=conditioning, batch_size=int(x.shape[0]), shape=x[0].shape, verbose=False, unconditional_guidance_scale=cfg_scale,
-        #                         unconditional_conditioning=unconditional_conditioning, eta=ddim_eta, x_T=x,
-        #                         img_callback=generation_callback if not server_state["bridge"] else None,
-        #                                 log_every_t=int(st.session_state.update_preview_frequency if not server_state["bridge"] else 100))
-        shape = [1, ia.C, ia.H // ia.f, ia.W // ia.f]
-        samples_ddim = ms.model.sample(S=ia.steps,
-                                 conditioning=c,
-                                 shape=shape,
-                                 verbose=False,
-                                 unconditional_guidance_scale=ia.scale,
-                                 unconditional_conditioning=uc,
-                                 eta=ia.eta,
-                                 x_T=None,
-                                 sampler = "plms",
-                                )
-        return samples_ddim
-    
-    if x is None :
-        shape = [ia.C, ia.H // ia.f, ia.W // ia.f]
-        #samples_ddim, _ = ms.sampler.sample(S=ia.steps, conditioning=c, unconditional_guidance_scale=ia.scale,
-        #                                    unconditional_conditioning=uc, x_T=x) #TODO see if I need a callback
-        samples_ddim, _ = ms.sampler.sample(S=ia.steps,
-                                         conditioning=c,
-                                         batch_size=1,
-                                         shape=shape,
-                                         verbose=False,
-                                         unconditional_guidance_scale=ia.scale,
-                                         unconditional_conditioning=uc,
-                                         eta=ia.eta,
-                                        )
-        return samples_ddim
-    else:
-        # encode (scaled latent) -> here we noise the image, according to t_enc
-        z_enc = ms.sampler.stochastic_encode(x, torch.tensor([t_enc]).to(ms.device))
-        # decode it -> here we denoise it, with t_enc too, and with prompt conditioning 
-        new_latent = ms.sampler.decode(z_enc, c, t_enc, 
-            unconditional_guidance_scale= ia.scale, unconditional_conditioning=uc)
-        return new_latent
-
-
-
->>>>>>> 8e246df2803102c3736ed48ac7a52e0113ffa1f3
 
 
 def generate_video (
@@ -255,12 +201,6 @@ def generate_video (
             # 
             # Generate the text embeddings with the language model
             # #
-<<<<<<< HEAD
-=======
-            model_state.CS.to(model_state.device)
-            model_state.FS.to(model_state.device)
-            model_state.model.to(model_state.device)
->>>>>>> 8e246df2803102c3736ed48ac7a52e0113ffa1f3
             uc = model_state.CS.get_learned_conditioning([""])
             C = []
             for prompt in video_args.prompts:
@@ -273,17 +213,10 @@ def generate_video (
             # Generate the first image
             # #
             first_latent = generate_image(c=C[0], uc=uc, ia=image_args, ms=model_state)
-<<<<<<< HEAD
             first_sample = model_state.FS.decode_first_stage(first_latent) #to move in other function
 
             #save it to disk
             send_to_upscale(first_sample, os.path.join(test_dir, f"{0:05}.png"))
-=======
-            first_sample = model_state.modelFS.decode_first_stage(first_latent) #to move in other function
-
-            #save it to disk
-            send_to_upscale(first_sample, os.path.join(test_dir, f"{0:05}.png")) #TODO probably send to upscale instead
->>>>>>> 8e246df2803102c3736ed48ac7a52e0113ffa1f3
 
 
 
@@ -307,19 +240,11 @@ def generate_video (
                 #get the prompt interpolation point for the current image 
                 c = compute_current_prompt(C, i+1, video_args.frames)
 
-<<<<<<< HEAD
                 previous_latent = process_previous_image(model_state.FS, previous_sample, xform, 
                                         video_args.color_match, color_sample, hsv= ((i % 2) == 0))
 
                 new_latent = generate_image(c=c, x=previous_latent, uc=uc, ia=image_args, ms=model_state, t_enc=t_enc) 
                 x_new = model_state.FS.decode_first_stage(new_latent)
-=======
-                previous_latent = process_previous_image(model_state.model, previous_sample, xform, 
-                                        video_args.color_match, color_sample, hsv= ((i % 2) == 0))
-
-                new_latent = generate_image(c=c, x=previous_latent, uc=uc, ia=image_args, ms=model_state, t_enc=t_enc) 
-                x_new = model_state.modelFS.decode_first_stage(new_latent)
->>>>>>> 8e246df2803102c3736ed48ac7a52e0113ffa1f3
                 send_to_upscale(x_new, os.path.join(test_dir, f"{(i+1):05}.png"))
                 previous_sample = x_new
 
@@ -346,10 +271,6 @@ optimized_cfg_path = 'optimizedSD/v1-inference.yaml'
 ckpt_path = 'models/ldm/stable-diffusion-v1/model.ckpt'
 model_state = ModelState()
 load_model(model_state, optimized_cfg_path, ckpt_path, optimized=True)
-<<<<<<< HEAD
-=======
-#load_model(model_state, cfg_path, ckpt_path, optimized=False)
->>>>>>> 8e246df2803102c3736ed48ac7a52e0113ffa1f3
 
 image_args = ImageArgs()
 video_args = VideoArgs()
