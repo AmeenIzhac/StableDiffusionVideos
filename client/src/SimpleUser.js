@@ -39,14 +39,32 @@ export default function SimpleUser() {
 
         setPrompt("");
     };
+
+    //dropdown code
+    const dropOptions = () => {
+        const dropdown = document.getElementById("dropdown")
+        const button = document.getElementById("button")
+        dropdown.classList.toggle("open")
+        button.classList.toggle("rotate")
+    }
+
+    
     
     return (
         <div className='SimpleUser'>
             <Navbar isSuper={false} link="Super User" href="superUser"/>
             <div className="mainDiv">
-                <div  className='promptDiv'>
-                    <input className='prompt' value={prompt} placeholder='Enter Text Prompt...' onChange={handleChange}></input>
-                    <button className='promptButton' onClick={getVideo}>Generate Video</button>
+                <div className='promptContainerDiv'>
+                    <div  className='promptDiv'>
+                        <input className='prompt' value={prompt} placeholder='Enter Text Prompt...' onChange={handleChange}></input>
+                        <button className='promptButton' onClick={getVideo}>Generate Video</button>
+                    </div>
+                    <div className='slideOptions'>
+                        <div className='dropdownOption' id="dropdown">
+                            hello mate
+                        </div>
+                        <button className='dropArrow' onClick={dropOptions} id="button"></button>
+                    </div>
                 </div>
                 <div className='videoDiv'>
                     {src ? 

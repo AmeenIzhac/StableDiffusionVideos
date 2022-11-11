@@ -1,14 +1,18 @@
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family:  'Ubuntu Mono', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 
+    'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+:root {
+  --main-bg-dark: #181818; /*363945*/
+  --main-bg-light: #9A4EAE;
+}
+
 body {
-  background-color: #363636;
+  background-color: var(--main-bg-dark);
 }
 
 input:focus::placeholder {
@@ -20,19 +24,31 @@ input:focus::placeholder {
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    margin-top: 10vh;
+}
+
+.promptContainerDiv {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.promptDiv {
+  display: flex;
+  margin-top: 10%;
 }
 
 .prompt {
     width: 70vw;
-    border:1px solid black;
-    border-bottom-left-radius: 10px;
+    border: none;
+    border-bottom: 3px solid var(--main-bg-light);
     border-top-left-radius: 10px;
-    padding: 12px 20px;
-    background-color: #646669;
-    caret-color: #26A7DE; 
-    font-size: 20px;
+    padding: 5px 20px;
+    background-color: var(--main-bg-dark); 
+    caret-color: var(--main-bg-light); 
+    font-family: 'Ubuntu Mono';
+    font-size: 2em;
+    text-align: center;
     overflow: auto;
+    margin-right: 5px;
 }
 
 .prompt::placeholder {
@@ -41,18 +57,23 @@ input:focus::placeholder {
 
 .prompt:focus {
     outline-width: 0;
-    color: #98c5d8;
+    color: white;
 }
 .promptButton {
-  background-color: #26A7DE;
+  background-color: var(--main-bg-dark);
   padding: 12px;
   font-size: 20px;
-  color: white;
-  border: 1px solid black;
-  border-bottom-right-radius: 10px;
-  border-top-right-radius: 10px;
+  color: var(--main-bg-light);
+  border: none;
+  border-bottom: 3px solid var(--main-bg-light);
+  font-family: 'Ubuntu Mono';
+  font-size: 1.2em;
   /* border-radius: 10px 10px 0 0; */
+}
 
+.promptButton:hover {
+  background-color: var(--main-bg-light);
+  color: var(--main-bg-dark);
 }
 
 .video {
@@ -60,3 +81,42 @@ input:focus::placeholder {
     margin-top: 5vh;
     width: 600px;
 }
+
+
+/* Dropdown settings */
+
+.slideOptions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-left: -15%;
+}
+
+.dropArrow {
+  background-image: url('./assets/drop-arrow.svg');
+  background-color: var(--main-bg-dark);
+  width: 30px;
+  height: 12px;
+  margin-top: 20px;
+  border: none;
+  transition: height 0.5s ease;
+}
+
+.dropdownOption {
+  margin-top: 10px;
+  background-color: var(--main-bg-light);
+  width: 40vw;
+  height: 0px;
+  overflow: hidden;
+  transition: height 0.5s ease;
+}
+
+.open {
+  height: 400px;
+}
+
+.rotate {
+  transform: rotate(180deg);
+}
+
+
