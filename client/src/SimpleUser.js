@@ -7,6 +7,9 @@ export default function SimpleUser() {
     const [src, setSrc] = useState("");
     const [prompt, setPrompt] = useState("");
     const [loading, setLoading] = useState(false);
+    const [frameNumber, setFrameNumber] = useState("30")
+    const [width, setWidth] = useState("")
+    const [height, setHeight] = useState("")
 
     const handleChange = (e) => {
         setPrompt(e.target.value);
@@ -48,6 +51,43 @@ export default function SimpleUser() {
         button.classList.toggle("rotate")
     }
 
+    const slideChange = (e) => {
+        setFrameNumber(e.target.value);
+    }
+
+    const widthChange = (e) => {
+        setWidth(e.target.value)
+    }
+    const heightChange = (e) => {
+        setHeight(e.target.value)
+    }
+
+    const logger = (e) => {
+        e.preventDefault()
+        const numberRegex = new RegExp('[0-9]+$')
+        console.log(`Prompt is ${prompt}`)
+        console.log(`Frames are ${frameNumber}`);
+        console.log(`Width is ${width}`)
+        if (!(numberRegex.test(width) && numberRegex.test(height))) {
+            alert('Please Enter Width and Height as Integer Values')
+            return;
+        } else {
+            const h = parseInt(height)
+            const w = parseInt(width)
+            if (h % 64 !==0  || w % 64 !== 0) {
+                alert('Width and Height should be multiples of 64')
+                return;
+            }
+        }
+        console.log(`Width is ${height}`)
+    }
+
+    function handleKeyDown(event) {
+        if (event.key === 'Enter') {
+            logger(event)
+        }
+    }
+
     
     
     return (
@@ -56,12 +96,27 @@ export default function SimpleUser() {
             <div className="mainDiv">
                 <div className='promptContainerDiv'>
                     <div  className='promptDiv'>
-                        <input className='prompt' value={prompt} placeholder='Enter Text Prompt...' onChange={handleChange}></input>
-                        <button className='promptButton' onClick={getVideo}>Generate Video</button>
+                        <input className='prompt' value={prompt} placeholder='Enter Text Prompt...' onChange={handleChange} onSubmit={logger} onKeyDown={handleKeyDown}></input>
+                        <button className='promptButton' onClick={logger}>Generate Video</button>
+                        {/* <button className='promptButton' onClick={getVideo} onSubmit={logger}>Generate Video</button> */}
                     </div>
                     <div className='slideOptions'>
                         <div className='dropdownOption' id="dropdown">
-                            hello mate
+                            <form>
+                                <div className='slideContainer alignCenter'>
+                                    <p>Number of Frames:</p>
+                                    <input type="range" min="1" max="60" value={frameNumber} className='slider' id="myRange" onChange={slideChange}/>
+                                    <p>Value: <span id="demo">{frameNumber}</span></p>
+                                </div>
+                                <hr/>
+                                <div className='alignCenter'>
+                                    <input className='dropdownInput alignCenter' value={width} placeholder='Enter Width' onChange={widthChange}/>
+                                </div>
+                                <hr/>
+                                <div className='alignCenter'>
+                                    <input className='dropdownInput alignCenter' value={height} placeholder='Enter Height' onChange={heightChange}/>
+                                </div>
+                            </form>
                         </div>
                         <button className='dropArrow' onClick={dropOptions} id="button"></button>
                     </div>

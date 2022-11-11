@@ -19,6 +19,11 @@ input:focus::placeholder {
   color: transparent;
 }
 
+hr {
+  border: none;
+  border-bottom: .5px solid var(--main-bg-dark);
+}
+
 .mainDiv {
     display: flex;
     justify-content: center;
@@ -49,6 +54,7 @@ input:focus::placeholder {
     text-align: center;
     overflow: auto;
     margin-right: 5px;
+    color: white;
 }
 
 .prompt::placeholder {
@@ -89,7 +95,7 @@ input:focus::placeholder {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-left: -15%;
+  margin-left: -13%;
 }
 
 .dropArrow {
@@ -109,6 +115,8 @@ input:focus::placeholder {
   height: 0px;
   overflow: hidden;
   transition: height 0.5s ease;
+  display: flex;
+  flex-direction: column;
 }
 
 .open {
@@ -117,6 +125,69 @@ input:focus::placeholder {
 
 .rotate {
   transform: rotate(180deg);
+}
+
+
+/* Slider Styles*/
+
+.alignCenter {
+  text-align: center;
+}
+.slider {
+  -webkit-appearance: none;
+  width: 70%;
+  height: 2px;
+  border-radius: 5px;
+  background: var(--main-bg-dark);
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+  margin-top: 10px;
+}
+
+.slider:hover {
+  opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--main-bg-dark);
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: #04AA6D;
+  cursor: pointer;
+}
+
+.dropdownInput {
+  border: none;
+  border-bottom: 3px solid var(--main-bg-dark);
+  border-top-left-radius: 10px;
+  padding: 5px 20px;
+  background-color: var(--main-bg-light); 
+  caret-color: var(--main-bg-dark); 
+  font-family: 'Ubuntu Mono';
+  font-size: 1.1em;
+  text-align: center;
+  overflow: auto;
+  margin-bottom: 10px;
+}
+.dropdownInput::placeholder {
+    color: var(--main-bg-dark);
+}
+
+.dropdownInput:focus {
+    outline-width: 0;
+    color: var(--main-bg-dark);
 }
 
 
