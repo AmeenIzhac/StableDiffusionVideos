@@ -7,25 +7,27 @@ from ldm.util import instantiate_from_config
 
 
 
-def load_model_from_config(ckpt, config=None, verbose=False):
+def load_model_from_config(ckpt, config=None, verbose=False, return_only_sd=False):
     print(f"Loading model from {ckpt}")
     pl_sd = torch.load(ckpt, map_location="cpu")
     if "global_step" in pl_sd:
         print(f"Global Step: {pl_sd['global_step']}")
     sd = pl_sd["state_dict"]
-    model = instantiate_from_config(config.model)
-    m, u = model.load_state_dict(sd, strict=False)
-    if len(m) > 0 and verbose:
-        print("missing keys:")
-        print(m)
-    if len(u) > 0 and verbose:
-        print("unexpected keys:")
-        print(u)
+    if return_only_sd :
+        return sd, None
+    else :
+        model = instantiate_from_config(config.model)
+        m, u = model.load_state_dict(sd, strict=False)
+        if len(m) > 0 and verbose:
+            print("missing keys:")
+            print(m)
+        if len(u) > 0 and verbose:
+            print("unexpected keys:")
+            print(u)
 
-    model.cuda()
-    model.eval()
-    return model
-    #return sd
+        model.cuda()
+        model.eval()
+        return sd, model
 
 #taken from deforum's video repo
 def maintain_colors(prev_img, color_match_sample, hsv=False):

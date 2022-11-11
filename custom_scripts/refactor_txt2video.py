@@ -16,6 +16,8 @@ from kdiffusion import KDiffusionSampler
 
 #fix that omg
 from ldm.models.diffusion.ddim import DDIMSampler
+from ldm.util import instantiate_from_config
+
 
 
 
@@ -56,54 +58,57 @@ class ModelState:
 
 
 
-def load_model(model_state, config_path, ckpt_path):
-    config = OmegaConf.load(f"{config_path}")
-    model = load_model_from_config(ckpt_path, config)
+def load_model(model_state, config_path, ckpt_path, optimized=False):
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-    model = model.to(device)
-    model_state.model = model
-    model_state.CS = model
-    model_state.FS = model
 
-    #sd = load_model_from_config(f"{ckpt_path}")
-    #li, lo = [], []
-    #for key, value in sd.items():
-    #    sp = key.split(".")
-    #    if (sp[0]) == "model":
-    #        if "input_blocks" in sp:
-    #            li.append(key)
-    #        elif "middle_block" in sp:
-    #            li.append(key)
-    #        elif "time_embed" in sp:
-    #            li.append(key)
-    #        else:
-    #            lo.append(key)
-    #for key in li:
-    #    sd["model1." + key[6:]] = sd.pop(key)
-    #for key in lo:
-    #    sd["model2." + key[6:]] = sd.pop(key)
-#
-    #config = OmegaConf.load(f"{config_path}")
-#
-    #model = instantiate_from_config(config.modelUNet)
-    #_, _ = model.load_state_dict(sd, strict=False)
-    #model.eval()
-    #model.unet_bs = 1
-    #model.cdevice = device
-    #model.turbo = True
-#
-    #modelCS = instantiate_from_config(config.modelCondStage)
-    #_, _ = modelCS.load_state_dict(sd, strict=False)
-    #modelCS.eval()
-    #modelCS.cond_stage_model.device = device
-#
-    #modelFS = instantiate_from_config(config.modelFirstStage)
-    #_, _ = modelFS.load_state_dict(sd, strict=False)
-    #modelFS.eval()
-    #del sd
-    #model_state.FS = modelFS
-    #model_state.CS = modelCS
-    #model_state.model = model
+    if not optimized:
+        config = OmegaConf.load(f"{config_path}")
+        _, model = load_model_from_config(ckpt_path, config, return_only_sd=False)
+        model = model.to(device)
+        model_state.model = model
+        model_state.CS = model
+        model_state.FS = model
+
+    else:
+        sd, _ = load_model_from_config(f"{ckpt_path}", return_only_sd=True)
+        li, lo = [], []
+        for key, value in sd.items():
+            sp = key.split(".")
+            if (sp[0]) == "model":
+                if "input_blocks" in sp:
+                    li.append(key)
+                elif "middle_block" in sp:
+                    li.append(key)
+                elif "time_embed" in sp:
+                    li.append(key)
+                else:
+                    lo.append(key)
+        for key in li:
+            sd["model1." + key[6:]] = sd.pop(key)
+        for key in lo:
+            sd["model2." + key[6:]] = sd.pop(key)
+
+        config = OmegaConf.load(f"{config_path}")
+
+        model = instantiate_from_config(config.modelUNet)
+        _, _ = model.load_state_dict(sd, strict=False)
+        model.eval()
+        model.unet_bs = 1
+        model.cdevice = device
+        model.turbo = True
+
+        modelCS = instantiate_from_config(config.modelCondStage)
+        _, _ = modelCS.load_state_dict(sd, strict=False)
+        modelCS.eval()
+        modelCS.cond_stage_model.device = device
+
+        modelFS = instantiate_from_config(config.modelFirstStage)
+        _, _ = modelFS.load_state_dict(sd, strict=False)
+        modelFS.eval()
+        del sd
+        model_state.FS = modelFS
+        model_state.CS = modelCS
+        model_state.model = model
 
 
 def compute_current_prompt(C, index, frames) :
@@ -145,6 +150,24 @@ def generate_image (
     ms = None,
     t_enc = None
 ) :
+    if True:
+        #samples_ddim, _ = sampler.sample(S=ddim_steps, conditioning=conditioning, batch_size=int(x.shape[0]), shape=x[0].shape, verbose=False, unconditional_guidance_scale=cfg_scale,
+        #                         unconditional_conditioning=unconditional_conditioning, eta=ddim_eta, x_T=x,
+        #                         img_callback=generation_callback if not server_state["bridge"] else None,
+        #                                 log_every_t=int(st.session_state.update_preview_frequency if not server_state["bridge"] else 100))
+        shape = [1, ia.C, ia.H // ia.f, ia.W // ia.f]
+        samples_ddim = ms.model.sample(S=ia.steps,
+                                 conditioning=c,
+                                 shape=shape,
+                                 verbose=False,
+                                 unconditional_guidance_scale=ia.scale,
+                                 unconditional_conditioning=uc,
+                                 eta=ia.eta,
+                                 x_T=None,
+                                 sampler = "plms",
+                                )
+        return samples_ddim
+    
     if x is None :
         shape = [ia.C, ia.H // ia.f, ia.W // ia.f]
         #samples_ddim, _ = ms.sampler.sample(S=ia.steps, conditioning=c, unconditional_guidance_scale=ia.scale,
@@ -205,71 +228,71 @@ def generate_video (
     precision_scope = autocast
     with torch.no_grad():
         with precision_scope("cuda"):
-            with model_state.model.ema_scope():
+            #with model_state.model.ema_scope():
 
-                # 
-                # Generate the text embeddings with the language model
-                # #
-                model_state.CS.to(model_state.device)
-                model_state.FS.to(model_state.device)
-                model_state.model.to(model_state.device)
-                uc = model_state.CS.get_learned_conditioning([""])
-                C = []
-                for prompt in video_args.prompts:
-                    C.append(model_state.CS.get_learned_conditioning([prompt])) #look if it can be done in parallel by handing a list of prompts
-
-
-
-                #=====================FIRST_IMAGE_GENERATION=========================#
-                # 
-                # Generate the first image
-                # #
-                first_latent = generate_image(c=C[0], uc=uc, ia=image_args, ms=model_state)
-                first_sample = model_state.model.decode_first_stage(first_latent) #to move in other function
-
-                #save it to disk
-                send_to_upscale(first_sample, os.path.join(test_dir, f"{0:05}.png")) #TODO probably send to upscale instead
+            # 
+            # Generate the text embeddings with the language model
+            # #
+            model_state.CS.to(model_state.device)
+            model_state.FS.to(model_state.device)
+            model_state.model.to(model_state.device)
+            uc = model_state.CS.get_learned_conditioning([""])
+            C = []
+            for prompt in video_args.prompts:
+                C.append(model_state.CS.get_learned_conditioning([prompt])) #look if it can be done in parallel by handing a list of prompts
 
 
 
+            #=====================FIRST_IMAGE_GENERATION=========================#
+            # 
+            # Generate the first image
+            # #
+            first_latent = generate_image(c=C[0], uc=uc, ia=image_args, ms=model_state)
+            first_sample = model_state.modelFS.decode_first_stage(first_latent) #to move in other function
 
-                #=====================SUBSEQUENT_IMAGES_GENERATION=========================#
-                xform = make_xform_2d(  image_args.W, image_args.H, video_args.x, 
-                                        video_args.y, video_args.angle, video_args.zoom )
-
-                t_enc = int(video_args.strength * image_args.steps)
-                previous_sample = first_sample
-                color_sample = sample_to_cv2(previous_sample).copy()
-
-                #maybe some code to get the proper sampler
-
-                for i in trange(video_args.frames-1, desc="Generating frames"):
-
-                    #seeding
-                    seed += 1
-                    seed_everything(seed)
-
-                    #get the prompt interpolation point for the current image 
-                    c = compute_current_prompt(C, i+1, video_args.frames)
-
-                    previous_latent = process_previous_image(model_state.model, previous_sample, xform, 
-                                            video_args.color_match, color_sample, hsv= ((i % 2) == 0))
-
-                    new_latent = generate_image(c=c, x=previous_latent, uc=uc, ia=image_args, ms=model_state, t_enc=t_enc) 
-                    x_new = model_state.model.decode_first_stage(new_latent)
-                    send_to_upscale(x_new, os.path.join(test_dir, f"{(i+1):05}.png"))
-                    previous_sample = x_new
+            #save it to disk
+            send_to_upscale(first_sample, os.path.join(test_dir, f"{0:05}.png")) #TODO probably send to upscale instead
 
 
-                #==========COMPILING=THE=VIDEO==========
-                if(video_args.video_name == None):
-                    video_count = 0 #len(os.listdir(video_path))
-                    video_name = f"video{video_count}"
-                else:
-                    video_name = video_args.video_name
-                sample_regex = os.path.join(test_dir, "%05d.png")
-                command = f"ffmpeg -r {video_args.fps} -start_number {0} -i {sample_regex} -c:v libx264 -r 30 -pix_fmt yuv420p {os.path.join(test_dir, video_name)}.mp4"   #TODO do that stuff                         
-                os.system(command)
+
+
+            #=====================SUBSEQUENT_IMAGES_GENERATION=========================#
+            xform = make_xform_2d(  image_args.W, image_args.H, video_args.x, 
+                                    video_args.y, video_args.angle, video_args.zoom )
+
+            t_enc = int(video_args.strength * image_args.steps)
+            previous_sample = first_sample
+            color_sample = sample_to_cv2(previous_sample).copy()
+
+            #maybe some code to get the proper sampler
+
+            for i in trange(video_args.frames-1, desc="Generating frames"):
+
+                #seeding
+                seed += 1
+                seed_everything(seed)
+
+                #get the prompt interpolation point for the current image 
+                c = compute_current_prompt(C, i+1, video_args.frames)
+
+                previous_latent = process_previous_image(model_state.model, previous_sample, xform, 
+                                        video_args.color_match, color_sample, hsv= ((i % 2) == 0))
+
+                new_latent = generate_image(c=c, x=previous_latent, uc=uc, ia=image_args, ms=model_state, t_enc=t_enc) 
+                x_new = model_state.modelFS.decode_first_stage(new_latent)
+                send_to_upscale(x_new, os.path.join(test_dir, f"{(i+1):05}.png"))
+                previous_sample = x_new
+
+
+            #==========COMPILING=THE=VIDEO==========
+            if(video_args.video_name == None):
+                video_count = 0 #len(os.listdir(video_path))
+                video_name = f"video{video_count}"
+            else:
+                video_name = video_args.video_name
+            sample_regex = os.path.join(test_dir, "%05d.png")
+            command = f"ffmpeg -r {video_args.fps} -start_number {0} -i {sample_regex} -c:v libx264 -r 30 -pix_fmt yuv420p {os.path.join(test_dir, video_name)}.mp4"   #TODO do that stuff                         
+            os.system(command)
 
     return
 
@@ -279,16 +302,18 @@ def generate_video (
 
 #Placeholder "main" code
 cfg_path = 'configs/stable-diffusion/v1-inference.yaml'
+optimized_cfg_path = 'optimizedSD/v1-inference.yaml'
 ckpt_path = 'models/ldm/stable-diffusion-v1/model.ckpt'
 model_state = ModelState()
-print(f'\n=================\n model state device = {model_state.device} \n====================\n')
-load_model(model_state, cfg_path, ckpt_path)
+load_model(model_state, optimized_cfg_path, ckpt_path, optimized=True)
+#load_model(model_state, cfg_path, ckpt_path, optimized=False)
 
 image_args = ImageArgs()
 video_args = VideoArgs()
 video_args.prompts = ["A 19th century dreamy colored drawing for a child book, surrealist, clouds, yellow glowing stars, moon with a face, sun with a face, paper perspective, art station"]
 video_args.fps = 20
 video_args.zoom = 1.02
-video_args.frames = 600
+video_args.frames = 2
+image_args.steps = 10
 
 generate_video(image_args, video_args, model_state)
