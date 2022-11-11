@@ -1,18 +1,27 @@
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family:  'Ubuntu Mono', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 
+    'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+:root {
+  --main-bg-dark: #181818; /*363945*/
+  --main-bg-light: #9A4EAE;
+}
+
 body {
-  background-color: #363636;
+  background-color: var(--main-bg-dark);
 }
 
 input:focus::placeholder {
   color: transparent;
+}
+
+hr {
+  border: none;
+  border-bottom: .5px solid var(--main-bg-dark);
 }
 
 .mainDiv {
@@ -20,19 +29,32 @@ input:focus::placeholder {
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    margin-top: 10vh;
+}
+
+.promptContainerDiv {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.promptDiv {
+  display: flex;
+  margin-top: 10%;
 }
 
 .prompt {
     width: 70vw;
-    border:1px solid black;
-    border-bottom-left-radius: 10px;
+    border: none;
+    border-bottom: 3px solid var(--main-bg-light);
     border-top-left-radius: 10px;
-    padding: 12px 20px;
-    background-color: #646669;
-    caret-color: #26A7DE; 
-    font-size: 20px;
+    padding: 5px 20px;
+    background-color: var(--main-bg-dark); 
+    caret-color: var(--main-bg-light); 
+    font-family: 'Ubuntu Mono';
+    font-size: 2em;
+    text-align: center;
     overflow: auto;
+    margin-right: 5px;
+    color: white;
 }
 
 .prompt::placeholder {
@@ -41,18 +63,23 @@ input:focus::placeholder {
 
 .prompt:focus {
     outline-width: 0;
-    color: #98c5d8;
+    color: white;
 }
 .promptButton {
-  background-color: #26A7DE;
+  background-color: var(--main-bg-dark);
   padding: 12px;
   font-size: 20px;
-  color: white;
-  border: 1px solid black;
-  border-bottom-right-radius: 10px;
-  border-top-right-radius: 10px;
+  color: var(--main-bg-light);
+  border: none;
+  border-bottom: 3px solid var(--main-bg-light);
+  font-family: 'Ubuntu Mono';
+  font-size: 1.2em;
   /* border-radius: 10px 10px 0 0; */
+}
 
+.promptButton:hover {
+  background-color: var(--main-bg-light);
+  color: var(--main-bg-dark);
 }
 
 .video {
@@ -60,3 +87,107 @@ input:focus::placeholder {
     margin-top: 5vh;
     width: 600px;
 }
+
+
+/* Dropdown settings */
+
+.slideOptions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-left: -13%;
+}
+
+.dropArrow {
+  background-image: url('./assets/drop-arrow.svg');
+  background-color: var(--main-bg-dark);
+  width: 30px;
+  height: 12px;
+  margin-top: 20px;
+  border: none;
+  transition: height 0.5s ease;
+}
+
+.dropdownOption {
+  margin-top: 10px;
+  background-color: var(--main-bg-light);
+  width: 40vw;
+  height: 0px;
+  overflow: hidden;
+  transition: height 0.5s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.open {
+  height: 400px;
+}
+
+.rotate {
+  transform: rotate(180deg);
+}
+
+
+/* Slider Styles*/
+
+.alignCenter {
+  text-align: center;
+}
+.slider {
+  -webkit-appearance: none;
+  width: 70%;
+  height: 2px;
+  border-radius: 5px;
+  background: var(--main-bg-dark);
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+  margin-top: 10px;
+}
+
+.slider:hover {
+  opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--main-bg-dark);
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: #04AA6D;
+  cursor: pointer;
+}
+
+.dropdownInput {
+  border: none;
+  border-bottom: 3px solid var(--main-bg-dark);
+  border-top-left-radius: 10px;
+  padding: 5px 20px;
+  background-color: var(--main-bg-light); 
+  caret-color: var(--main-bg-dark); 
+  font-family: 'Ubuntu Mono';
+  font-size: 1.1em;
+  text-align: center;
+  overflow: auto;
+  margin-bottom: 10px;
+}
+.dropdownInput::placeholder {
+    color: var(--main-bg-dark);
+}
+
+.dropdownInput:focus {
+    outline-width: 0;
+    color: var(--main-bg-dark);
+}
+
+
