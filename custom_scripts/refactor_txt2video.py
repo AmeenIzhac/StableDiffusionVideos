@@ -13,6 +13,7 @@ import random
 #repo imports
 from sd_video_utils import *
 from kdiffusion import KDiffusionSampler
+from inference_realesrgan import *
 
 #fix that omg
 from ldm.models.diffusion.ddim import DDIMSampler
@@ -141,7 +142,7 @@ def send_to_upscale(x_new, output_path):
 
     for x_sample in x_new_clamp:
         x_sample = 255. * rearrange(x_sample.cpu().numpy(), 'c h w -> h w c')
-        executeRealESRGAN(x_sample, None, output_path, model_name='RealESRGAN_x2plus')
+        executeRealESRGAN(x_sample.astype(np.uint8), None, output_path, model_name='RealESRGAN_x2plus')
         #Image.fromarray(x_sample.astype(np.uint8)).save(output_path)
 
 
@@ -162,7 +163,7 @@ def generate_image (
     else:
         samples_ddim, _ = ms.sampler.sample(S=ia.steps, conditioning=c, unconditional_guidance_scale=ia.scale,
                                 unconditional_conditioning=uc, x_T=x, img2img=True, t_enc=t_enc)
-    return ms.FS.encode_first_stage(samples_ddim)
+    return ms.FS.decode_first_stage(samples_ddim)
 
 
 def generate_video (
@@ -178,7 +179,7 @@ def generate_video (
         seed = random.randint(0, 10 ** 6)
     seed_everything(seed)
     
-    model_state.sampler = KDiffusionSampler(model_state.model,'euler') # TODO either we assume we receive a sampler, or it is reinstantiated at each call if we allow sampler choice
+    model_state.sampler = KDiffusionSampler(model_state.model,'euler_ancestral') # TODO either we assume we receive a sampler, or it is reinstantiated at each call if we allow sampler choice
 
     #
     # Place here DIR variables if necessary #TODO probably should receive them from the server caller, cleaner to do that way than to have implicit convention
@@ -281,12 +282,13 @@ load_model(model_state, optimized_cfg_path, ckpt_path, optimized=True)
 
 image_args = ImageArgs()
 video_args = VideoArgs()
-video_args.prompts = ["A 19th century dreamy colored drawing for a child book, surrealist, clouds, yellow glowing stars, moon with a face, sun with a face, paper perspective, art station"]
+video_args.prompts = ["A solarpunk metropolis, skyscrapers with lush vegetation on terraces, abandonned city, deer and animals on the street, 4k artstation colocolorful ecological"]
 video_args.fps = 20
-video_args.zoom = 1.015
-video_args.x = -3
-video_args.frames = 120
-image_args.steps = 40
+video_args.strength = 0.375
+video_args.zoom = 1.005
+video_args.x = -5
+video_args.frames = 2000
+image_args.steps = 50
 image_args.W = 768
 
 generate_video(image_args, video_args, model_state)
