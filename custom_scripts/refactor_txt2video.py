@@ -55,10 +55,12 @@ class ModelState:
     sampler = None
     FS = None
     CS = None
+    upsampler = None
 
 
 
 def load_model(model_state, config_path, ckpt_path, optimized=False):
+    model_state.upsampler = load_ESRGAN_model(model_name='RealESRGAN_x2plus')
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
     if not optimized:
@@ -136,13 +138,12 @@ def process_previous_image(modelFS, previous_sample, xform, color_match=True, co
     return modelFS.get_first_stage_encoding(modelFS.encode_first_stage(previous_noised))
 
 
-def send_to_upscale(x_new, output_path):
-    #for now we'll just do a mere save
+def send_to_upscale(x_new, output_path, model_state):
     x_new_clamp = torch.clamp((x_new + 1.0) / 2.0, min=0.0, max=1.0)
 
     for x_sample in x_new_clamp:
         x_sample = 255. * rearrange(x_sample.cpu().numpy(), 'c h w -> h w c')
-        executeRealESRGAN(x_sample.astype(np.uint8), None, output_path, model_name='RealESRGAN_x2plus')
+        executeRealESRGAN(x_sample.astype(np.uint8), output_path, model_state.upsampler)
         #Image.fromarray(x_sample.astype(np.uint8)).save(output_path)
 
 
@@ -163,6 +164,8 @@ def generate_image (
     else:
         samples_ddim, _ = ms.sampler.sample(S=ia.steps, conditioning=c, unconditional_guidance_scale=ia.scale,
                                 unconditional_conditioning=uc, x_T=x, img2img=True, t_enc=t_enc)
+                    
+    os.system('nvidia-smi')
     return ms.FS.decode_first_stage(samples_ddim)
 
 
@@ -225,7 +228,7 @@ def generate_video (
             first_sample = generate_image(c=C[0], uc=uc, ia=image_args, ms=model_state)
 
             #save it to disk
-            send_to_upscale(first_sample, os.path.join(test_dir, f"{0:05}.png"))
+            send_to_upscale(first_sample, os.path.join(test_dir, f"{0:05}.png"), model_state)
 
 
 
@@ -253,7 +256,7 @@ def generate_video (
                                         video_args.color_match, color_sample, hsv= ((i % 2) == 0))
 
                 x_new = generate_image(c=c, x=previous_latent, uc=uc, ia=image_args, ms=model_state, t_enc=t_enc) 
-                send_to_upscale(x_new, os.path.join(test_dir, f"{(i+1):05}.png"))
+                send_to_upscale(x_new, os.path.join(test_dir, f"{(i+1):05}.png"), model_state)
                 previous_sample = x_new
 
 
