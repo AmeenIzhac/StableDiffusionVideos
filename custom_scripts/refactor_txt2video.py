@@ -119,7 +119,7 @@ def compute_current_prompt(C, index, frames) :
 
 
 #previous image processing (color coherency, noise, encoding)
-def process_previous_image(modelFS, previous_sample, xform, color_match=True, color_sample=None, noise=0.03, hsv=False):
+def process_previous_image(modelFS, previous_sample, xform, color_match=True, color_sample=None, noise=0.03, hsv=False): #TODO : look if that can be done in parallel (analyze runtime first to see if it's worth it)
     previous_img = sample_to_cv2(previous_sample)
     previous_img = cv2.warpPerspective(
         previous_img,
@@ -141,7 +141,8 @@ def send_to_upscale(x_new, output_path):
 
     for x_sample in x_new_clamp:
         x_sample = 255. * rearrange(x_sample.cpu().numpy(), 'c h w -> h w c')
-        Image.fromarray(x_sample.astype(np.uint8)).save(output_path)
+        executeRealESRGAN(x_sample, None, output_path, model_name='RealESRGAN_x2plus')
+        #Image.fromarray(x_sample.astype(np.uint8)).save(output_path)
 
 
 
@@ -161,7 +162,7 @@ def generate_image (
     else:
         samples_ddim, _ = ms.sampler.sample(S=ia.steps, conditioning=c, unconditional_guidance_scale=ia.scale,
                                 unconditional_conditioning=uc, x_T=x, img2img=True, t_enc=t_enc)
-    return samples_ddim
+    return ms.FS.encode_first_stage(samples_ddim)
 
 
 def generate_video (
@@ -220,8 +221,7 @@ def generate_video (
             # 
             # Generate the first image
             # #
-            first_latent = generate_image(c=C[0], uc=uc, ia=image_args, ms=model_state)
-            first_sample = model_state.FS.decode_first_stage(first_latent) #to move in other function
+            first_sample = generate_image(c=C[0], uc=uc, ia=image_args, ms=model_state)
 
             #save it to disk
             send_to_upscale(first_sample, os.path.join(test_dir, f"{0:05}.png"))
@@ -251,8 +251,7 @@ def generate_video (
                 previous_latent = process_previous_image(model_state.FS, previous_sample, xform, 
                                         video_args.color_match, color_sample, hsv= ((i % 2) == 0))
 
-                new_latent = generate_image(c=c, x=previous_latent, uc=uc, ia=image_args, ms=model_state, t_enc=t_enc) 
-                x_new = model_state.FS.decode_first_stage(new_latent)
+                x_new = generate_image(c=c, x=previous_latent, uc=uc, ia=image_args, ms=model_state, t_enc=t_enc) 
                 send_to_upscale(x_new, os.path.join(test_dir, f"{(i+1):05}.png"))
                 previous_sample = x_new
 
