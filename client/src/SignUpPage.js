@@ -1,20 +1,57 @@
-import './SignUpPage.css';
+import "./SignUpPage.css";
+import "./LoginPage.css";
+import firebase from "./FirebaseBusiness";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function SignUpPage() {
+  const navigate = useNavigate();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const ref = firebase.firestore().collection("users");
+  function addUser() {
+    ref.add({ name: name, email: email, password: password });
+    setName("");
+    setEmail("");
+    setPassword("");
+    navigate("/login");
+  }
+
   return (
     <div className="SignUpPage">
-        <div className="container">
-            <label>Name</label>
-            <input className='input' type="text" />
-            <label>Email</label>
-            <input className='input' type="text" />
-            <label>Password</label>
-            <input className='input' type="password" />
-            <div className="btnContainer">
-            <button className="btn">Sign Up</button>
-            <button className="btn"><a href="/login">Login</a></button>
-            </div>
+      <div className="container">
+        <label>Name</label>
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="input"
+          type="text"
+        />
+        <label>Email</label>
+        <input
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="input"
+          type="text"
+        />
+        <label>Password</label>
+        <input
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="input"
+          type="password"
+        />
+        <div className="btnContainer">
+          <button className="btn" onClick={addUser}>
+            Sign Up
+          </button>
+          <button className="btn">
+            <a href="/login">Login</a>
+          </button>
         </div>
+      </div>
     </div>
   );
 }
