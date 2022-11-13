@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 body {
   margin: 0;
   font-family:  'Ubuntu Mono', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 
@@ -17,6 +18,11 @@ body {
 
 input:focus::placeholder {
   color: transparent;
+}
+
+hr {
+  border: none;
+  border-bottom: .5px solid var(--main-bg-dark);
 }
 
 ul {
@@ -53,6 +59,7 @@ ul {
     text-align: center;
     overflow: auto;
     margin-right: 5px;
+    color: white;
 }
 
 .prompt::placeholder {
@@ -93,7 +100,7 @@ ul {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-left: -15%;
+  margin-left: -13%;
 }
 
 .dropArrow {
@@ -113,6 +120,8 @@ ul {
   height: 0px;
   overflow: hidden;
   transition: height 0.5s ease;
+  display: flex;
+  flex-direction: column;
 }
 
 .open {
@@ -123,6 +132,134 @@ ul {
   transform: rotate(180deg);
 }
 
+
+/* Slider Styles*/
+
+.alignCenter {
+  text-align: center;
+}
+.slider {
+  -webkit-appearance: none;
+  width: 70%;
+  height: 2px;
+  border-radius: 5px;
+  background: var(--main-bg-dark);
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+  margin-top: 10px;
+}
+
+.slider:hover {
+  opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--main-bg-dark);
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: #04AA6D;
+  cursor: pointer;
+}
+
+.dropdownInput {
+  border: none;
+  border-bottom: 3px solid var(--main-bg-dark);
+  border-top-left-radius: 10px;
+  padding: 5px 20px;
+  background-color: var(--main-bg-light); 
+  caret-color: var(--main-bg-dark); 
+  font-family: 'Ubuntu Mono';
+  font-size: 1.1em;
+  text-align: center;
+  overflow: auto;
+  margin-bottom: 10px;
+}
+.dropdownInput::placeholder {
+    color: var(--main-bg-dark);
+}
+
+.dropdownInput:focus {
+    outline-width: 0;
+    color: var(--main-bg-dark);
+}
+
+
+
+/* Login and styling code */
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    border: 1px solid var(--main-bg-light);
+    border-radius: 5px;
+    max-width: 600px;
+    min-width: 300px;
+    width: 35vw;
+    height: 50vh;
+}
+
+.input {
+    background-color: var(--main-bg-dark);
+    border: none;
+    border-bottom: 2px solid var(--main-bg-light);
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: large;
+    font-family: 'Ubuntu Mono';
+    caret-color: var(--main-bg-light); 
+    width: 60%;
+}
+
+.input:focus {
+    outline: none;
+}
+
+.btn {
+    font-family: 'Ubuntu Mono';
+    font-size: large;
+    background-color: var(--main-bg-dark);
+    border: 1px solid var(--main-bg-light);
+    margin: 3px 0px;
+    padding: 5px 0px;
+    width: 60%;
+    border-radius: 100vmax;
+    color: var(--main-bg-light);
+}
+
+.btn:hover {
+    background-color: var(--main-bg-light);
+    color: var(--main-bg-dark);
+}
+
+.partial-color:hover {
+    background-color: rgba(154, 78, 174, 0.1);
+    color: var(--main-bg-light);
+}
+
+.header {
+  color: var(--main-bg-light);
+  margin: 0;
+  margin-bottom: 1.5em;
+}
+
+.back-to-search {
+  font-size: xx-large;
+  color: var(--main-bg-light);
+}
 
 
 /* Login and styling code */
