@@ -7,9 +7,9 @@ export default function SimpleUser() {
   const [src, setSrc] = useState("");
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
-    const [frameNumber, setFrameNumber] = useState("30")
-    const [width, setWidth] = useState("")
-    const [height, setHeight] = useState("")
+  const [frameNumber, setFrameNumber] = useState("30")
+  const [width, setWidth] = useState("")
+  const [height, setHeight] = useState("")
 
   const handleChange = (e) => {
     setPrompt(e.target.value);
@@ -91,7 +91,7 @@ export default function SimpleUser() {
     
     return (
         <div className='SimpleUser'>
-            <Navbar isSuper={false} link="Super User" href="superUser"/>
+            <Navbar />
             <div className="mainDiv">
                 <div className='promptContainerDiv'>
                     <div  className='promptDiv'>
@@ -132,59 +132,6 @@ export default function SimpleUser() {
                     
                 </div>
             </div>
-  //dropdown code
-  const dropOptions = () => {
-    const dropdown = document.getElementById("dropdown");
-    const button = document.getElementById("button");
-    dropdown.classList.toggle("open");
-    button.classList.toggle("rotate");
-  };
-
-  return (
-    <div className="SimpleUser">
-      <Navbar isSuper={false} link="Super User" href="superUser" />
-      <div className="mainDiv">
-        <div className="promptContainerDiv">
-          <div className="promptDiv">
-            <input
-              className="prompt"
-              value={prompt}
-              placeholder="Enter Text Prompt..."
-              onChange={handleChange}
-            ></input>
-            <button className="promptButton" onClick={getVideo}>
-              Generate Video
-            </button>
           </div>
-          <div className="slideOptions">
-            <div className="dropdownOption" id="dropdown">
-              hello mate
-            </div>
-            <button
-              className="dropArrow"
-              onClick={dropOptions}
-              id="button"
-            ></button>
-          </div>
-        </div>
-        <div className="videoDiv">
-          {src ? (
-            <video
-              id="vidObj"
-              width="500"
-              height="360"
-              controls
-              loop
-              muted
-              autoPlay
-            >
-              <source src={src} type="video/mp4" />
-            </video>
-          ) : loading ? (
-            <img src={loadingAnimation} alt="loading thingy" />
-          ) : null}
-        </div>
-      </div>
-    </div>
-  );
+    );
 }
