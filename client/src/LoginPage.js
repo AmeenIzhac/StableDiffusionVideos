@@ -32,6 +32,7 @@ export default function LoginPage() {
 
   return (
     <div className="LoginPage">
+      <h1><a href="/" className="back-to-search">&larr; Back To Video Generation</a></h1>
       <div className="container">
         <h1 className="header">Login</h1>
         <input

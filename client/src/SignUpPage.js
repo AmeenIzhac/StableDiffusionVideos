@@ -21,6 +21,7 @@ export default function SignUpPage() {
 
   return (
     <div className="SignUpPage">
+      <h1><a href="/" className="back-to-search">&larr; Back To Video Generation</a></h1>
       <div className="container">
         <h1 className="header">Sign Up</h1>
         <input
