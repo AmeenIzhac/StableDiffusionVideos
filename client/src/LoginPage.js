@@ -33,6 +33,7 @@ export default function LoginPage() {
   return (
     <div className="LoginPage">
       <div className="container">
+        <h1 className="header">Login</h1>
         <input
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -50,7 +51,7 @@ export default function LoginPage() {
         <button className="btn" onClick={login}>
           Login
         </button>
-        <button className="btn">
+        <button className="btn partial-color">
           <a href="/signup">Sign Up</a>
         </button>
       </div>

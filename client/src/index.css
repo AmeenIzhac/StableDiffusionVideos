@@ -130,7 +130,8 @@ input:focus::placeholder {
     flex-direction: column;
     border: 1px solid var(--main-bg-light);
     border-radius: 5px;
-    max-width: 400px;
+    max-width: 600px;
+    min-width: 300px;
     width: 35vw;
     height: 50vh;
 }
@@ -139,7 +140,7 @@ input:focus::placeholder {
     background-color: var(--main-bg-dark);
     border: none;
     border-bottom: 2px solid var(--main-bg-light);
-    margin-bottom: 10px;
+    margin-bottom: 20px;
     text-align: center;
     font-size: large;
     font-family: 'Ubuntu Mono';
@@ -166,5 +167,16 @@ input:focus::placeholder {
 .btn:hover {
     background-color: var(--main-bg-light);
     color: var(--main-bg-dark);
+}
+
+.partial-color:hover {
+    background-color: rgba(154, 78, 174, 0.1);
+    color: var(--main-bg-light);
+}
+
+.header {
+  color: var(--main-bg-light);
+  margin: 0;
+  margin-bottom: 1.5em;
 }
 

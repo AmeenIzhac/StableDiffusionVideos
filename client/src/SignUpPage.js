@@ -22,6 +22,7 @@ export default function SignUpPage() {
   return (
     <div className="SignUpPage">
       <div className="container">
+        <h1 className="header">Sign Up</h1>
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -46,7 +47,7 @@ export default function SignUpPage() {
         <button className="btn" onClick={addUser}>
           Sign Up
         </button>
-        <button className="btn">
+        <button className="btn partial-color">
           <a href="/login">Login</a>
         </button>
       </div>
