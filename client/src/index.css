@@ -120,3 +120,51 @@ input:focus::placeholder {
 }
 
 
+
+/* Login and styling code */
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    border: 1px solid var(--main-bg-light);
+    border-radius: 5px;
+    max-width: 400px;
+    width: 35vw;
+    height: 50vh;
+}
+
+.input {
+    background-color: var(--main-bg-dark);
+    border: none;
+    border-bottom: 2px solid var(--main-bg-light);
+    margin-bottom: 10px;
+    text-align: center;
+    font-size: large;
+    font-family: 'Ubuntu Mono';
+    caret-color: var(--main-bg-light); 
+    width: 60%;
+}
+
+.input:focus {
+    outline: none;
+}
+
+.btn {
+    font-family: 'Ubuntu Mono';
+    font-size: large;
+    background-color: var(--main-bg-dark);
+    border: 1px solid var(--main-bg-light);
+    margin: 3px 0px;
+    padding: 5px 0px;
+    width: 60%;
+    border-radius: 100vmax;
+    color: var(--main-bg-light);
+}
+
+.btn:hover {
+    background-color: var(--main-bg-light);
+    color: var(--main-bg-dark);
+}
+

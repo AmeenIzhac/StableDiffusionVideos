@@ -1,13 +1,7 @@
-.SignUpPage .container {
+.SignUpPage {
     display: flex;
     justify-content: center;
     align-items: center;
-    flex-direction: column;
-    margin-top: 20%;
-}
-
-.SignUpPage.btnContainer {
-}
-
-.SignUpPage .btn {
+    width: 100vw;
+    height: 100vh;
 }

@@ -1,13 +1,12 @@
-.LoginPage .container {
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.LoginPage {
     display: flex;
     justify-content: center;
     align-items: center;
-    flex-direction: column;
-    margin-top: 20%;
-}
-
-.LoginPage .input {
-}
-
-.LoginPage .btn {
+    width: 100vw;
+    height: 100vh;
 }

@@ -24,6 +24,8 @@ export default function LoginPage() {
         Cookies.set("loggedInUser", email, { expires: 7 }); // 7 days
         navigate("/");
         console.log(Cookies.get("loggedInUser"));
+      } else {
+        console.log("no entry");
       }
     });
   }
@@ -31,28 +33,26 @@ export default function LoginPage() {
   return (
     <div className="LoginPage">
       <div className="container">
-        <label>Email</label>
         <input
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           className="input"
           type="text"
+          placeholder="Email"
         />
-        <label>Password</label>
         <input
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           className="input"
           type="password"
+          placeholder="Password"
         />
-        <div className="btnContainer">
-          <button className="btn" onClick={login}>
-            Login
-          </button>
-          <button className="btn">
-            <a href="/signup">Sign Up</a>
-          </button>
-        </div>
+        <button className="btn" onClick={login}>
+          Login
+        </button>
+        <button className="btn">
+          <a href="/signup">Sign Up</a>
+        </button>
       </div>
     </div>
   );

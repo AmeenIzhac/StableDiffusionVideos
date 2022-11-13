@@ -22,35 +22,33 @@ export default function SignUpPage() {
   return (
     <div className="SignUpPage">
       <div className="container">
-        <label>Name</label>
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
           className="input"
           type="text"
+          placeholder="Name"
         />
-        <label>Email</label>
         <input
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           className="input"
           type="text"
+          placeholder="Email"
         />
-        <label>Password</label>
         <input
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           className="input"
           type="password"
+          placeholder="Password"
         />
-        <div className="btnContainer">
-          <button className="btn" onClick={addUser}>
-            Sign Up
-          </button>
-          <button className="btn">
-            <a href="/login">Login</a>
-          </button>
-        </div>
+        <button className="btn" onClick={addUser}>
+          Sign Up
+        </button>
+        <button className="btn">
+          <a href="/login">Login</a>
+        </button>
       </div>
     </div>
   );
