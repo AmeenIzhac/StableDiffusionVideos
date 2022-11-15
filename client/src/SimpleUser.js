@@ -23,6 +23,7 @@ export default function SimpleUser() {
       return;
     }
 
+
     setLoading(true);
     axios({
       method: "get",
@@ -41,6 +42,7 @@ export default function SimpleUser() {
       .finally(() => {
         setLoading(false);
       });
+
 
     setPrompt("");
   }
@@ -76,7 +78,7 @@ export default function SimpleUser() {
         } else {
             const h = parseInt(height)
             const w = parseInt(width)
-            if (h % 64 !==0  || w % 64 !== 0) {
+            if (h % 64 !== 0 || w % 64 !== 0) {
                 alert('Width and Height should be multiples of 64')
                 return;
             }
@@ -90,16 +92,17 @@ export default function SimpleUser() {
         }
     }
 
-    
-    
+
+
     return (
         <div className='SimpleUser'>
             <Navbar loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
+
             <div className="mainDiv">
                 <div className='promptContainerDiv'>
-                    <div  className='promptDiv'>
+                    <div className='promptDiv'>
                         <input className='prompt' value={prompt} placeholder='Enter Text Prompt...' onChange={handleChange} onSubmit={logger} onKeyDown={handleKeyDown}></input>
-                        <button className='promptButton' onClick={logger}>Generate Video</button>
+                        <button className='promptButton' onClick={test}>Generate Video</button>
                         {/* <button className='promptButton' onClick={getVideo} onSubmit={logger}>Generate Video</button> */}
                     </div>
                     <div className='slideOptions'>
@@ -127,20 +130,22 @@ export default function SimpleUser() {
                             :
                             <></>
                         }
+
                     </div>
                 </div>
                 <div className='videoDiv'>
-                    {src ? 
+                    {src ?
                         <video id="vidObj" width="500" height="360" controls loop muted autoPlay>
-                            <source src={src} type="video/mp4"/>
-                        </video> 
-                        : 
-                        (loading ? 
-                            <img src={loadingAnimation} alt='loading thingy'/> : null)
+                            <source src={src} type="video/mp4" />
+                        </video>
+                        :
+                        (loading ?
+                            <img src={loadingAnimation} alt='loading thingy' /> : null)
                     }
-                    
+
                 </div>
             </div>
           </div>
     );
 }
+
