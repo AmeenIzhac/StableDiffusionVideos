@@ -1,71 +1,51 @@
-import Navbar from './Navbar'
-import { useState } from 'react';
-import axios from 'axios';
-import loadingAnimation from './assets/painting.gif';
+import Navbar from "./Navbar";
+import { useState } from "react";
+import axios from "axios";
+import loadingAnimation from "./assets/painting.gif";
+import Cookies from 'js-cookie'
 
 export default function SimpleUser() {
-    const [src, setSrc] = useState("");
-    const [prompt, setPrompt] = useState("");
-    const [loading, setLoading] = useState(false);
-    const [frameNumber, setFrameNumber] = useState("30")
-    const [width, setWidth] = useState("")
-    const [height, setHeight] = useState("")
+  const [src, setSrc] = useState("");
+  const [prompt, setPrompt] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [frameNumber, setFrameNumber] = useState("30")
+  const [width, setWidth] = useState("")
+  const [height, setHeight] = useState("")
+  const [loggedIn, setLoggedIn] = useState(Cookies.get("loggedInUser") != null)
 
-    const handleChange = (e) => {
-        setPrompt(e.target.value);
-    }
 
-    function test() {
-        setLoading(true);
-        axios({
-            method: 'get',
-            url: `https://stablediffusionvideoswebserver-production.up.railway.app/api`,
-            responseType: 'blob',
-            timeout: 10000000,
-        })
-            .then((response) => {
-                console.log(response.data)
-                setSrc(URL.createObjectURL(response.data));
-                console.log(src);
-            })
-            .catch((error) => {
-                console.log(error);
-            })
-            .finally(() => {
-                alert("Server is currently down for maintenance!");
-                setLoading(false);
-            });
+  const handleChange = (e) => {
+    setPrompt(e.target.value);
+  };
+  function getVideo() {
+    if (prompt === "") {
+      alert("Please enter a prompt");
+      return;
     }
 
 
-    function getVideo() {
+    setLoading(true);
+    axios({
+      method: "get",
+      url: `http://109.158.65.154:8080/api?prompt=` + prompt,
+      responseType: "blob",
+      timeout: 10000000,
+    })
+      .then((response) => {
+        console.log(response.data);
+        setSrc(URL.createObjectURL(response.data));
+        console.log(src);
+      })
+      .catch((error) => {
+        console.log(error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
 
-        if (prompt === "") {
-            alert("Please enter a prompt");
-            return;
-        }
 
-        setLoading(true);
-        axios({
-            method: 'get',
-            url: `http://109.158.65.154:8080/api?prompt=` + prompt,
-            responseType: 'blob',
-            timeout: 10000000,
-        })
-            .then((response) => {
-                console.log(response.data)
-                setSrc(URL.createObjectURL(response.data));
-                console.log(src);
-            })
-            .catch((error) => {
-                console.log(error);
-            })
-            .finally(() => {
-                setLoading(false);
-            });
-
-        setPrompt("");
-    };
+    setPrompt("");
+  }
 
     //dropdown code
     const dropOptions = () => {
@@ -116,7 +96,8 @@ export default function SimpleUser() {
 
     return (
         <div className='SimpleUser'>
-            <Navbar isSuper={false} link="Super User" href="superUser" />
+            <Navbar loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
+
             <div className="mainDiv">
                 <div className='promptContainerDiv'>
                     <div className='promptDiv'>
@@ -125,24 +106,31 @@ export default function SimpleUser() {
                         {/* <button className='promptButton' onClick={getVideo} onSubmit={logger}>Generate Video</button> */}
                     </div>
                     <div className='slideOptions'>
-                        <div className='dropdownOption' id="dropdown">
-                            <form>
-                                <div className='slideContainer alignCenter'>
-                                    <p>Number of Frames:</p>
-                                    <input type="range" min="1" max="60" value={frameNumber} className='slider' id="myRange" onChange={slideChange} />
-                                    <p>Value: <span id="demo">{frameNumber}</span></p>
-                                </div>
-                                <hr />
-                                <div className='alignCenter'>
-                                    <input className='dropdownInput alignCenter' value={width} placeholder='Enter Width' onChange={widthChange} />
-                                </div>
-                                <hr />
-                                <div className='alignCenter'>
-                                    <input className='dropdownInput alignCenter' value={height} placeholder='Enter Height' onChange={heightChange} />
-                                </div>
-                            </form>
-                        </div>
-                        <button className='dropArrow' onClick={dropOptions} id="button"></button>
+                        { Cookies.get("loggedInUser") ? 
+                            <>
+                            <div className='dropdownOption' id="dropdown">
+                                <form>
+                                    <div className='slideContainer alignCenter'>
+                                        <p>Number of Frames:</p>
+                                        <input type="range" min="1" max="60" value={frameNumber} className='slider' id="myRange" onChange={slideChange}/>
+                                        <p>Value: <span id="demo">{frameNumber}</span></p>
+                                    </div>
+                                    <hr/>
+                                    <div className='alignCenter'>
+                                        <input className='dropdownInput alignCenter' value={width} placeholder='Enter Width' onChange={widthChange}/>
+                                    </div>
+                                    <hr/>
+                                    <div className='alignCenter'>
+                                        <input className='dropdownInput alignCenter' value={height} placeholder='Enter Height' onChange={heightChange}/>
+                                    </div>
+                                </form>
+                            </div>
+                            <button className='dropArrow' onClick={dropOptions} id="button"></button>
+                            </>
+                            :
+                            <></>
+                        }
+
                     </div>
                 </div>
                 <div className='videoDiv'>
@@ -157,9 +145,7 @@ export default function SimpleUser() {
 
                 </div>
             </div>
-        </div>
+          </div>
     );
-
 }
-
 
