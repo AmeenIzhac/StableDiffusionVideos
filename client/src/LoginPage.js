@@ -6,8 +6,8 @@ import Cookies from "js-cookie";
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState();
-  const [password, setPassword] = useState();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const ref = firebase.firestore().collection("users");
 
   function login() {

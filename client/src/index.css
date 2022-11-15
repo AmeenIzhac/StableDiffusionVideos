@@ -27,6 +27,7 @@ hr {
 
 ul {
   display: flex;
+  align-items: center;
 }
 
 .mainDiv {
@@ -222,6 +223,7 @@ ul {
     font-family: 'Ubuntu Mono';
     caret-color: var(--main-bg-light); 
     width: 60%;
+    color:white;
 }
 
 .input:focus {

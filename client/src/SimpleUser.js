@@ -2,6 +2,7 @@ import Navbar from "./Navbar";
 import { useState } from "react";
 import axios from "axios";
 import loadingAnimation from "./assets/painting.gif";
+import Cookies from 'js-cookie'
 
 export default function SimpleUser() {
   const [src, setSrc] = useState("");
@@ -10,6 +11,8 @@ export default function SimpleUser() {
   const [frameNumber, setFrameNumber] = useState("30")
   const [width, setWidth] = useState("")
   const [height, setHeight] = useState("")
+  const [loggedIn, setLoggedIn] = useState(Cookies.get("loggedInUser") != null)
+
 
   const handleChange = (e) => {
     setPrompt(e.target.value);
@@ -91,7 +94,7 @@ export default function SimpleUser() {
     
     return (
         <div className='SimpleUser'>
-            <Navbar />
+            <Navbar loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
             <div className="mainDiv">
                 <div className='promptContainerDiv'>
                     <div  className='promptDiv'>
@@ -100,24 +103,30 @@ export default function SimpleUser() {
                         {/* <button className='promptButton' onClick={getVideo} onSubmit={logger}>Generate Video</button> */}
                     </div>
                     <div className='slideOptions'>
-                        <div className='dropdownOption' id="dropdown">
-                            <form>
-                                <div className='slideContainer alignCenter'>
-                                    <p>Number of Frames:</p>
-                                    <input type="range" min="1" max="60" value={frameNumber} className='slider' id="myRange" onChange={slideChange}/>
-                                    <p>Value: <span id="demo">{frameNumber}</span></p>
-                                </div>
-                                <hr/>
-                                <div className='alignCenter'>
-                                    <input className='dropdownInput alignCenter' value={width} placeholder='Enter Width' onChange={widthChange}/>
-                                </div>
-                                <hr/>
-                                <div className='alignCenter'>
-                                    <input className='dropdownInput alignCenter' value={height} placeholder='Enter Height' onChange={heightChange}/>
-                                </div>
-                            </form>
-                        </div>
-                        <button className='dropArrow' onClick={dropOptions} id="button"></button>
+                        { Cookies.get("loggedInUser") ? 
+                            <>
+                            <div className='dropdownOption' id="dropdown">
+                                <form>
+                                    <div className='slideContainer alignCenter'>
+                                        <p>Number of Frames:</p>
+                                        <input type="range" min="1" max="60" value={frameNumber} className='slider' id="myRange" onChange={slideChange}/>
+                                        <p>Value: <span id="demo">{frameNumber}</span></p>
+                                    </div>
+                                    <hr/>
+                                    <div className='alignCenter'>
+                                        <input className='dropdownInput alignCenter' value={width} placeholder='Enter Width' onChange={widthChange}/>
+                                    </div>
+                                    <hr/>
+                                    <div className='alignCenter'>
+                                        <input className='dropdownInput alignCenter' value={height} placeholder='Enter Height' onChange={heightChange}/>
+                                    </div>
+                                </form>
+                            </div>
+                            <button className='dropArrow' onClick={dropOptions} id="button"></button>
+                            </>
+                            :
+                            <></>
+                        }
                     </div>
                 </div>
                 <div className='videoDiv'>
