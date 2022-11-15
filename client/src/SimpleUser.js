@@ -102,7 +102,7 @@ export default function SimpleUser() {
                 <div className='promptContainerDiv'>
                     <div className='promptDiv'>
                         <input className='prompt' value={prompt} placeholder='Enter Text Prompt...' onChange={handleChange} onSubmit={logger} onKeyDown={handleKeyDown}></input>
-                        <button className='promptButton' onClick={test}>Generate Video</button>
+                        <button className='promptButton' onClick={logger}>Generate Video</button>
                         {/* <button className='promptButton' onClick={getVideo} onSubmit={logger}>Generate Video</button> */}
                     </div>
                     <div className='slideOptions'>
