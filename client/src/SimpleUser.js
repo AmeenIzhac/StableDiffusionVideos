@@ -27,7 +27,8 @@ export default function SimpleUser() {
     setLoading(true);
     axios({
       method: "get",
-      url: `https://stablediffusionvideoswebserver-production.up.railway.app/generate?prompt=${prompt}`,
+      // url: `https://stablediffusionvideoswebserver-production.up.railway.app/generate?prompt=${prompt}`,
+      url: `http://localhost:3001/api3?prompt=${prompt}&frameNumber=${frameNumber}&width=${width}&height=${height}`,
       responseType: "blob",
       timeout: 10000000,
     })
@@ -51,6 +52,14 @@ export default function SimpleUser() {
   const dropOptions = () => {
     const dropdown = document.getElementById("dropdown")
     const button = document.getElementById("button")
+    const video = document.getElementById("belowPrompt")
+    if (video.classList.contains("flex")) {
+      setTimeout(() => {
+        video.classList.toggle("flex")
+      }, 500);
+    } else {
+      video.classList.toggle("flex")
+    }
     dropdown.classList.toggle("open")
     button.classList.toggle("rotate")
   }
@@ -105,44 +114,47 @@ export default function SimpleUser() {
             <button className='promptButton' onClick={getVideo}>Generate Video</button>
             {/* <button className='promptButton' onClick={getVideo} onSubmit={logger}>Generate Video</button> */}
           </div>
-          <div className='slideOptions'>
-            {Cookies.get("loggedInUser") ?
-              <>
-                <div className='dropdownOption' id="dropdown">
-                  <form>
-                    <div className='slideContainer alignCenter'>
-                      <p>Number of Frames:</p>
-                      <input type="range" min="1" max="60" value={frameNumber} className='slider' id="myRange" onChange={slideChange} />
-                      <p>Value: <span id="demo">{frameNumber}</span></p>
-                    </div>
-                    <hr />
-                    <div className='alignCenter'>
-                      <input className='dropdownInput alignCenter' value={width} placeholder='Enter Width' onChange={widthChange} />
-                    </div>
-                    <hr />
-                    <div className='alignCenter'>
-                      <input className='dropdownInput alignCenter' value={height} placeholder='Enter Height' onChange={heightChange} />
-                    </div>
-                  </form>
-                </div>
-                <button className='dropArrow' onClick={dropOptions} id="button"></button>
-              </>
-              :
-              <></>
-            }
+          <div id="belowPrompt">
+            <div className='slideOptions'>
+              {Cookies.get("loggedInUser") ?
+                <>
+                  <div className='dropdownOption' id="dropdown">
+                    <form>
+                      <div className='slideContainer alignCenter'>
+                        <p>Number of Frames:</p>
+                        <input type="range" min="1" max="60" value={frameNumber} className='slider' id="myRange" onChange={slideChange} />
+                        <p>Value: <span id="demo">{frameNumber}</span></p>
+                      </div>
+                      <hr />
+                      <div className='alignCenter'>
+                        <input className='dropdownInput alignCenter' value={width} placeholder='Enter Width' onChange={widthChange} />
+                      </div>
+                      <hr />
+                      <div className='alignCenter'>
+                        <input className='dropdownInput alignCenter' value={height} placeholder='Enter Height' onChange={heightChange} />
+                      </div>
+                    </form>
+                  </div>
+                  <button className='dropArrow' onClick={dropOptions} id="button"></button>
+                </>
+                :
+                <></>
+              }
+
+            </div>
+            <div className='videoDiv'>
+              {src ?
+                <video id="vidObj" width="500" height="360" controls loop muted autoPlay>
+                  <source src={src} type="video/mp4" />
+                </video>
+                :
+                (loading ?
+                  <img src={loadingAnimation} alt='loading thingy' /> : null)
+              }
+
+            </div>
 
           </div>
-        </div>
-        <div className='videoDiv'>
-          {src ?
-            <video id="vidObj" width="500" height="360" controls loop muted autoPlay>
-              <source src={src} type="video/mp4" />
-            </video>
-            :
-            (loading ?
-              <img src={loadingAnimation} alt='loading thingy' /> : null)
-          }
-
         </div>
       </div>
     </div>

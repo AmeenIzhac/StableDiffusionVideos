@@ -27,7 +27,7 @@
 
 .Navbar .superTag {
     display: inline;
-    color: var(--main-bg-dark); 
+    color: var(--main-bg-dark);
     font-weight: 100;
     font-size: 0.7em;
 }
@@ -36,16 +36,18 @@
     position: relative;
 }
 
-button.pageLink, a.link {
+button.pageLink,
+a.link {
     margin: 0;
     background-color: var(--main-bg-dark);
     border: none;
     font-family: 'Ubuntu Mono';
     font-size: 2em;
     border-bottom: 2px solid var(--main-bg-light);
-    padding: 0px 10px;
+    padding: 5px 10px;
 }
 
-button.pageLink:hover, a.link:hover {
+button.pageLink:hover,
+a.link:hover {
     background-color: var(--main-bg-light);
 }
