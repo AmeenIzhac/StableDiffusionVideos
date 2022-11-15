@@ -216,6 +216,9 @@ hr {
   display: block;
   width: 100%;
   height: auto;
+  font-family: 'Ubuntu Mono';
+  font-size: 12em;
+  color: var(--main-bg-light);
 }
 
 .frameOverlay {
@@ -235,4 +238,15 @@ hr {
 
 .frameContainer:hover .frameOverlay {
   opacity: 0.8;
+}
+
+.newFrameButton {
+  background: none;
+  border: none;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  font-family: 'Ubuntu Mono';
+  font-size: 12em;
+  color: var(--main-bg-light);
 }

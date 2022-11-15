@@ -22,6 +22,10 @@ export default function SimpleUser() {
     const selectFunction = (index) => {
         console.log(`Frame ${index} Selected`);
     }
+    const getNewFrame = () => {
+        console.log("Get new frame");
+    }
+    // end temp testing
 
     const handleChange = (e) => {
         setPrompt(e.target.value);
@@ -158,7 +162,7 @@ export default function SimpleUser() {
                     </div>
                 </div>
                 <div>
-                    <FrameSelect srcs={frames} selectFunction={selectFunction} ></FrameSelect>
+                    <FrameSelect srcs={frames} selectFunction={selectFunction} getNewFrame={getNewFrame}></FrameSelect>
                 </div>
                 <div className='videoDiv'>
                     {src ?
