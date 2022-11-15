@@ -2,14 +2,26 @@ import Navbar from './Navbar'
 import { useState } from 'react';
 import axios from 'axios';
 import loadingAnimation from './assets/painting.gif';
+import FrameSelect from './components/FrameSelect';
+
+import a from './assets/a.jpg';
+import b from './assets/b.jpg';
+import c from './assets/c.jpg';
+import d from './assets/d.jpg';
 
 export default function SimpleUser() {
     const [src, setSrc] = useState("");
     const [prompt, setPrompt] = useState("");
     const [loading, setLoading] = useState(false);
-    const [frameNumber, setFrameNumber] = useState("30")
-    const [width, setWidth] = useState("")
-    const [height, setHeight] = useState("")
+    const [frameNumber, setFrameNumber] = useState("30");
+    const [width, setWidth] = useState("");
+    const [height, setHeight] = useState("");
+
+    // temp for testing
+    const frames = [a, b, c, d];
+    const selectFunction = (index) => {
+        console.log(`Frame ${index} Selected`);
+    }
 
     const handleChange = (e) => {
         setPrompt(e.target.value);
@@ -144,6 +156,9 @@ export default function SimpleUser() {
                         </div>
                         <button className='dropArrow' onClick={dropOptions} id="button"></button>
                     </div>
+                </div>
+                <div>
+                    <FrameSelect srcs={frames} selectFunction={selectFunction} ></FrameSelect>
                 </div>
                 <div className='videoDiv'>
                     {src ?
