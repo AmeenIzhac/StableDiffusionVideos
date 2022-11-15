@@ -2,14 +2,15 @@
     display: flex;
     justify-content: space-between;
     padding: 15px;
-    background-color: #363636;
+    background-color: var(--main-bg-dark);
     height: 5vh;
 }
 
 .Navbar .logo {
     font-weight: bold;
-    font-size: 1.5em;
+    font-size: 2em;
     color: white;
+    margin-left: 10px;
 }
 
 .Navbar .pageLink {
@@ -20,13 +21,13 @@
 .Navbar .link {
     text-decoration: none;
     list-style: none;
-    color: black;
+    font-size: 1.5rem;
     color: white;
 }
 
 .Navbar .superTag {
     display: inline;
-    color: #26A7DE;
+    color: var(--main-bg-dark); 
     font-weight: 100;
     font-size: 0.7em;
 }
