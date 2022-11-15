@@ -14,6 +14,30 @@ export default function SimpleUser() {
     const handleChange = (e) => {
         setPrompt(e.target.value);
     }
+
+    function test() {
+        setLoading(true);
+        axios({
+            method: 'get',
+            url: `https://stablediffusionvideoswebserver-production.up.railway.app/api`,
+            responseType: 'blob',
+            timeout: 10000000,
+        })
+            .then((response) => {
+                console.log(response.data)
+                setSrc(URL.createObjectURL(response.data));
+                console.log(src);
+            })
+            .catch((error) => {
+                console.log(error);
+            })
+            .finally(() => {
+                alert("Server is currently down for maintenance!");
+                setLoading(false);
+            });
+    }
+
+
     function getVideo() {
 
         if (prompt === "") {
@@ -28,17 +52,17 @@ export default function SimpleUser() {
             responseType: 'blob',
             timeout: 10000000,
         })
-        .then((response) => {
-            console.log(response.data)
-            setSrc(URL.createObjectURL(response.data));
-            console.log(src);
-        })
-        .catch((error) => {
-            console.log(error);
-        })
-        .finally(() => {
-            setLoading(false);
-        });
+            .then((response) => {
+                console.log(response.data)
+                setSrc(URL.createObjectURL(response.data));
+                console.log(src);
+            })
+            .catch((error) => {
+                console.log(error);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
 
         setPrompt("");
     };
@@ -74,7 +98,7 @@ export default function SimpleUser() {
         } else {
             const h = parseInt(height)
             const w = parseInt(width)
-            if (h % 64 !==0  || w % 64 !== 0) {
+            if (h % 64 !== 0 || w % 64 !== 0) {
                 alert('Width and Height should be multiples of 64')
                 return;
             }
@@ -88,16 +112,16 @@ export default function SimpleUser() {
         }
     }
 
-    
-    
+
+
     return (
         <div className='SimpleUser'>
-            <Navbar isSuper={false} link="Super User" href="superUser"/>
+            <Navbar isSuper={false} link="Super User" href="superUser" />
             <div className="mainDiv">
                 <div className='promptContainerDiv'>
-                    <div  className='promptDiv'>
+                    <div className='promptDiv'>
                         <input className='prompt' value={prompt} placeholder='Enter Text Prompt...' onChange={handleChange} onSubmit={logger} onKeyDown={handleKeyDown}></input>
-                        <button className='promptButton' onClick={logger}>Generate Video</button>
+                        <button className='promptButton' onClick={test}>Generate Video</button>
                         {/* <button className='promptButton' onClick={getVideo} onSubmit={logger}>Generate Video</button> */}
                     </div>
                     <div className='slideOptions'>
@@ -105,16 +129,16 @@ export default function SimpleUser() {
                             <form>
                                 <div className='slideContainer alignCenter'>
                                     <p>Number of Frames:</p>
-                                    <input type="range" min="1" max="60" value={frameNumber} className='slider' id="myRange" onChange={slideChange}/>
+                                    <input type="range" min="1" max="60" value={frameNumber} className='slider' id="myRange" onChange={slideChange} />
                                     <p>Value: <span id="demo">{frameNumber}</span></p>
                                 </div>
-                                <hr/>
+                                <hr />
                                 <div className='alignCenter'>
-                                    <input className='dropdownInput alignCenter' value={width} placeholder='Enter Width' onChange={widthChange}/>
+                                    <input className='dropdownInput alignCenter' value={width} placeholder='Enter Width' onChange={widthChange} />
                                 </div>
-                                <hr/>
+                                <hr />
                                 <div className='alignCenter'>
-                                    <input className='dropdownInput alignCenter' value={height} placeholder='Enter Height' onChange={heightChange}/>
+                                    <input className='dropdownInput alignCenter' value={height} placeholder='Enter Height' onChange={heightChange} />
                                 </div>
                             </form>
                         </div>
@@ -122,20 +146,20 @@ export default function SimpleUser() {
                     </div>
                 </div>
                 <div className='videoDiv'>
-                    {src ? 
+                    {src ?
                         <video id="vidObj" width="500" height="360" controls loop muted autoPlay>
-                            <source src={src} type="video/mp4"/>
-                        </video> 
-                        : 
-                        (loading ? 
-                            <img src={loadingAnimation} alt='loading thingy'/> : null)
+                            <source src={src} type="video/mp4" />
+                        </video>
+                        :
+                        (loading ?
+                            <img src={loadingAnimation} alt='loading thingy' /> : null)
                     }
-                    
+
                 </div>
             </div>
         </div>
     );
 
-  }
+}
 
-  
+
