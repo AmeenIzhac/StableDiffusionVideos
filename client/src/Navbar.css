@@ -35,3 +35,17 @@
 .Navbar .video {
     position: relative;
 }
+
+button.pageLink, a.link {
+    margin: 0;
+    background-color: var(--main-bg-dark);
+    border: none;
+    font-family: 'Ubuntu Mono';
+    font-size: 2em;
+    border-bottom: 2px solid var(--main-bg-light);
+    padding: 0px 10px;
+}
+
+button.pageLink:hover, a.link:hover {
+    background-color: var(--main-bg-light);
+}
