@@ -1,4 +1,5 @@
-from refactor_txt2video import *
+import sys
+from txt2video import *
 
 #Placeholder "main" code
 cfg_path = 'configs/stable-diffusion/v1-inference.yaml'
