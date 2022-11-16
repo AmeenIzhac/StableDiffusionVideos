@@ -29,11 +29,12 @@ def api():
     args = request.args
     prompt = args.get('prompt')
     video_name = str(prompt).replace(" ", "_")
-
+    
     # Prepare options
     image_args = ImageArgs()
     image_args.steps = 50
-    image_args.W = 768
+    image_args.W = int(args.get('width')) if ("width" in args) else 512
+    image_args.H = int(args.get('height')) if ("height" in args) else 512
 
     video_args = VideoArgs()
     video_args.video_name = video_name
@@ -42,7 +43,7 @@ def api():
     video_args.strength = 0.375
     video_args.zoom = 1.005
     video_args.x = -5
-    video_args.frames = 20 #2000
+    video_args.frames = int(args.get('frames')) if ("frames" in args) else 60
     video_args.upscale = True
 
     path_args = PathArgs()
@@ -59,5 +60,5 @@ def api():
 if __name__ == '__main__':
     # ssl_context = ('./certicates/server.crt', './certicates/server.key')
     app.run(
-        # host='192.168.1.126', 
+        # host='192.168.1.125', 
         port=8080)
