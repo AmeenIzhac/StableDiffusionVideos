@@ -8,9 +8,9 @@ sys.path.append('../custom_scripts/')
 from txt2video import load_model, generate_video, ImageArgs, VideoArgs, PathArgs
 
 # Load model
-cfg_path = 'configs/stable-diffusion/v1-inference.yaml'
-optimized_cfg_path = 'optimizedSD/v1-inference.yaml'
-ckpt_path = 'models/ldm/stable-diffusion-v1/model.ckpt'
+cfg_path = '../stable-diffusion-2/configs/stable-diffusion/v1-inference.yaml'
+optimized_cfg_path = '../stable-diffusion-2/optimizedSD/v1-inference.yaml'
+ckpt_path = '../stable-diffusion-2/models/ldm/stable-diffusion-v1/model.ckpt'
 model = load_model(optimized_cfg_path, ckpt_path, optimized=True)
 
 
@@ -58,4 +58,6 @@ def api():
 
 if __name__ == '__main__':
     # ssl_context = ('./certicates/server.crt', './certicates/server.key')
-    app.run(host='192.168.1.126', port=8080)
+    app.run(
+        # host='192.168.1.126', 
+        port=8080)
