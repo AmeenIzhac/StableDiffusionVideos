@@ -52,7 +52,7 @@ class VideoArgs:
     color_match = True
     seed = -1
     video_name = None
-    sampler = 'dpm2'  
+    sampler = 'dpm_2'  
     upscale = True
     init_sample = None
 

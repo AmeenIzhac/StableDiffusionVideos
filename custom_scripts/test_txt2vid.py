@@ -30,7 +30,7 @@ image_args.scale = 10
 video_args.zoom = 1.008
 video_args.x = -3
 video_args.upscale = True
-video_args.color_match = False
+video_args.color_match = True
 video_args.video_name = "the_4_seasons"
 
 generate_video(image_args, video_args, model_state, path_args)
