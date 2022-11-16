@@ -7,6 +7,8 @@ ckpt_path = 'models/ldm/stable-diffusion-v1/model.ckpt'
 model_state = ModelState()
 load_model(model_state, optimized_cfg_path, ckpt_path, optimized=True)
 
+path_args = PathArgs()
+
 image_args = ImageArgs()
 video_args = VideoArgs()
 
@@ -27,4 +29,4 @@ image_args.seed = 25
 for sampler in ['dpm_2_ancestral', 'dpm_2', 'euler_ancestral', 'euler', 'heun', 'lms']:
     video_args.sampler = sampler
     video_args.video_name = f"underwater_{sampler}"
-    generate_video(image_args, video_args, model_state)
+    generate_video(image_args, video_args, model_state, path_args)
