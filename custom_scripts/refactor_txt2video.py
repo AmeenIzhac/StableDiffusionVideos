@@ -25,10 +25,17 @@ from ldm.util import instantiate_from_config
 #the init image saving question
 
 
-
-
 #TODO : find out how to properly comment in python
 
+# Generatng the initial frames:
+#  1. Get(/generateInitFrames?numFrames=x)
+#       - clear the temp directory
+#       - Server generates 4 frames, stores the torchs in a dict, files in temp directory
+#       - returns code:200 upon completion
+#  2. x * Get(/getFrame?index=x)
+#       - each get request returns the frame x and it's respective id
+#  3.  finally user selects a frame on the client side and sends a post request with the id of the frame
+#      - server then gets the torch from the id and uses it to generate a video, returns video to client
 
 
 class ImageArgs:
