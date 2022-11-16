@@ -14,8 +14,6 @@ import random
 from sd_video_utils import *
 from kdiffusion import KDiffusionSampler
 from inference_realesrgan import *
-
-#fix that omg
 from ldm.util import instantiate_from_config
 
 
@@ -122,9 +120,29 @@ def load_model(model_state, config_path, ckpt_path, optimized=False):
         model_state.model = model
 
 
-def compute_current_prompt(C, index, frames) :
-    return C[0] #TODO obviously do better
+def compute_current_prompt(C, index, F) :
+    C_s = len(C)
+    if C_s == 1:
+        return C[0]
     #maybe use a function for the t of slerp here : perhaps a sigmoid, find out
+    #outline : find the 2 embeddings to interpolate between, find the t value, pass it into some function, and interpolate.
+    
+    prompt_frames = np.arange(len(C)) * (F / (len(C) - 1)) #TODO cache this
+    #if len(C) = 2, F = 100, then prompt i will have prompt_frame = i * 99/1
+    #as expected prompt 0 will be prompt_frame 0, and prompt 1 will get frame 99.
+    r = index / (F - 1)
+    if(r >= 1):
+        return C[C_s - 1]
+
+    i1 = int(r * len[C])
+    i2 = int(r * len[C]) + 1
+    c1 = C[i1]
+    c2 = C[i2]
+    f1 = prompt_frames[i1]
+    f2 = prompt_frames[i2]
+    t = (index - f1) / (f2 - f1)
+    c = slerp(t, c1, c2)
+
 
 
 #previous image processing (color coherency, noise, encoding)
