@@ -12,21 +12,25 @@ path_args = PathArgs()
 image_args = ImageArgs()
 video_args = VideoArgs()
 
-video_args.prompts = ["underwater ocean scene, with fishes, coral, seeweed, algae, octopus, sharks, water, 4k colorful"]
+video_args.prompts = [
+    "a nice little path with trees, winter season, artstation",
+    "a nice little path with trees, spring season, artstation",
+    "a nice little path with trees, summer season, artstation",
+    "a nice little path with trees, autumn season, artstation",
+    "a nice little path with trees, winter season, artstation",
+    ]
+
 video_args.fps = 20
-video_args.strength = 0.38
-video_args.zoom = 1.01
-video_args.x = -4
-video_args.y = -2
-video_args.frames = 50
-image_args.steps = 40
+video_args.strength = 0.40
+video_args.frames = 200
+image_args.steps = 60
 image_args.W = 512
 image_args.H = 512
 image_args.scale = 10
-video_args.upscale = False
-image_args.seed = 25
+video_args.zoom = 1.008
+video_args.x = -3
+video_args.upscale = True
+video_args.color_match = True
+video_args.video_name = "the_4_seasons"
 
-for sampler in ['dpm_2_ancestral', 'dpm_2', 'euler_ancestral', 'euler', 'heun', 'lms']:
-    video_args.sampler = sampler
-    video_args.video_name = f"underwater_{sampler}"
-    generate_video(image_args, video_args, model_state, path_args)
+generate_video(image_args, video_args, model_state, path_args)

@@ -3,6 +3,7 @@ import os
 import cv2
 import torch
 import numpy as np
+import math
 from omegaconf import OmegaConf
 from PIL import Image
 from tqdm import tqdm, trange
@@ -15,12 +16,17 @@ from concurrent.futures import ThreadPoolExecutor
 from sd_video_utils import *
 from kdiffusion import KDiffusionSampler
 from inference_realesrgan import *
-
-#fix that omg
 from ldm.util import instantiate_from_config
 
 import sys
 sys.path.append('../stable-diffusion-2/optimizedSD')
+
+#questions with raaif:
+#implement the server properly (with loading the model once)
+#the path question
+#the prompt list question
+#the init image format question
+#the init image saving question
 
 
 #TODO : find out how to properly comment in python
@@ -53,6 +59,7 @@ class VideoArgs:
         self.sampler = 'euler_ancestral'
         self.upscale = True
         self.init_sample = None
+
 
 class ModelState:
     def __init__(self):
@@ -133,13 +140,34 @@ def load_model(config_path, ckpt_path, optimized=False):
     return model_state
 
 
-def compute_current_prompt(C, index, frames) :
-    return C[0] #TODO obviously do better
-    #maybe use a function for the t of slerp here : perhaps a sigmoid, find out
+def compute_current_prompt(C, image_index, F, v=15.0) :
+    C_s = len(C)
+    if C_s == 1:
+        return C[0]
+    
+    prompt_frames = np.arange(C_s) * ( (F-1) / (C_s - 1)) #TODO cache this
+    #if len(C) = 2, F = 100, then prompt i will have prompt_frame = i * 99/1
+    #as expected prompt 0 will be prompt_frame 0, and prompt 1 will get frame 99.
+    r = image_index / (F - 1)
+    if(r >= 1):
+        return C[C_s - 1]
+
+    i1 = int(r * (C_s-1))
+    i2 = int(r * (C_s-1)) + 1
+    c1 = C[i1]
+    c2 = C[i2]
+    ip_ratio = (F - 1) / (C_s - 1)
+    f1 = i1 * ip_ratio #prompt_frames[i1]
+    f2 = i2 * ip_ratio
+    t = (image_index - f1) / (f2 - f1)
+    s = 1 / (1 + math.exp(-v * (t - 0.5))) #v controls the stiffness of the sigmoid, essentially controlling the transition speed between 2 prompts
+    c = slerp(s, c1, c2)
+    return c
+
 
 
 #previous image processing (color coherency, noise, encoding)
-def process_previous_image(model_state, previous_sample, xform, color_match=True, color_sample=None, noise=0.03, hsv=False): #TODO : look if that can be done in parallel (analyze runtime first to see if it's worth it)
+def process_previous_image(ms, previous_sample, xform, color_match=True, color_sample=None, noise=0.03, hsv=False): #TODO : look if that can be done in parallel (analyze runtime first to see if it's worth it)
     previous_img = sample_to_cv2(previous_sample)
     previous_img = cv2.warpPerspective(
         previous_img,
@@ -151,8 +179,9 @@ def process_previous_image(model_state, previous_sample, xform, color_match=True
         assert color_sample is not None
         previous_img = maintain_colors(previous_img, color_sample, hsv=hsv)
     previous_sample = sample_from_cv2(previous_img)
-    previous_noised = add_noise(previous_sample, noise).half().to(model_state.device)
-    return model_state.FS.get_first_stage_encoding(model_state.FS.encode_first_stage(previous_noised))
+
+    previous_noised = add_noise(previous_sample, noise).half().to(ms.device)
+    return ms.FS.get_first_stage_encoding(ms.FS.encode_first_stage(previous_noised))
 
 
 def save_image(x_new, output_path, model_state, upscale=True):
@@ -259,8 +288,6 @@ def generate_video (
 
             #save it to disk
             pool.submit(save_image, first_sample, frame_path(base_count), model_state, upscale=video_args.upscale)
-
-
 
 
             #=====================SUBSEQUENT_IMAGES_GENERATION=========================#
