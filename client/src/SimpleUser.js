@@ -24,10 +24,12 @@ export default function SimpleUser() {
       return;
     }
 
+    setSrc("");
     setLoading(true);
     axios({
       method: "get",
-      url: `https://stablediffusionvideoswebserver-production.up.railway.app/generate?prompt=${prompt}`,
+      url: `https://stablediffusionvideoswebserver-production.up.railway.app/generate?prompt=${prompt}&frameNumber=${frameNumber}&width=${width}&height=${height}`,
+      // url: `http://localhost:3001/generate?prompt=${prompt}&frameNumber=${frameNumber}&width=${width}&height=${height}`,
       responseType: "blob",
       timeout: 10000000,
     })
