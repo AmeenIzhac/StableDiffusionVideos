@@ -253,7 +253,7 @@ def generate_video (
     base_count = len(os.listdir(path_args.image_path))
     start_number = base_count
 
-    def frame_path(frame_number):
+    def frame_path(frame_number, ):
         return os.path.join(path_args.image_path, f"{frame_number:05}.png")
 
     #
@@ -343,7 +343,7 @@ def generate_video (
 
     return
 
-def generate_initial_images(image_args, video_args, model_state, count=4) :
+def generate_initial_images(image_args, video_args, image_dir, model_state, count=4) :
     #I should really factorise this method and generate_video TODO
     seed = video_args.seed
     if seed < 0:
@@ -364,9 +364,10 @@ def generate_initial_images(image_args, video_args, model_state, count=4) :
 
     samples = generate_images(c=c, uc=uc, ia=image_args, ms=model_state, batch_size=count)
 
-    for sample in samples:
-        #do here the image-saving, returning
-        images = None
+    for i,sample in enumerate(samples):
+        save_image(sample, output_path=os.join(image_dir, f"{frame_number:05}.png"), model_state=model_state, upscale=False)
+    samples_list = torch.split(samples, 1)
+
     
-    return images, seed
+    return samples_list
 
