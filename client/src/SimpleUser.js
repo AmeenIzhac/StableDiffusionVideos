@@ -8,7 +8,7 @@ export default function SimpleUser() {
   const [src, setSrc] = useState("");
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
-  const [frameNumber, setFrameNumber] = useState("30")
+  const [frames, setFrames] = useState("30")
   const [width, setWidth] = useState("")
   const [height, setHeight] = useState("")
   const [loggedIn, setLoggedIn] = useState(Cookies.get("loggedInUser") != null)
@@ -28,8 +28,8 @@ export default function SimpleUser() {
     setLoading(true);
     axios({
       method: "get",
-      url: `https://stablediffusionvideoswebserver-production.up.railway.app/generate?prompt=${prompt}&frameNumber=${frameNumber}&width=${width}&height=${height}`,
-      // url: `http://localhost:3001/generate?prompt=${prompt}&frameNumber=${frameNumber}&width=${width}&height=${height}`,
+      url: `https://stablediffusionvideoswebserver-production.up.railway.app/generate?prompt=${prompt}&frames=${frames}&width=${width}&height=${height}`,
+      // url: `http://localhost:3001/generate?prompt=${prompt}&frames=${frames}&width=${width}&height=${height}`,
       responseType: "blob",
       timeout: 10000000,
     })
@@ -58,7 +58,7 @@ export default function SimpleUser() {
   }
 
   const slideChange = (e) => {
-    setFrameNumber(e.target.value);
+    setFrames(e.target.value);
   }
 
   const widthChange = (e) => {
@@ -72,7 +72,7 @@ export default function SimpleUser() {
     e.preventDefault()
     const numberRegex = new RegExp('[0-9]+$')
     console.log(`Prompt is ${prompt}`)
-    console.log(`Frames are ${frameNumber}`);
+    console.log(`Frames are ${frames}`);
     console.log(`Width is ${width}`)
     if (!(numberRegex.test(width) && numberRegex.test(height))) {
       alert('Please Enter Width and Height as Integer Values')
@@ -114,8 +114,8 @@ export default function SimpleUser() {
                   <form>
                     <div className='slideContainer alignCenter'>
                       <p>Number of Frames:</p>
-                      <input type="range" min="1" max="60" value={frameNumber} className='slider' id="myRange" onChange={slideChange} />
-                      <p>Value: <span id="demo">{frameNumber}</span></p>
+                      <input type="range" min="1" max="60" value={frames} className='slider' id="myRange" onChange={slideChange} />
+                      <p>Value: <span id="demo">{frames}</span></p>
                     </div>
                     <hr />
                     <div className='alignCenter'>
