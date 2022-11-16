@@ -10,12 +10,16 @@ from tqdm import tqdm, trange
 from pytorch_lightning import seed_everything
 from torch import autocast
 import random
+from concurrent.futures import ThreadPoolExecutor
 
 #repo imports
 from sd_video_utils import *
 from kdiffusion import KDiffusionSampler
 from inference_realesrgan import *
 from ldm.util import instantiate_from_config
+
+import sys
+sys.path.append('../stable-diffusion-2/optimizedSD')
 
 #questions with raaif:
 #implement the server properly (with loading the model once)
@@ -37,47 +41,55 @@ from ldm.util import instantiate_from_config
 #  3.  finally user selects a frame on the client side and sends a post request with the id of the frame
 #      - server then gets the torch from the id and uses it to generate a video, returns video to client
 
-
 class ImageArgs:
-    steps = 50
-    H = 512
-    W = 512
-    scale = 10.0
-    eta = 0.0
-    C = 4
-    f = 8
+    def __init__(self):
+        self.steps = 50
+        self.H = 512
+        self.W = 512
+        self.scale = 8.0
+        self.eta = 0.0
+        self.C = 4
+        self.f = 8
+
 
 class VideoArgs:
-    prompts = ["A cartoon drawing of a sun wearing sunglasses"]
-    strength = 0.4
-    frames = 60
-    fps = 15
-    x = 0.0
-    y = 0.0
-    zoom = 1.0
-    angle = 0.0
-    color_match = True
-    seed = -1
-    video_name = None
-    sampler = 'dpm_2'  
-    upscale = True
-    init_sample = None
+    def __init__(self):
+        self.prompts = ["A cartoon drawing of a sun wearing sunglasses"]
+        self.strength = 0.4
+        self.frames = 60
+        self.fps = 15
+        self.x = 0.0
+        self.y = 0.0
+        self.zoom = 1.0
+        self.angle = 0.0
+        self.color_match = True
+        self.seed = -1
+        self.video_name = None
+        self.sampler = 'euler_ancestral'
+        self.upscale = True
+        self.init_sample = None
+
 
 class ModelState:
-    model = None
-    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-    sampler = None
-    FS = None
-    CS = None
-    upsampler = None
+    def __init__(self):
+        self.model = None
+        self.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+        self.sampler = None
+        self.FS = None
+        self.CS = None
+        self.upsampler = None
+
 
 class PathArgs:
-    image_path = 'outputs/images'
-    video_path = 'outputs/videos'
+    def __init__(self):
+        self.image_path = 'outputs/images'
+        self.video_path = 'outputs/videos'
 
 
 
-def load_model(model_state, config_path, ckpt_path, optimized=False):
+def load_model(config_path, ckpt_path, optimized=False):
+    model_state = ModelState()
+
     model_state.upsampler = load_ESRGAN_model(model_name='RealESRGAN_x2plus')
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
@@ -134,6 +146,8 @@ def load_model(model_state, config_path, ckpt_path, optimized=False):
         model_state.CS = modelCS
         model_state.model = model
 
+    return model_state
+
 
 def compute_current_prompt(C, image_index, F, v=15.0) :
     C_s = len(C)
@@ -174,6 +188,7 @@ def process_previous_image(ms, previous_sample, xform, color_match=True, color_s
         assert color_sample is not None
         previous_img = maintain_colors(previous_img, color_sample, hsv=hsv)
     previous_sample = sample_from_cv2(previous_img)
+
     previous_noised = add_noise(previous_sample, noise).half().to(ms.device)
     return ms.FS.get_first_stage_encoding(ms.FS.encode_first_stage(previous_noised))
 
@@ -188,7 +203,6 @@ def save_image(x_new, output_path, model_state, upscale=True):
             executeRealESRGAN(x_sample.astype(np.uint8), output_path, model_state.upsampler)
         else:
             Image.fromarray(x_sample.astype(np.uint8)).save(output_path)
-
 
 
 def generate_image (
@@ -217,8 +231,8 @@ def generate_image (
 def generate_video (
     image_args,
     video_args,
+    path_args,
     model_state,
-    path_args
 ) -> str :
     #outline : compute embeddings, generate first image, send it to upscale (in parallel), then loop, do processings, compute interpolated prompt, call generate_image, send it to upscale
     
@@ -235,9 +249,12 @@ def generate_video (
     # #
     #Idea : have an video or smtg folder, in it have a subdirectory for each user, and in that put images, and simply video, and then maybe a guest directory
     os.makedirs(path_args.image_path, exist_ok=True)
-    os.makedirs(path_args.video_path, exist_ok=True)
+    os.makedirs(os.path.dirname(path_args.video_path), exist_ok=True)
     base_count = len(os.listdir(path_args.image_path))
     start_number = base_count
+
+    def frame_path(frame_number):
+        return os.path.join(path_args.image_path, f"{frame_number:05}.png")
 
     #
     # Assertions about consistency of arguments
@@ -268,6 +285,9 @@ def generate_video (
 
             model_state.FS.to(model_state.device)
 
+            # Init thread pool
+            num_workers = 1
+            pool = ThreadPoolExecutor(num_workers)
 
             #=====================FIRST_IMAGE_GENERATION=========================#
             # 
@@ -276,9 +296,7 @@ def generate_video (
             first_sample = generate_image(c=C[0], uc=uc, ia=image_args, ms=model_state) if video_args.init_sample is None else video_args.init_sample
 
             #save it to disk
-            save_image(first_sample, os.path.join(path_args.image_path, f"{base_count:05}.png"), model_state, upscale=video_args.upscale)
-
-
+            pool.submit(save_image, first_sample, frame_path(base_count), model_state, upscale=video_args.upscale)
 
 
             #=====================SUBSEQUENT_IMAGES_GENERATION=========================#
@@ -304,8 +322,11 @@ def generate_video (
                                         video_args.color_match, color_sample, hsv= ((i % 2) == 0))
 
                 x_new = generate_image(c=c, x=previous_latent, uc=uc, ia=image_args, ms=model_state, t_enc=t_enc) 
-                save_image(x_new, os.path.join(path_args.image_path, f"{(base_count + i + 1):05}.png"), model_state, upscale=video_args.upscale)
+                pool.submit(save_image, x_new, frame_path(base_count + i + 1), model_state, upscale=video_args.upscale)
                 previous_sample = x_new
+
+            # Wait for upscaling/saving to finish
+            pool.shutdown()
 
 
             #==========COMPILING=THE=VIDEO==========
@@ -315,7 +336,7 @@ def generate_video (
             else:
                 video_name = video_args.video_name
             sample_regex = os.path.join(path_args.image_path, "%05d.png")
-            command = f"ffmpeg -r {video_args.fps} -start_number {base_count} -i {sample_regex} -c:v libx264 -r 30 -pix_fmt yuv420p {os.path.join(path_args.video_path, video_name)}.mp4"   #TODO do that stuff                         
+            command = f"ffmpeg -r {video_args.fps} -start_number {base_count} -i {sample_regex} -c:v libx264 -r 30 -pix_fmt yuv420p {path_args.video_path}"   #TODO do that stuff                         
             os.system(command)
 
             #TODO : do smtg like put the FS model to cpu at the end
