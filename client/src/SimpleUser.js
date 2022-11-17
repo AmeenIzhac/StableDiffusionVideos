@@ -36,7 +36,8 @@ export default function SimpleUser() {
         console.log(response.data);
         setSrc(URL.createObjectURL(response.data));
         const storage = getStorage();
-        const storageRef = ref(storage, "some-child");
+        const user = Cookies.get("loggedInUser");
+        const storageRef = ref(storage, { user } + "some-child");
 
         // 'file' comes from the Blob or File API
         uploadBytes(storageRef, URL.createObjectURL(response.data))
