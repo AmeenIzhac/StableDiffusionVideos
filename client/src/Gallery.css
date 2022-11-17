@@ -1,0 +1,28 @@
+.Gallery .vidsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+.Gallery .title {
+  font-family: "Ubuntu Mono";
+  font-size: 4.5em;
+  color: var(--main-bg-light);
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  margin: 50px 0 50px 0;
+}
+
+.Gallery .vid {
+  max-width: 400px;
+  max-height: 200px;
+  margin: 20px;
+  border: 4px white solid;
+}

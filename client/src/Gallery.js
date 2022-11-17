@@ -1,3 +1,5 @@
+import "./Gallery.css";
+
 import { useState, useEffect } from "react";
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
 
@@ -25,10 +27,48 @@ export default function Gallery() {
       });
   }, []);
   return (
-    <div>
+    <div className="Gallery">
       <a href="/">Go back to search</a>
-      <h1>Hello World</h1>
-      <video src={video} alt="no video for u mate" />
+      <br />
+      <h1 className="title">Your Gallery</h1>
+      <div className="vidsContainer">
+        <video src="vid1.mp4" className="vid" alt="no video for u mate" />
+        <video src="vid2.mp4" className="vid" alt="no video for u mate" />
+        <video src="vid3.mp4" className="vid" alt="no video for u mate" />
+        <video src="vid4.mp4" className="vid" alt="no video for u mate" />
+        <video src="vid1.mp4" className="vid" alt="no video for u mate" />
+        <video src="vid2.mp4" className="vid" alt="no video for u mate" />
+        <video src="vid3.mp4" className="vid" alt="no video for u mate" />
+        <video src="vid4.mp4" className="vid" alt="no video for u mate" />
+        <video src="vid1.mp4" className="vid" alt="no video for u mate" />
+        <video src="vid2.mp4" className="vid" alt="no video for u mate" />
+        <video src="vid3.mp4" className="vid" alt="no video for u mate" />
+        <video src="vid4.mp4" className="vid" alt="no video for u mate" />
+        <video src="vid1.mp4" className="vid" alt="no video for u mate" />
+        <video src="vid2.mp4" className="vid" alt="no video for u mate" />
+        <video src="vid3.mp4" className="vid" alt="no video for u mate" />
+        <video src="vid4.mp4" className="vid" alt="no video for u mate" />
+        <video src="vid1.mp4" className="vid" alt="no video for u mate" />
+        <video src="vid2.mp4" className="vid" alt="no video for u mate" />
+        <video src="vid3.mp4" className="vid" alt="no video for u mate" />
+        <video src="vid4.mp4" className="vid" alt="no video for u mate" />
+        <video src="vid1.mp4" className="vid" alt="no video for u mate" />
+        <video src="vid2.mp4" className="vid" alt="no video for u mate" />
+        <video src="vid3.mp4" className="vid" alt="no video for u mate" />
+        <video src="vid4.mp4" className="vid" alt="no video for u mate" />
+        <video src="vid1.mp4" className="vid" alt="no video for u mate" />
+        <video src="vid2.mp4" className="vid" alt="no video for u mate" />
+        <video src="vid3.mp4" className="vid" alt="no video for u mate" />
+        <video src="vid4.mp4" className="vid" alt="no video for u mate" />
+        <video src="vid1.mp4" className="vid" alt="no video for u mate" />
+        <video src="vid2.mp4" className="vid" alt="no video for u mate" />
+        <video src="vid3.mp4" className="vid" alt="no video for u mate" />
+        <video src="vid4.mp4" className="vid" alt="no video for u mate" />
+        <video src="vid1.mp4" className="vid" alt="no video for u mate" />
+        <video src="vid2.mp4" className="vid" alt="no video for u mate" />
+        <video src="vid3.mp4" className="vid" alt="no video for u mate" />
+        <video src="vid4.mp4" className="vid" alt="no video for u mate" />
+      </div>
     </div>
   );
 }

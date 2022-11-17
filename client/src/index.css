@@ -1,15 +1,15 @@
-@import url('https://fonts.googleapis.com/css2?family=Ubuntu+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Ubuntu+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap");
 body {
   margin: 0;
-  font-family:  'Ubuntu Mono', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 
-    'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-family: "Ubuntu Mono", "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
+    "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 :root {
   --main-bg-dark: #181818; /*363945*/
-  --main-bg-light: #9A4EAE;
+  --main-bg-light: #9a4eae;
 }
 
 body {
@@ -22,7 +22,7 @@ input:focus::placeholder {
 
 hr {
   border: none;
-  border-bottom: .5px solid var(--main-bg-dark);
+  border-bottom: 0.5px solid var(--main-bg-dark);
 }
 
 ul {
@@ -31,10 +31,10 @@ ul {
 }
 
 .mainDiv {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
 }
 
 .promptContainerDiv {
@@ -48,28 +48,28 @@ ul {
 }
 
 .prompt {
-    width: 70vw;
-    border: none;
-    border-bottom: 3px solid var(--main-bg-light);
-    border-top-left-radius: 10px;
-    padding: 5px 20px;
-    background-color: var(--main-bg-dark); 
-    caret-color: var(--main-bg-light); 
-    font-family: 'Ubuntu Mono';
-    font-size: 2em;
-    text-align: center;
-    overflow: auto;
-    margin-right: 5px;
-    color: white;
+  width: 70vw;
+  border: none;
+  border-bottom: 3px solid var(--main-bg-light);
+  border-top-left-radius: 10px;
+  padding: 5px 20px;
+  background-color: var(--main-bg-dark);
+  caret-color: var(--main-bg-light);
+  font-family: "Ubuntu Mono";
+  font-size: 2em;
+  text-align: center;
+  overflow: auto;
+  margin-right: 5px;
+  color: white;
 }
 
 .prompt::placeholder {
-    color: white;
+  color: white;
 }
 
 .prompt:focus {
-    outline-width: 0;
-    color: white;
+  outline-width: 0;
+  color: white;
 }
 .promptButton {
   background-color: var(--main-bg-dark);
@@ -78,7 +78,7 @@ ul {
   color: var(--main-bg-light);
   border: none;
   border-bottom: 3px solid var(--main-bg-light);
-  font-family: 'Ubuntu Mono';
+  font-family: "Ubuntu Mono";
   font-size: 1.2em;
   /* border-radius: 10px 10px 0 0; */
 }
@@ -89,11 +89,10 @@ ul {
 }
 
 .video {
-    position: relative;
-    margin-top: 5vh;
-    width: 600px;
+  position: relative;
+  margin-top: 5vh;
+  width: 600px;
 }
-
 
 /* Dropdown settings */
 
@@ -105,7 +104,7 @@ ul {
 }
 
 .dropArrow {
-  background-image: url('./assets/drop-arrow.svg');
+  background-image: url("./assets/drop-arrow.svg");
   background-color: var(--main-bg-dark);
   width: 30px;
   height: 12px;
@@ -133,7 +132,6 @@ ul {
   transform: rotate(180deg);
 }
 
-
 /* Slider Styles*/
 
 .alignCenter {
@@ -147,8 +145,8 @@ ul {
   background: var(--main-bg-dark);
   outline: none;
   opacity: 0.7;
-  -webkit-transition: .2s;
-  transition: opacity .2s;
+  -webkit-transition: 0.2s;
+  transition: opacity 0.2s;
   margin-top: 10px;
 }
 
@@ -170,7 +168,7 @@ ul {
   width: 25px;
   height: 25px;
   border-radius: 50%;
-  background: #04AA6D;
+  background: #04aa6d;
   cursor: pointer;
 }
 
@@ -179,77 +177,75 @@ ul {
   border-bottom: 3px solid var(--main-bg-dark);
   border-top-left-radius: 10px;
   padding: 5px 20px;
-  background-color: var(--main-bg-light); 
-  caret-color: var(--main-bg-dark); 
-  font-family: 'Ubuntu Mono';
+  background-color: var(--main-bg-light);
+  caret-color: var(--main-bg-dark);
+  font-family: "Ubuntu Mono";
   font-size: 1.1em;
   text-align: center;
   overflow: auto;
   margin-bottom: 10px;
 }
 .dropdownInput::placeholder {
-    color: var(--main-bg-dark);
+  color: var(--main-bg-dark);
 }
 
 .dropdownInput:focus {
-    outline-width: 0;
-    color: var(--main-bg-dark);
+  outline-width: 0;
+  color: var(--main-bg-dark);
 }
-
-
 
 /* Login and sign up styling code */
 
 .container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    border: 1px solid var(--main-bg-light);
-    border-radius: 5px;
-    max-width: 600px;
-    min-width: 300px;
-    width: 35vw;
-    height: 50vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  border: 1px solid var(--main-bg-light);
+  border-radius: 5px;
+  max-width: 600px;
+  min-width: 300px;
+  width: 35vw;
+  height: 50vh;
 }
 
 .input {
-    background-color: var(--main-bg-dark);
-    border: none;
-    border-bottom: 2px solid var(--main-bg-light);
-    margin-bottom: 20px;
-    text-align: center;
-    font-size: large;
-    font-family: 'Ubuntu Mono';
-    caret-color: var(--main-bg-light); 
-    width: 60%;
-    color:white;
+  background-color: var(--main-bg-dark);
+  border: none;
+  border-bottom: 2px solid var(--main-bg-light);
+  margin-bottom: 20px;
+  text-align: center;
+  font-size: large;
+  font-family: "Ubuntu Mono";
+  caret-color: var(--main-bg-light);
+  width: 60%;
+  color: white;
 }
 
 .input:focus {
-    outline: none;
+  outline: none;
 }
 
 .btn {
-    font-family: 'Ubuntu Mono';
-    font-size: large;
-    background-color: var(--main-bg-dark);
-    border: 1px solid var(--main-bg-light);
-    margin: 3px 0px;
-    padding: 5px 0px;
-    width: 60%;
-    border-radius: 100vmax;
-    color: var(--main-bg-light);
+  font-family: "Ubuntu Mono";
+  font-size: large;
+  background-color: var(--main-bg-dark);
+  border: 1px solid var(--main-bg-light);
+  margin: 3px 0px;
+  padding: 5px 0px;
+  width: 60%;
+  border-radius: 100vmax;
+  color: var(--main-bg-light);
 }
 
 .btn:hover {
-    background-color: var(--main-bg-light);
-    color: var(--main-bg-dark);
+  background-color: var(--main-bg-light);
+  color: var(--main-bg-dark);
 }
 
 .partial-color:hover {
-    background-color: rgba(154, 78, 174, 0.1);
-    color: var(--main-bg-light);
+  background-color: rgba(154, 78, 174, 0.1);
+  color: var(--main-bg-light);
 }
 
 .header {
@@ -262,59 +258,58 @@ ul {
   font-size: xx-large;
   color: var(--main-bg-light);
 }
-
 
 /* Login and styling code */
 
 .container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    border: 1px solid var(--main-bg-light);
-    border-radius: 5px;
-    max-width: 600px;
-    min-width: 300px;
-    width: 35vw;
-    height: 50vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  border: 1px solid var(--main-bg-light);
+  border-radius: 5px;
+  max-width: 600px;
+  min-width: 300px;
+  width: 35vw;
+  height: 50vh;
 }
 
 .input {
-    background-color: var(--main-bg-dark);
-    border: none;
-    border-bottom: 2px solid var(--main-bg-light);
-    margin-bottom: 20px;
-    text-align: center;
-    font-size: large;
-    font-family: 'Ubuntu Mono';
-    caret-color: var(--main-bg-light); 
-    width: 60%;
+  background-color: var(--main-bg-dark);
+  border: none;
+  border-bottom: 2px solid var(--main-bg-light);
+  margin-bottom: 20px;
+  text-align: center;
+  font-size: large;
+  font-family: "Ubuntu Mono";
+  caret-color: var(--main-bg-light);
+  width: 60%;
 }
 
 .input:focus {
-    outline: none;
+  outline: none;
 }
 
 .btn {
-    font-family: 'Ubuntu Mono';
-    font-size: large;
-    background-color: var(--main-bg-dark);
-    border: 1px solid var(--main-bg-light);
-    margin: 3px 0px;
-    padding: 5px 0px;
-    width: 60%;
-    border-radius: 100vmax;
-    color: var(--main-bg-light);
+  font-family: "Ubuntu Mono";
+  font-size: large;
+  background-color: var(--main-bg-dark);
+  border: 1px solid var(--main-bg-light);
+  margin: 3px 0px;
+  padding: 5px 0px;
+  width: 60%;
+  border-radius: 100vmax;
+  color: var(--main-bg-light);
 }
 
 .btn:hover {
-    background-color: var(--main-bg-light);
-    color: var(--main-bg-dark);
+  background-color: var(--main-bg-light);
+  color: var(--main-bg-dark);
 }
 
 .partial-color:hover {
-    background-color: rgba(154, 78, 174, 0.1);
-    color: var(--main-bg-light);
+  background-color: rgba(154, 78, 174, 0.1);
+  color: var(--main-bg-light);
 }
 
 .header {
@@ -327,4 +322,3 @@ ul {
   font-size: xx-large;
   color: var(--main-bg-light);
 }
-
