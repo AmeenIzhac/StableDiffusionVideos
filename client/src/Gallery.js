@@ -14,10 +14,11 @@ export default function Gallery() {
         xhr.responseType = "blob";
         xhr.onload = (event) => {
           setVideo(URL.createObjectURL(xhr.response));
+          console.log(video);
         };
         xhr.open("GET", url);
+        xhr.setRequestHeader("Access-Control-Allow-Origin", "*");
         xhr.send();
-
         // Or inserted into an <img> element
         const img = document.getElementById("myimg");
         img.setAttribute("src", url);
@@ -32,7 +33,11 @@ export default function Gallery() {
       <br />
       <h1 className="title">Your Gallery</h1>
       <div className="vidsContainer">
-        <video src="vid1.mp4" className="vid" alt="no video for u mate" />
+        <video
+          src={video ? video : "vid2.mp4"}
+          className="vid"
+          alt="no video for u mate"
+        />
         <video src="vid2.mp4" className="vid" alt="no video for u mate" />
         <video src="vid3.mp4" className="vid" alt="no video for u mate" />
         <video src="vid4.mp4" className="vid" alt="no video for u mate" />
