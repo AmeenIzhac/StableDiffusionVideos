@@ -1,11 +1,12 @@
-from refactor_txt2video import *
+import sys
+from txt2video import *
+sys.path.append('stable-diffusion-2/optimizedSD')
 
 #Placeholder "main" code
-cfg_path = 'configs/stable-diffusion/v1-inference.yaml'
-optimized_cfg_path = 'optimizedSD/v1-inference.yaml'
-ckpt_path = 'models/ldm/stable-diffusion-v1/model.ckpt'
-model_state = ModelState()
-load_model(model_state, optimized_cfg_path, ckpt_path, optimized=True)
+cfg_path = './stable-diffusion-2/configs/stable-diffusion/v1-inference.yaml'
+optimized_cfg_path = './stable-diffusion-2/optimizedSD/v1-inference.yaml'
+ckpt_path = './stable-diffusion-2/models/ldm/stable-diffusion-v1/model.ckpt'
+model_state = load_model(optimized_cfg_path, ckpt_path, optimized=True)
 
 path_args = PathArgs()
 
@@ -31,6 +32,6 @@ video_args.zoom = 1.008
 video_args.x = -3
 video_args.upscale = True
 video_args.color_match = True
-video_args.video_name = "the_4_seasons"
+video_args.video_name = "the_4_seasons_2"
 
-generate_video(image_args, video_args, model_state, path_args)
+generate_video(image_args, video_args, path_args, model_state)
