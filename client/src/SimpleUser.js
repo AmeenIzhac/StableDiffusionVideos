@@ -42,7 +42,7 @@ export default function SimpleUser() {
         console.log(src);
       })
       .catch((error) => {
-        console.log(error);
+        alert("Could not connect to server");
       })
       .finally(() => {
         setLoading(false);
@@ -63,6 +63,16 @@ export default function SimpleUser() {
   const dropOptions = () => {
     const dropdown = document.getElementById("dropdown")
     const button = document.getElementById("button")
+    const flex = document.getElementById("flex")
+    if (!dropdown.classList.contains("open")) {
+      flex.style.flexDirection = 'row'
+      flex.style.alignItems = 'initial'
+    } else {
+      setTimeout(() => {
+        flex.style.flexDirection = 'column'
+        flex.style.alignItems = 'center'
+      }, 500);
+    }
     dropdown.classList.toggle("open")
     button.classList.toggle("rotate")
   }
@@ -125,30 +135,32 @@ export default function SimpleUser() {
             <button className='promptButton' onClick={getVideo}>Generate Video</button>
             {/* <button className='promptButton' onClick={getVideo} onSubmit={logger}>Generate Video</button> */}
           </div>
-          <Dropdown
-            frames={frames}
-            slideFrameChange={slideFrameChange}
-            width={width}
-            slideWidthChange={slideWidthChange}
-            height={height}
-            slideHeightChange={slideHeightChange}
-            zoom={zoom}
-            slideZoomChange={slideZoomChange}
-            angle={angle}
-            slideAngleChange={slideAngleChange}
-            dropOptions={dropOptions}
-          />
-        </div>
-        <div className='videoDiv'>
-          {src ?
-            <video id="vidObj" width="500" height="360" controls loop muted autoPlay>
-              <source src={src} type="video/mp4" />
-            </video>
-            :
-            (loading ?
-              <img src={loadingAnimation} alt='loading thingy' /> : null)
-          }
+          <div className="flex" id="flex">
+            <Dropdown
+              frames={frames}
+              slideFrameChange={slideFrameChange}
+              width={width}
+              slideWidthChange={slideWidthChange}
+              height={height}
+              slideHeightChange={slideHeightChange}
+              zoom={zoom}
+              slideZoomChange={slideZoomChange}
+              angle={angle}
+              slideAngleChange={slideAngleChange}
+              dropOptions={dropOptions}
+            />
+            <div className='videoDiv'>
+              {src ?
+                <video id="vidObj" width="500" height="360" controls loop muted autoPlay>
+                  <source src={src} type="video/mp4" />
+                </video>
+                :
+                (loading ?
+                  <img src={loadingAnimation} alt='loading thingy' /> : null)
+              }
 
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -20,7 +20,11 @@ cors = CORS(app)
 
 @app.route('/')
 def index():
-    return jsonify({"This is": "a test"})
+    return jsonify({"The server": "is running!"})
+
+@app.route('/test')
+def test():
+    return send_file('./outputs/videos/Lego_man_committing_seppuku.mp4', mimetype='video/mp4')
 
 
 @app.route('/api')
@@ -60,5 +64,5 @@ def api():
 if __name__ == '__main__':
     # ssl_context = ('./certicates/server.crt', './certicates/server.key')
     app.run(
-        # host='192.168.1.125', 
+        host='192.168.1.125', 
         port=8080)
