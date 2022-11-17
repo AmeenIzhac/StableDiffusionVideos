@@ -1,16 +1,19 @@
 import Navbar from "./Navbar";
 import { useState } from "react";
 import axios from "axios";
-import loadingAnimation from "./assets/painting.gif";
+import loadingAnimation from "./assets/loading.gif";
 import Cookies from 'js-cookie'
+import Dropdown from "./Dropdown";
 
 export default function SimpleUser() {
   const [src, setSrc] = useState("");
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
   const [frames, setFrames] = useState("30")
-  const [width, setWidth] = useState("")
-  const [height, setHeight] = useState("")
+  const [width, setWidth] = useState("704")
+  const [height, setHeight] = useState("704")
+  const [angle, setAngle] = useState("0")
+  const [zoom, setZoom] = useState("1")
   const [loggedIn, setLoggedIn] = useState(Cookies.get("loggedInUser") != null)
 
 
@@ -28,7 +31,7 @@ export default function SimpleUser() {
     setLoading(true);
     axios({
       method: "get",
-      url: `https://stablediffusionvideoswebserver-production.up.railway.app/generate?prompt=${prompt}&frames=${frames}&width=${width}&height=${height}`,
+      url: `https://stablediffusionvideoswebserver-production.up.railway.app/generate?prompt=${prompt}&frames=${frames}&width=${width}&height=${height}&angle=${angle}&zoom=${zoom}`,
       // url: `http://localhost:3001/generate?prompt=${prompt}&frames=${frames}&width=${width}&height=${height}`,
       responseType: "blob",
       timeout: 10000000,
@@ -45,8 +48,15 @@ export default function SimpleUser() {
         setLoading(false);
       });
 
-
+    setAngle("0")
+    setZoom("1")
+    setWidth("704")
+    setHeight("704")
     setPrompt("");
+    const dropdown = document.getElementById("dropdown")
+    const button = document.getElementById("button")
+    dropdown.classList.remove("open")
+    button.classList.remove("rotate")
   }
 
   //dropdown code
@@ -57,15 +67,23 @@ export default function SimpleUser() {
     button.classList.toggle("rotate")
   }
 
-  const slideChange = (e) => {
+  const slideFrameChange = (e) => {
     setFrames(e.target.value);
   }
 
-  const widthChange = (e) => {
+  const slideWidthChange = (e) => {
     setWidth(e.target.value)
   }
-  const heightChange = (e) => {
+  const slideHeightChange = (e) => {
     setHeight(e.target.value)
+  }
+
+  const slideAngleChange = (e) => {
+    setAngle(e.target.value)
+  }
+
+  const slideZoomChange = (e) => {
+    setZoom(e.target.value)
   }
 
   const logger = (e) => {
@@ -107,33 +125,19 @@ export default function SimpleUser() {
             <button className='promptButton' onClick={getVideo}>Generate Video</button>
             {/* <button className='promptButton' onClick={getVideo} onSubmit={logger}>Generate Video</button> */}
           </div>
-          <div className='slideOptions'>
-            {Cookies.get("loggedInUser") ?
-              <>
-                <div className='dropdownOption' id="dropdown">
-                  <form>
-                    <div className='slideContainer alignCenter'>
-                      <p>Number of Frames:</p>
-                      <input type="range" min="1" max="60" value={frames} className='slider' id="myRange" onChange={slideChange} />
-                      <p>Value: <span id="demo">{frames}</span></p>
-                    </div>
-                    <hr />
-                    <div className='alignCenter'>
-                      <input className='dropdownInput alignCenter' value={width} placeholder='Enter Width' onChange={widthChange} />
-                    </div>
-                    <hr />
-                    <div className='alignCenter'>
-                      <input className='dropdownInput alignCenter' value={height} placeholder='Enter Height' onChange={heightChange} />
-                    </div>
-                  </form>
-                </div>
-                <button className='dropArrow' onClick={dropOptions} id="button"></button>
-              </>
-              :
-              <></>
-            }
-
-          </div>
+          <Dropdown
+            frames={frames}
+            slideFrameChange={slideFrameChange}
+            width={width}
+            slideWidthChange={slideWidthChange}
+            height={height}
+            slideHeightChange={slideHeightChange}
+            zoom={zoom}
+            slideZoomChange={slideZoomChange}
+            angle={angle}
+            slideAngleChange={slideAngleChange}
+            dropOptions={dropOptions}
+          />
         </div>
         <div className='videoDiv'>
           {src ?
