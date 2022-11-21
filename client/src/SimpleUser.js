@@ -4,6 +4,8 @@ import axios from "axios";
 import loadingAnimation from "./assets/loading.gif";
 import Cookies from 'js-cookie'
 import Dropdown from "./Dropdown";
+import * as qs from 'qs';
+
 
 export default function SimpleUser() {
   const [src, setSrc] = useState("");
@@ -22,7 +24,7 @@ export default function SimpleUser() {
     setPrompt(e.target.value);
   };
 
-  function getVideo() {
+  async function getVideo() {
     if (prompt === "") {
       alert("Please enter a prompt");
       return;
@@ -32,10 +34,18 @@ export default function SimpleUser() {
     setLoading(true);
     axios({
       method: "get",
-      url: `https://stablediffusionvideoswebserver-production.up.railway.app/generate?prompt=${prompt}&frames=${frames}&width=${width}&height=${height}&angle=${angle}&zoom=${zoom}`,
-      // url: `http://localhost:3001/generate?prompt=${prompt}&frames=${frames}&width=${width}&height=${height}`,
+      // url: `https://stablediffusionvideoswebserver-production.up.railway.app/generate`,
+      url: `http://localhost:3001/generate`,
+      params: {
+        prompts: [...prompts, prompt],
+        frames: frames,
+        width: width,
+        height: height,
+        angle: angle,
+        zoom: zoom
+      },
       responseType: "blob",
-      timeout: 10000000,
+      timeout: 10000000
     })
       .then((response) => {
         console.log(response.data);
@@ -53,7 +63,8 @@ export default function SimpleUser() {
     setZoom("1")
     setWidth("704")
     setHeight("704")
-    setPrompt("");
+    setPrompt("")
+    setPrompts([])
     const dropdown = document.getElementById("dropdown")
     const button = document.getElementById("button")
     dropdown.classList.remove("open")
@@ -149,7 +160,7 @@ export default function SimpleUser() {
           <div className="promptsContainer">
             {prompts.map((prompt, index) => {
               return <div key={index} className="promptsList">
-                <text> {prompt} </text>
+                <span> {prompt} </span>
                 <button
                   onClick={() => { setPrompts(prompts.filter((_, i) => i !== index)) }}
                   className="removePrompt">
