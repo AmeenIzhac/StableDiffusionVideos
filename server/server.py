@@ -31,7 +31,7 @@ def test():
 def api():
     # Extract options
     args = request.args
-    prompt = args.get('prompt')
+    prompts = args.get('prompts')
     video_name = str(prompt).replace(" ", "_")
     
     # Prepare options
@@ -42,7 +42,7 @@ def api():
 
     video_args = VideoArgs()
     video_args.video_name = video_name
-    video_args.prompts = [prompt]
+    video_args.prompts = prompts
     video_args.fps = 20
     video_args.strength = 0.375
     video_args.zoom = 1.005
