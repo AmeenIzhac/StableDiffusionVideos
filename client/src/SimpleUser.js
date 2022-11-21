@@ -15,6 +15,7 @@ export default function SimpleUser() {
   const [angle, setAngle] = useState("0")
   const [zoom, setZoom] = useState("1")
   const [loggedIn, setLoggedIn] = useState(Cookies.get("loggedInUser") != null)
+  const [prompts, setPrompts] = useState([])
 
 
   const handleChange = (e) => {
@@ -57,6 +58,15 @@ export default function SimpleUser() {
     const button = document.getElementById("button")
     dropdown.classList.remove("open")
     button.classList.remove("rotate")
+  }
+
+  function addPrompt() {
+    if (prompt === "") {
+      alert("Please enter a prompt");
+      return;
+    }
+    setPrompts([...prompts, prompt])
+    setPrompt("")
   }
 
   //dropdown code
@@ -132,8 +142,21 @@ export default function SimpleUser() {
         <div className='promptContainerDiv'>
           <div className='promptDiv'>
             <input className='prompt' value={prompt} placeholder='Enter Text Prompt...' onChange={handleChange} onSubmit={getVideo} onKeyDown={handleKeyDown}></input>
+            <button className='promptButton' onClick={addPrompt}>+</button>
             <button className='promptButton' onClick={getVideo}>Generate Video</button>
             {/* <button className='promptButton' onClick={getVideo} onSubmit={logger}>Generate Video</button> */}
+          </div>
+          <div className="promptsContainer">
+            {prompts.map((prompt, index) => {
+              return <div key={index} className="promptsList">
+                <text> {prompt} </text>
+                <button
+                  onClick={() => { setPrompts(prompts.filter((_, i) => i !== index)) }}
+                  className="removePrompt">
+                  X
+                </button>
+              </div>
+            })}
           </div>
           <div className="flex" id="flex">
             <Dropdown
