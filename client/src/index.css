@@ -31,8 +31,11 @@ ul {
   display: flex;
   align-items: center;
 }
-
 .mainDiv {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -93,9 +96,7 @@ ul {
 }
 
 .video {
-  position: relative;
-  margin-top: 5vh;
-  width: 600px;
+  max-width: 1024px;
 }
 
 
@@ -103,17 +104,21 @@ ul {
 
 .flex {
   display: flex;
-  /* flex-direction: column; */
-  /* align-items: center; */
+  flex-direction: column;
+  align-items: center;
   justify-content: right;
   margin-left: -13%;
 }
 
 .slideOptions {
+  position: absolute;
   display: flex;
   flex-direction: column;
   align-items: center;
   margin-bottom: 5vh;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
 }
 
 .dropArrow {
@@ -121,20 +126,35 @@ ul {
   background-color: var(--main-bg-dark);
   width: 30px;
   height: 12px;
-  margin-top: 20px;
+  margin-top: 10px;
   border: none;
   transition: height 0.5s ease;
 }
 
 .dropdownOption {
-  margin-top: 10px;
   background-color: var(--main-bg-light);
-  width: 40vw;
+  width: 95vw;
   height: 0px;
   overflow: hidden;
   transition: height 0.5s ease;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1em;
+}
+
+@media screen and (min-width: 900px) {
+  .dropdownOption {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1em;
+  }
+
+}
+@media screen and (max-width: 700px) {
+  .dropdownOption {
+    grid-template-columns: repeat(1, 1fr);
+    gap: 1em;
+  }
+
 }
 
 .open {
@@ -145,16 +165,26 @@ ul {
   transform: rotate(180deg);
 }
 
+.loading {
+  max-width: 150px;
+  margin: 0;
+}
+
 
 /* Slider Styles*/
 
 .alignCenter {
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
 }
 
 .slider {
   -webkit-appearance: none;
-  width: 70%;
+  width: min(90%, 75rem);
   height: 2px;
   border-radius: 5px;
   background: var(--main-bg-dark);

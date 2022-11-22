@@ -13,9 +13,9 @@ export default function Navbar({loggedIn, setLoggedIn}) {
                 <label className='logo'>AI VidGen</label>
                 { loggedIn ? 
                 <ul>
-                    <li className="pageLink link"><a className="link" href='gallery'>Gallery</a></li>
-                    <li className="pageLink" >
-                        <button className='pageLink link'onClick={logout}>Logout</button>
+                    <li className="pageLink"><a className='link' href='gallery'>Gallery</a></li>
+                    <li  className='pageLink' >
+                        <button className='buttonLink' onClick={logout}>Logout</button>
                     </li>
                 </ul>
                 :
