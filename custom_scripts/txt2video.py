@@ -56,7 +56,7 @@ class VideoArgs:
         self.color_match = True
         self.seed = -1
         self.video_name = None
-        self.sampler = 'euler_ancestral'
+        self.sampler = 'dpm_2'
         self.upscale = True
         self.init_sample = None
 
