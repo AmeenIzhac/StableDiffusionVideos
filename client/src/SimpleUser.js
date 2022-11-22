@@ -164,7 +164,7 @@ export default function SimpleUser() {
                 <button
                   onClick={() => { setPrompts(prompts.filter((_, i) => i !== index)) }}
                   className="removePrompt">
-                  X
+                  <div className="horizontal"></div>
                 </button>
               </div>
             })}
