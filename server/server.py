@@ -31,8 +31,9 @@ def test():
 def api():
     # Extract options
     args = request.args
-    prompts = args.get('prompts')
-    video_name = str(prompt).replace(" ", "_")
+    
+    prompts = args.get('prompts').split(',')
+    video_name = str(prompts[0]).replace(" ", "_")
     
     # Prepare options
     image_args = ImageArgs()
