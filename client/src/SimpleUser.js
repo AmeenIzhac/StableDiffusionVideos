@@ -4,8 +4,6 @@ import axios from "axios";
 import loadingAnimation from "./assets/loading.gif";
 import Cookies from 'js-cookie'
 import Dropdown from "./Dropdown";
-import * as qs from 'qs';
-
 
 export default function SimpleUser() {
   const [src, setSrc] = useState("");
@@ -19,7 +17,6 @@ export default function SimpleUser() {
   const [loggedIn, setLoggedIn] = useState(Cookies.get("loggedInUser") != null)
   const [prompts, setPrompts] = useState([])
 
-
   const handleChange = (e) => {
     setPrompt(e.target.value);
   };
@@ -29,7 +26,6 @@ export default function SimpleUser() {
       alert("Please enter a prompt");
       return;
     }
-
     setSrc("");
     setLoading(true);
     axios({
@@ -37,7 +33,7 @@ export default function SimpleUser() {
       // url: `https://stablediffusionvideoswebserver-production.up.railway.app/generate`,
       url: `http://localhost:3001/generate`,
       params: {
-        prompts: [...prompts, prompt],
+        prompts: [...prompts, prompt].join(),
         frames: frames,
         width: width,
         height: height,
