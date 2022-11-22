@@ -57,7 +57,6 @@ ul {
   width: 70vw;
   border: none;
   border-bottom: 3px solid var(--main-bg-light);
-  border-top-left-radius: 10px;
   padding: 5px 20px;
   background-color: var(--main-bg-dark);
   caret-color: var(--main-bg-light);
@@ -153,6 +152,19 @@ ul {
   .dropdownOption {
     grid-template-columns: repeat(1, 1fr);
     gap: 1em;
+  }
+  .promptButton {
+    padding: 12px;
+    font-size: 3vw;
+    /* border-radius: 10px 10px 0 0; */
+  }
+  .prompt {
+    width: 70vw;
+    border: none;
+    border-bottom: 3px solid var(--main-bg-light);
+    padding: 1vh 1vw;
+    font-size: 4vw;
+    margin-right: 1vw;
   }
 
 }

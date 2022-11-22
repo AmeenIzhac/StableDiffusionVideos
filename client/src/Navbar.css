@@ -5,6 +5,7 @@
     background-color: var(--main-bg-dark);
     height: 5vh;
     box-shadow: 0px 1px var(--main-bg-light);
+    align-items: center;
 }
 
 .Navbar .logo {
@@ -43,5 +44,27 @@ li {
 
 .pageLink {
     margin-right: 1em;
-    padding: 2px 10px;
+    padding: 5px 10px;
+}
+
+@media screen and (max-width: 700px) {
+    .Navbar .logo {
+        font-size: 1.8em;
+        margin-left: 10px;
+    }
+    .buttonLink, .pageLink, .link {
+        font-size: 1.1em;
+    }
+
+}
+
+@media screen and (max-width: 540px) {
+    .Navbar .logo {
+        font-size: 1em;
+        margin-left: 10px;
+    }
+    .buttonLink, .pageLink, .link {
+        font-size: 1em;
+    }
+
 }
