@@ -32,7 +32,7 @@ def api():
     # Extract options
     args = request.args
     
-    prompts = args.get('prompts').split(',')
+    prompts = args.get('prompts').split(';')
     video_name = str(prompts[0]).replace(" ", "_")
     
     # Prepare options

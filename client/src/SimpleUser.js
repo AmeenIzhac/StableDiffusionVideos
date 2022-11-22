@@ -33,7 +33,7 @@ export default function SimpleUser() {
       // url: `https://stablediffusionvideoswebserver-production.up.railway.app/generate`,
       url: `http://localhost:3001/generate`,
       params: {
-        prompts: [...prompts, prompt].join(),
+        prompts: [...prompts, prompt].join(";"),
         frames: frames,
         width: width,
         height: height,
