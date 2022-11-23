@@ -17,13 +17,6 @@ export default function SimpleUser() {
   const [loggedIn, setLoggedIn] = useState(Cookies.get("loggedInUser") != null)
   const [prompts, setPrompts] = useState([])
 
-  const handleChange = (e) => {
-    setPrompt(e.target.value);
-  };
-
-  async function getVideo() {
-
-
   function getVideo() {
     const prompt = promptRef.current.value
 
@@ -78,8 +71,8 @@ export default function SimpleUser() {
       alert("Please enter a prompt");
       return;
     }
-    setPrompts([...prompts, prompt])
-    setPrompt("")
+    setPrompts([...prompts, promptRef.current.value])
+    promptRef.current.value = "";
   }
 
   //dropdown code
@@ -167,5 +160,5 @@ export default function SimpleUser() {
       </div>
     </div>
   );
-}
 
+}
