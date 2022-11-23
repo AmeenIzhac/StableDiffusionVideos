@@ -67,7 +67,7 @@ export default function SimpleUser() {
   }
 
   function addPrompt() {
-    if (prompt === "") {
+    if (promptRef.current.value === "") {
       alert("Please enter a prompt");
       return;
     }
