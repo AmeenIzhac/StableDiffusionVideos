@@ -15,22 +15,38 @@ export default function SimpleUser() {
   const [angle, setAngle] = useState("0")
   const [zoom, setZoom] = useState("1")
   const [loggedIn, setLoggedIn] = useState(Cookies.get("loggedInUser") != null)
+  const [prompts, setPrompts] = useState([])
+
+  const handleChange = (e) => {
+    setPrompt(e.target.value);
+  };
+
+  async function getVideo() {
+
 
   function getVideo() {
     const prompt = promptRef.current.value
+
     if (prompt === "") {
       alert("Please enter a prompt");
       return;
     }
-
     setSrc("");
     setLoading(true);
     axios({
       method: "get",
-      url: `https://stablediffusionvideoswebserver-production.up.railway.app/generate?prompt=${prompt}&frames=${frames}&width=${width}&height=${height}&angle=${angle}&zoom=${zoom}`,
-      // url: `http://localhost:3001/generate?prompt=${prompt}&frames=${frames}&width=${width}&height=${height}`,
+      // url: `https://stablediffusionvideoswebserver-production.up.railway.app/generate`,
+      url: `http://localhost:3001/generate`,
+      params: {
+        prompts: [...prompts, prompt].join(";"),
+        frames: frames,
+        width: width,
+        height: height,
+        angle: angle,
+        zoom: zoom
+      },
       responseType: "blob",
-      timeout: 10000000,
+      timeout: 10000000
     })
       .then((response) => {
         console.log(response.data);
@@ -48,10 +64,22 @@ export default function SimpleUser() {
     setZoom("1")
     setWidth("704")
     setHeight("704")
+
+    promptRef.current.value = "";
+    setPrompts([])
     const dropdown = document.getElementById("dropdown")
     const button = document.getElementById("button")
     dropdown.classList.remove("open")
     button.classList.remove("rotate")
+  }
+
+  function addPrompt() {
+    if (prompt === "") {
+      alert("Please enter a prompt");
+      return;
+    }
+    setPrompts([...prompts, prompt])
+    setPrompt("")
   }
 
   //dropdown code
@@ -119,10 +147,22 @@ export default function SimpleUser() {
         <div className='promptContainerDiv'>
           <div className='promptDiv'>
             <input className='prompt' ref={promptRef} placeholder='Enter Text Prompt...' onSubmit={getVideo} onKeyDown={handleKeyDown}></input>
+            <button className='promptButton' onClick={addPrompt}>+</button>
             <button className='promptButton' onClick={getVideo}>Generate Video</button>
             {/* <button className='promptButton' onClick={getVideo} onSubmit={logger}>Generate Video</button> */}
           </div>
-            
+          <div className="promptsContainer">
+            {prompts.map((prompt, index) => {
+              return <div key={index} className="promptsList">
+                <span> {prompt} </span>
+                <button
+                  onClick={() => { setPrompts(prompts.filter((_, i) => i !== index)) }}
+                  className="removePrompt">
+                  <div className="horizontal"></div>
+                </button>
+              </div>
+            })}
+          </div>
         </div>
       </div>
     </div>
