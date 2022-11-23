@@ -160,7 +160,7 @@ def compute_current_prompt(C, image_index, F, k=4.0) :
     f1 = i1 * ip_ratio #prompt_frames[i1]
     f2 = i2 * ip_ratio
     t = (image_index - f1) / (f2 - f1)
-    s = 1 / (1 + (1/x - 1) ** k) #v controls the stiffness of the sigmoid, essentially controlling the transition speed between 2 prompts
+    s = 1 / (1 + (1/t - 1) ** k) if t > 0.0 else 0.0 #k controls the stiffness of the sigmoid, essentially controlling the transition speed between 2 prompts
     c = slerp(s, c1, c2)
     return c
 
@@ -205,15 +205,19 @@ def generate_image (
     t_enc = None,
     batch_size = 1
 ) :
-    if x is None:
+    if x is None: #doing txt2img with noise to be generated
         shape = [batch_size, ia.C, ia.H // ia.f, ia.W // ia.f]
         x = torch.randn(shape, device=ms.device)
         samples, _ = ms.sampler.sample(S=ia.steps, conditioning=c, unconditional_guidance_scale=ia.scale,
                                 unconditional_conditioning=uc, x_T=x)
     else:
-        #maybe adapt for batch size here if it's of any relevance : just a copy-cat operation ig
-        samples, _ = ms.sampler.sample(S=ia.steps, conditioning=c, unconditional_guidance_scale=ia.scale,
-                                unconditional_conditioning=uc, x_T=x, img2img=True, t_enc=t_enc)
+        if t_enc is None: #doing noise walk
+            samples, _ = ms.sampler.sample(S=ia.steps, conditioning=c, unconditional_guidance_scale=ia.scale,
+                                unconditional_conditioning=uc, x_T=x)
+        else: #doing img2img
+            #maybe adapt for batch size here if it's of any relevance : just a copy-cat operation ig
+            samples, _ = ms.sampler.sample(S=ia.steps, conditioning=c, unconditional_guidance_scale=ia.scale,
+                                    unconditional_conditioning=uc, x_T=x, img2img=True, t_enc=t_enc)
                     
     os.system('nvidia-smi --query-gpu=memory.used --format=csv')
     return ms.FS.decode_first_stage(samples)
@@ -307,7 +311,7 @@ def generate_video (
                 seed_everything(seed)
 
                 #get the prompt interpolation point for the current image 
-                c = compute_current_prompt(C, i+1, video_args.frames)
+                c = compute_current_prompt(C, i+1, video_args.frames, k=1.0)
 
                 previous_latent = process_previous_image(model_state, previous_sample, xform, 
                                         video_args.color_match, color_sample, hsv= ((i % 2) == 0))
@@ -340,6 +344,7 @@ def generate_walk_video(
     video_args,
     path_args,
     model_state,
+    latent_walk=False
     ):    
 
     seed = video_args.seed
@@ -389,10 +394,16 @@ def generate_walk_video(
             num_workers = 1
             pool = ThreadPoolExecutor(num_workers)
 
+            shape = [1, image_args.C, image_args.H // image_args.f, image_args.W // image_args.f]
+            init_noise = torch.randn(shape, device=model_state.device)
+            if latent_walk:
+                end_noise = torch.randn(shape, device=model_state.device)
+
             for i in trange(video_args.frames, desc="Generating interpolation steps"):
-                sample = generate_image(c=compute_current_prompt(C, i, video_args.frames), uc=uc, ia=image_args, ms=model_state)
+                x = init_noise if not latent_walk else slerp(i/(video_args.frames-1), init_noise, end_noise)
+                sample = generate_image(c=compute_current_prompt(C, i, video_args.frames, k=1.0), x=x, uc=uc, ia=image_args, ms=model_state)
                 #save it to disk
-                pool.submit(save_image, first_sample, frame_path(base_count), model_state, upscale=video_args.upscale)
+                pool.submit(save_image, sample, frame_path(base_count+i), model_state, upscale=video_args.upscale)
 
             # Wait for upscaling/saving to finish
             pool.shutdown()
