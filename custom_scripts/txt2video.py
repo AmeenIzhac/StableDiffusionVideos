@@ -56,7 +56,7 @@ class VideoArgs:
         self.color_match = True
         self.seed = -1
         self.video_name = None
-        self.sampler = 'euler_ancestral'
+        self.sampler = 'dpm_2'
         self.upscale = True
         self.init_sample = None
 
@@ -140,7 +140,7 @@ def load_model(config_path, ckpt_path, optimized=False):
     return model_state
 
 
-def compute_current_prompt(C, image_index, F, v=15.0) :
+def compute_current_prompt(C, image_index, F, k=4.0) :
     C_s = len(C)
     if C_s == 1:
         return C[0]
@@ -160,7 +160,7 @@ def compute_current_prompt(C, image_index, F, v=15.0) :
     f1 = i1 * ip_ratio #prompt_frames[i1]
     f2 = i2 * ip_ratio
     t = (image_index - f1) / (f2 - f1)
-    s = 1 / (1 + math.exp(-v * (t - 0.5))) #v controls the stiffness of the sigmoid, essentially controlling the transition speed between 2 prompts
+    s = 1 / (1 + (1/t - 1) ** k) if t > 0.0 else 0.0 #k controls the stiffness of the sigmoid, essentially controlling the transition speed between 2 prompts
     c = slerp(s, c1, c2)
     return c
 
@@ -205,15 +205,19 @@ def generate_image (
     t_enc = None,
     batch_size = 1
 ) :
-    if x is None:
+    if x is None: #doing txt2img with noise to be generated
         shape = [batch_size, ia.C, ia.H // ia.f, ia.W // ia.f]
         x = torch.randn(shape, device=ms.device)
         samples, _ = ms.sampler.sample(S=ia.steps, conditioning=c, unconditional_guidance_scale=ia.scale,
                                 unconditional_conditioning=uc, x_T=x)
     else:
-        #maybe adapt for batch size here if it's of any relevance : just a copy-cat operation ig
-        samples, _ = ms.sampler.sample(S=ia.steps, conditioning=c, unconditional_guidance_scale=ia.scale,
-                                unconditional_conditioning=uc, x_T=x, img2img=True, t_enc=t_enc)
+        if t_enc is None: #doing noise walk
+            samples, _ = ms.sampler.sample(S=ia.steps, conditioning=c, unconditional_guidance_scale=ia.scale,
+                                unconditional_conditioning=uc, x_T=x)
+        else: #doing img2img
+            #maybe adapt for batch size here if it's of any relevance : just a copy-cat operation ig
+            samples, _ = ms.sampler.sample(S=ia.steps, conditioning=c, unconditional_guidance_scale=ia.scale,
+                                    unconditional_conditioning=uc, x_T=x, img2img=True, t_enc=t_enc)
                     
     os.system('nvidia-smi --query-gpu=memory.used --format=csv')
     return ms.FS.decode_first_stage(samples)
@@ -307,7 +311,7 @@ def generate_video (
                 seed_everything(seed)
 
                 #get the prompt interpolation point for the current image 
-                c = compute_current_prompt(C, i+1, video_args.frames)
+                c = compute_current_prompt(C, i+1, video_args.frames, k=1.0)
 
                 previous_latent = process_previous_image(model_state, previous_sample, xform, 
                                         video_args.color_match, color_sample, hsv= ((i % 2) == 0))
@@ -333,6 +337,94 @@ def generate_video (
             #TODO : do smtg like put the FS model to cpu at the end
 
     return
+
+
+def generate_walk_video(    
+    image_args,
+    video_args,
+    path_args,
+    model_state,
+    n_noises=1
+    ):    
+
+    seed = video_args.seed
+    if seed < 0 :
+        seed = random.randint(0, 10 ** 6)
+    seed_everything(seed)
+    
+    model_state.sampler = KDiffusionSampler(model_state.model, video_args.sampler) # TODO either we assume we receive a sampler, or it is reinstantiated at each call if we allow sampler choice
+
+    os.makedirs(path_args.image_path, exist_ok=True)
+    os.makedirs(os.path.dirname(path_args.video_path), exist_ok=True)
+    base_count = len(os.listdir(path_args.image_path))
+    start_number = base_count
+
+    def frame_path(frame_number):
+        return os.path.join(path_args.image_path, f"{frame_number:05}.png")
+
+    #
+    # Assertions about consistency of arguments
+    # #
+    n_prompts = len(video_args.prompts)
+    assert n_prompts > 0
+    assert video_args.frames >= n_prompts
+
+
+    precision_scope = autocast
+    with torch.no_grad():
+        with precision_scope("cuda"):
+
+            # 
+            # Generate the text embeddings with the language model
+            # #
+            model_state.CS.to(model_state.device)
+            uc = model_state.CS.get_learned_conditioning([""])
+            C = []
+            for prompt in video_args.prompts:
+                C.append(model_state.CS.get_learned_conditioning([prompt])) #look if it can be done in parallel by handing a list of prompts
+            if model_state.device != "cpu":
+                mem = torch.cuda.memory_allocated() / 1e6
+                model_state.CS.to("cpu")
+                while torch.cuda.memory_allocated() / 1e6 >= mem:
+                    time.sleep(1)
+
+            model_state.FS.to(model_state.device)
+
+            # Init thread pool
+            num_workers = 1
+            pool = ThreadPoolExecutor(num_workers)
+
+            shape = [1, image_args.C, image_args.H // image_args.f, image_args.W // image_args.f]
+            Noises = []
+            for i in range(n_noises):
+                Noises.append(torch.randn(shape, device=model_state.device))
+            
+
+            for i in trange(video_args.frames, desc="Generating interpolation steps"):
+                #x = init_noise if not latent_walk else slerp(i/(video_args.frames-1), init_noise, end_noise)
+                x = compute_current_prompt(Noises, i, video_args.frames, k=1.0)
+                sample = generate_image(c=compute_current_prompt(C, i, video_args.frames, k=1.0), x=x, uc=uc, ia=image_args, ms=model_state)
+                #save it to disk
+                pool.submit(save_image, sample, frame_path(base_count+i), model_state, upscale=video_args.upscale)
+
+            # Wait for upscaling/saving to finish
+            pool.shutdown()
+
+
+            #==========COMPILING=THE=VIDEO==========
+            if(video_args.video_name == None):
+                video_count = len(os.listdir(path_args.video_path))
+                video_name = f"video{video_count}"
+            else:
+                video_name = video_args.video_name
+            sample_regex = os.path.join(path_args.image_path, "%05d.png")
+            command = f"ffmpeg -r {video_args.fps} -start_number {base_count} -i {sample_regex} -c:v libx264 -r 30 -pix_fmt yuv420p {path_args.video_path}"   #TODO do that stuff                         
+            os.system(command)
+
+            #TODO : do smtg like put the FS model to cpu at the end
+
+    return
+
 
 def generate_initial_images(image_args, video_args, model_state, count=4) :
     #I should really factorise this method and generate_video TODO
