@@ -2,35 +2,69 @@
     display: flex;
     justify-content: space-between;
     padding: 15px;
-    background-color: #363636;
+    background-color: var(--main-bg-dark);
     height: 5vh;
+    box-shadow: 0px 1px var(--main-bg-light);
+    align-items: center;
 }
 
 .Navbar .logo {
     font-weight: bold;
-    font-size: 1.5em;
+    font-size: 2em;
+    color: white;
+    margin-left: 10px;
+}
+
+li {
+    list-style-type: none;
+}
+
+.buttonLink, .pageLink, .link {
+    margin: 0;
+    padding: 0;
+    border: none;
+    font-family: 'Ubuntu Mono';
+    font-size: 1.2em;
     color: white;
 }
 
-.Navbar .pageLink {
-    list-style: none;
-    margin-right: 2em;
+
+.pageLink {
+    background-color: var(--main-bg-dark);
+    border-bottom: 2px solid var(--main-bg-light);
 }
 
-.Navbar .link {
-    text-decoration: none;
-    list-style: none;
-    color: black;
-    color: white;
+.buttonLink {
+    background-color: inherit;
 }
 
-.Navbar .superTag {
-    display: inline;
-    color: #26A7DE;
-    font-weight: 100;
-    font-size: 0.7em;
+.link:hover, .buttonLink:hover,.pageLink:hover {
+    background-color: var(--main-bg-light);
 }
 
-.Navbar .video {
-    position: relative;
+.pageLink {
+    margin-right: 1em;
+    padding: 5px 10px;
+}
+
+@media screen and (max-width: 700px) {
+    .Navbar .logo {
+        font-size: 1.8em;
+        margin-left: 10px;
+    }
+    .buttonLink, .pageLink, .link {
+        font-size: 1.1em;
+    }
+
+}
+
+@media screen and (max-width: 540px) {
+    .Navbar .logo {
+        font-size: 1em;
+        margin-left: 10px;
+    }
+    .buttonLink, .pageLink, .link {
+        font-size: 1em;
+    }
+
 }

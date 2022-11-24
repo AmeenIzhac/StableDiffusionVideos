@@ -1,15 +1,15 @@
 import argparse
-import cv2
 import glob
 import os
 from basicsr.archs.rrdbnet_arch import RRDBNet
 from basicsr.utils.download_util import load_file_from_url
+from PIL import Image
 
 from realesrgan import RealESRGANer
 from realesrgan.archs.srvgg_arch import SRVGGNetCompact
 
 
-def executeRealESRGAN(img, imgname, outputDirectory, model_name="realesr-animevideov3", scale=2, extension="png"):
+def load_ESRGAN_model(model_name="realesr-animevideov3", scale=2):
     # determine models according to model names
 
     if model_name == 'RealESRGAN_x4plus':  # x4 RRDBNet model
@@ -49,12 +49,18 @@ def executeRealESRGAN(img, imgname, outputDirectory, model_name="realesr-animevi
         scale=netscale,
         model_path=model_path,
         model=model)
+    
+    return upsampler
 
+
+def executeRealESRGAN(img, output_path, upsampler, extension="png", scale=2):
     try:
         output, _ = upsampler.enhance(img, outscale=scale)
     except RuntimeError as error:
         print('Error', error)
     else:
-        save_path = os.path.join(outputDirectory, f'{imgname}.{extension}')
-        cv2.imwrite(save_path, output)
+        #save_path = os.path.join(outputDirectory, f'{imgname}.{extension}')
+        #cv2.imwrite(output_path, output)
+        Image.fromarray(output).save(output_path)
+
 
