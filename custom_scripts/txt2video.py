@@ -344,7 +344,7 @@ def generate_walk_video(
     video_args,
     path_args,
     model_state,
-    latent_walk=False
+    n_noises=1
     ):    
 
     seed = video_args.seed
@@ -395,12 +395,14 @@ def generate_walk_video(
             pool = ThreadPoolExecutor(num_workers)
 
             shape = [1, image_args.C, image_args.H // image_args.f, image_args.W // image_args.f]
-            init_noise = torch.randn(shape, device=model_state.device)
-            if latent_walk:
-                end_noise = torch.randn(shape, device=model_state.device)
+            Noises = []
+            for i in range(n_noises):
+                Noises.append(torch.randn(shape, device=model_state.device))
+            
 
             for i in trange(video_args.frames, desc="Generating interpolation steps"):
-                x = init_noise if not latent_walk else slerp(i/(video_args.frames-1), init_noise, end_noise)
+                #x = init_noise if not latent_walk else slerp(i/(video_args.frames-1), init_noise, end_noise)
+                x = compute_current_prompt(Noises, i, video_args.frames, k=1.0)
                 sample = generate_image(c=compute_current_prompt(C, i, video_args.frames, k=1.0), x=x, uc=uc, ia=image_args, ms=model_state)
                 #save it to disk
                 pool.submit(save_image, sample, frame_path(base_count+i), model_state, upscale=video_args.upscale)
