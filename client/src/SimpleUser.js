@@ -17,6 +17,60 @@ export default function SimpleUser() {
   const [loggedIn, setLoggedIn] = useState(Cookies.get("loggedInUser") != null)
   const [prompts, setPrompts] = useState([])
 
+  var jobID;
+
+
+  // Create a new job on server and set the current jobID
+  function createJob() {
+    const prompt = promptRef.current.value
+    setLoading(true);
+    axios({
+      method: "get",
+      // url: `https://stablediffusionvideoswebserver-production.up.railway.app/generate`,
+      url: `http://localhost:3001/job`,
+      params: {
+        prompts: [...prompts, prompt].join(";"),
+        frames: frames,
+        width: width,
+        height: height,
+        angle: angle,
+        zoom: zoom
+      },
+      responseType: "application/json",
+      timeout: 10000
+    })
+      .then((res) => {
+        jobID = JSON.parse(res.data).id
+        console.log(jobID);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+
+  // get status of job
+  function getJobStatus() {
+    console.log(jobID)
+    axios({
+      method: "get",
+      // url: `https://stablediffusionvideoswebserver-production.up.railway.app/status`,
+      url: `http://localhost:3001/status`,
+      params: {
+        jobID: jobID
+      },
+      responseType: "text",
+      timeout: 10000
+    })
+      .then((res) => {
+        console.log(res);
+        console.log(JSON.parse(res.data).status);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+
+
   function getVideo() {
     const prompt = promptRef.current.value
 
@@ -142,6 +196,8 @@ export default function SimpleUser() {
             <input className='prompt' ref={promptRef} placeholder='Enter Text Prompt...' onSubmit={getVideo} onKeyDown={handleKeyDown}></input>
             <button className='promptButton' onClick={addPrompt}>+</button>
             <button className='promptButton' onClick={getVideo}>Generate Video</button>
+            {/* <button className='promptButton' onClick={createJob}>new job</button>
+            <button className='promptButton' onClick={getJobStatus}>poll</button> */}
             {/* <button className='promptButton' onClick={getVideo} onSubmit={logger}>Generate Video</button> */}
           </div>
           <div className="promptsContainer">
