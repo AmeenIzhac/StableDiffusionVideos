@@ -15,7 +15,6 @@ export default function Gallery() {
         setVideo(URL.createObjectURL(xhr.response));
       };
       xhr.open("GET", url);
-      xhr.setRequestHeader("Access-Control-Allow-Origin", "*");
       xhr.send();
     });
   }, []);
