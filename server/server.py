@@ -17,6 +17,7 @@ model = load_model(optimized_cfg_path, ckpt_path, optimized=True)
 app = Flask(__name__)
 cors = CORS(app)
 
+progress = 0
 
 @app.route('/')
 def index():
@@ -26,9 +27,16 @@ def index():
 def test():
     return send_file('./outputs/videos/Lego_man_committing_seppuku.mp4', mimetype='video/mp4')
 
+@app.route('/getProgress')
+def getProgress():
+    return jsonify({"progress": progress})
+
 
 @app.route('/api')
 def api():
+    # reset progress
+    progress = 0
+    
     # Extract options
     args = request.args
     
