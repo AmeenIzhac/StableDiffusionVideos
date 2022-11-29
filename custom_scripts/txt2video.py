@@ -426,11 +426,8 @@ def generate_walk_video(
     return
 
 
-def generate_initial_images(image_args, video_args, model_state, count=4) :
+def generateInitFrame(image_args, video_args, path_args, model_state, n=4) :
     #I should really factorise this method and generate_video TODO
-    seed = video_args.seed
-    if seed < 0:
-        seed = random.randint(0, 10 ** 6)
 
     model_state.sampler = KDiffusionSampler(model_state.model, video_args.sampler)
 
@@ -445,11 +442,14 @@ def generate_initial_images(image_args, video_args, model_state, count=4) :
             
     model_state.FS.to(model_state.device)
 
-    samples = generate_images(c=c, uc=uc, ia=image_args, ms=model_state, batch_size=count)
+    max_batch_size = 4
 
-    for sample in samples:
-        #do here the image-saving, returning
-        images = None
+    seeds = [random.randint(0, 10 ** 6) for i in range(n)]
+
+    for seed in seeds:
+        samples = generate_images(c=c, uc=uc, ia=image_args, ms=model_state, batch_size=1)
+        for sample in samples:
+            save_image(sample, os.path.join(path_args.image_path, f'{seed}.png'), model_state, upscale=False)
     
-    return images, seed
+    return seeds
 
