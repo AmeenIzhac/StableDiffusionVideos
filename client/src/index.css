@@ -152,7 +152,20 @@ ul {
   .dropdownOption {
     grid-template-columns: repeat(1, 1fr);
     gap: 1em;
+    overflow-y: scroll;
   }
+
+  .dropdownOption::-webkit-scrollbar {
+    background-color: var(--main-bg-light);
+    width: 4px;
+  }
+
+  .dropdownOption::-webkit-scrollbar-thumb {
+    background-color: var(--main-bg-dark);
+    border-radius: 100vmax;
+  }
+
+
   .promptButton {
     padding: 12px;
     font-size: 3vw;
@@ -167,10 +180,11 @@ ul {
     margin-right: 1vw;
   }
 
+
 }
 
 .open {
-  height: 400px;
+  height: max(400px, 60vh);
 }
 
 .rotate {

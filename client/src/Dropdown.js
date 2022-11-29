@@ -11,6 +11,12 @@ export default function Dropdown({
     slideAngleChange,
     zoom,
     slideZoomChange,
+    fps,
+    slideFpsChange,
+    xShift,
+    slidexShiftChange,
+    yShift,
+    slideyShiftChange,
     dropOptions
 }) {
     return (
@@ -20,7 +26,7 @@ export default function Dropdown({
                     <div className='dropdownOption' id="dropdown">
                         <div className='slideContainer alignCenter'>
                             <p>Number of Frames: <span id="demo">{frames}</span></p>
-                            <input type="range" min="1" max="60" value={frames} className='slider' id="myRange" onChange={slideFrameChange} />
+                            <input type="range" min="1" max="120" value={frames} className='slider' id="myRange" onChange={slideFrameChange} />
                         </div>
                         <div className='alignCenter'>
                             <p>Width: <span id="demo">{width}</span></p>
@@ -37,6 +43,18 @@ export default function Dropdown({
                         <div className='alignCenter'>
                             <p>Zoom: <span id="demo">{zoom}</span></p>
                             <input type="range" min="0.7" step="0.05" max="1.3" value={zoom} className='slider' id="myRange" onChange={slideZoomChange} />
+                        </div>
+                        <div className='slideContainer alignCenter'>
+                            <p>Frames per second: <span id="demo">{fps}</span></p>
+                            <input type="range" min="1" max="30" value={fps} className='slider' id="myRange" onChange={slideFpsChange} />
+                        </div>
+                        <div className='alignCenter'>
+                            <p>x-shift: <span id="demo">{xShift}</span></p>
+                            <input type="range" min="0" step="0.2" max="2" value={xShift} className='slider' id="myRange" onChange={slidexShiftChange} />
+                        </div>
+                        <div className='alignCenter'>
+                            <p>y-shift: <span id="demo">{yShift}</span></p>
+                            <input type="range" min="0" step="0.2" max="2" value={yShift} className='slider' id="myRange" onChange={slideyShiftChange} />
                         </div>
                     </div>
                     <button className='dropArrow' onClick={dropOptions} id="button"></button>

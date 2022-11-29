@@ -9,11 +9,14 @@ export default function SimpleUser() {
   const [src, setSrc] = useState("");
   const promptRef = useRef()
   const [loading, setLoading] = useState(false);
-  const [frames, setFrames] = useState("30")
+  const [frames, setFrames] = useState("60")
   const [width, setWidth] = useState("704")
   const [height, setHeight] = useState("704")
   const [angle, setAngle] = useState("0")
   const [zoom, setZoom] = useState("1")
+  const [fps, setFps] = useState("20")
+  const [xShift,setxShift] = useState("1")
+  const [yShift,setyShift] = useState("1")
   const [loggedIn, setLoggedIn] = useState(Cookies.get("loggedInUser") != null)
 
   function getVideo() {
@@ -81,6 +84,16 @@ export default function SimpleUser() {
     setZoom(e.target.value)
   }
 
+  const slideFpsChange = (e) => {
+    setFps(e.target.value)
+  }
+  const slidexShiftChange = (e) => {
+    setxShift(e.target.value)
+  }
+  const slideyShiftChange = (e) => {
+    setyShift(e.target.value)
+  }
+
   function handleKeyDown(event) {
     if (event.key === 'Enter') {
       getVideo()
@@ -103,6 +116,12 @@ export default function SimpleUser() {
         slideZoomChange={slideZoomChange}
         angle={angle}
         slideAngleChange={slideAngleChange}
+        fps={fps}
+        slideFpsChange={slideFpsChange}
+        xShift={xShift}
+        slidexShiftChange={slidexShiftChange}
+        yShift={yShift}
+        slideyShiftChange={slideyShiftChange}
         dropOptions={dropOptions}
       />
       <div className="mainDiv">
