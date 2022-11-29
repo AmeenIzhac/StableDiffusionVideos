@@ -16,9 +16,8 @@ export default function SimpleUser() {
   const [zoom, setZoom] = useState("1")
   const [loggedIn, setLoggedIn] = useState(Cookies.get("loggedInUser") != null)
   const [prompts, setPrompts] = useState([])
-
+  const [progress, setProgress] = useState(0)
   var jobID;
-
 
   // Create a new job on server and set the current jobID
   function createJob() {
@@ -27,7 +26,7 @@ export default function SimpleUser() {
     axios({
       method: "get",
       // url: `https://stablediffusionvideoswebserver-production.up.railway.app/generate`,
-      url: `http://localhost:3001/job`,
+      url: `http://localhost:3001/request`,
       params: {
         prompts: [...prompts, prompt].join(";"),
         frames: frames,
@@ -42,16 +41,42 @@ export default function SimpleUser() {
       .then((res) => {
         jobID = JSON.parse(res.data).id
         console.log(jobID);
+        poll();
       })
       .catch((err) => {
         console.log(err);
       });
   }
 
+  async function poll() {
+    while (true) {
+      const status = await getJobStatus();
+      console.log(status);
+      switch (status.status) {
+        case "pending":
+          // setProgress(status.progress)
+          break;
+        case "generating":
+          // setProgress(status.progress)
+          break;
+        case "done":
+          //getVideo();
+          return;
+        case "error":
+          setLoading(false);
+          alert("Error generating video");
+          return;
+        default:
+          console.log("Unknown status");
+      }
+      await new Promise((r) => setTimeout(r, 1000));
+    }
+  }
+
   // get status of job
-  function getJobStatus() {
+  async function getJobStatus() {
     console.log(jobID)
-    axios({
+    return axios({
       method: "get",
       // url: `https://stablediffusionvideoswebserver-production.up.railway.app/status`,
       url: `http://localhost:3001/status`,
@@ -62,14 +87,15 @@ export default function SimpleUser() {
       timeout: 10000
     })
       .then((res) => {
-        console.log(res);
-        console.log(JSON.parse(res.data).status);
+        console.log(JSON.parse(res.data));
+        return JSON.parse(res.data);
       })
       .catch((err) => {
         console.log(err);
+        return "error";
       });
-  }
 
+  }
 
   function getVideo() {
     const prompt = promptRef.current.value
@@ -196,8 +222,8 @@ export default function SimpleUser() {
             <input className='prompt' ref={promptRef} placeholder='Enter Text Prompt...' onSubmit={getVideo} onKeyDown={handleKeyDown}></input>
             <button className='promptButton' onClick={addPrompt}>+</button>
             <button className='promptButton' onClick={getVideo}>Generate Video</button>
-            {/* <button className='promptButton' onClick={createJob}>new job</button>
-            <button className='promptButton' onClick={getJobStatus}>poll</button> */}
+            <button className='promptButton' onClick={createJob}>new job</button>
+            <button className='promptButton' onClick={getJobStatus}>poll</button>
             {/* <button className='promptButton' onClick={getVideo} onSubmit={logger}>Generate Video</button> */}
           </div>
           <div className="promptsContainer">
