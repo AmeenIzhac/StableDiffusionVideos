@@ -142,7 +142,6 @@ ul {
 }
 
 .dropdownVidOption {
-  grid-column: 1 / span 2;
   border-bottom: 1px solid var(--main-bg-dark);
   height: 5vh;
 }
@@ -153,8 +152,20 @@ ul {
   display: flex;
 }
 
-.img2img, .latentWalk, .semanticWalk {
-  width: calc(100% / 3);
+.extraOptions {
+  grid-column: 1 / span 2;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1em;
+}
+
+.fullRow {
+  grid-column: 1 / span 2;
+  text-align: center;
+}
+
+.img2img, .walk {
+  width: 50%;
   height: inherit;
   display: flex;
   justify-content: center;
@@ -177,8 +188,13 @@ ul {
     grid-template-columns: repeat(3, 1fr);
     gap: 1em;
   }
-  .dropdownVidOption {
+  .fullRow {
     grid-column: 1 / span 3;
+  }
+  .extraOptions {
+    grid-column: 1 / span 3;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1em;
   }
 
 }
@@ -189,7 +205,11 @@ ul {
     overflow-y: scroll;
   }
 
-  .dropdownVidOption {
+  .fullRow {
+    grid-column: 1 / span 1;
+  }
+
+  .extraOptions {
     grid-column: 1 / span 1;
   }
 
@@ -222,7 +242,7 @@ ul {
 }
 
 .open {
-  height: max(400px, 60vh);
+  height: min(500px, 90vh);
 }
 
 .rotate {
@@ -234,6 +254,11 @@ ul {
   margin: 0;
 }
 
+.checkBoxContainer {
+  display: flex;
+  align-items: center;
+  font-size: 1.2em;
+}
 
 /* Slider Styles*/
 

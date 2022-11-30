@@ -9,8 +9,7 @@ export default function SimpleUser() {
   const [src, setSrc] = useState("");
   const promptRef = useRef()
   const [isImg2Img, setisImg2Img] = useState(true);
-  const [isLatentWalk, setisLatentWalk] = useState(false)
-  const [isSemanticWalk, setisSemanticWalk] = useState(false)
+  const [isWalk, setisWalk] = useState(false)
   const [loading, setLoading] = useState(false);
   const [frames, setFrames] = useState("60")
   const [width, setWidth] = useState("512")
@@ -20,6 +19,7 @@ export default function SimpleUser() {
   const [fps, setFps] = useState("20")
   const [xShift,setxShift] = useState("1")
   const [yShift,setyShift] = useState("1")
+  const [noNoises, setNoNoises] = useState("1")
   const [loggedIn, setLoggedIn] = useState(Cookies.get("loggedInUser") != null)
 
   function getVideo() {
@@ -96,6 +96,9 @@ export default function SimpleUser() {
   const slideyShiftChange = (e) => {
     setyShift(e.target.value)
   }
+  const slideNoNoisesChange = (e) => {
+    setNoNoises(e.target.value)
+  }
 
   function handleKeyDown(event) {
     if (event.key === 'Enter') {
@@ -113,10 +116,8 @@ export default function SimpleUser() {
         slideFrameChange={slideFrameChange}
         isImg2Img={isImg2Img}
         setisImg2Img={setisImg2Img}
-        isLatentWalk={isLatentWalk}
-        setisLatentWalk={setisLatentWalk}
-        isSemanticWalk={isSemanticWalk}
-        setisSemanticWalk={setisSemanticWalk}
+        isWalk={isWalk}
+        setisWalk={setisWalk}
         width={width}
         slideWidthChange={slideWidthChange}
         height={height}
@@ -131,6 +132,8 @@ export default function SimpleUser() {
         slidexShiftChange={slidexShiftChange}
         yShift={yShift}
         slideyShiftChange={slideyShiftChange}
+        noNoises={noNoises}
+        slideNoNoisesChange={slideNoNoisesChange}
         dropOptions={dropOptions}
       />
       <div className="mainDiv">
