@@ -21,13 +21,6 @@ from ldm.util import instantiate_from_config
 import sys
 sys.path.append('../stable-diffusion-2/optimizedSD')
 
-#questions with raaif:
-#implement the server properly (with loading the model once)
-#the path question
-#the prompt list question
-#the init image format question
-#the init image saving question
-
 
 #TODO : find out how to properly comment in python
 
@@ -56,7 +49,7 @@ class VideoArgs:
         self.color_match = True
         self.seed = -1
         self.video_name = None
-        self.sampler = 'euler_ancestral'
+        self.sampler = 'dpm_2'
         self.upscale = True
         self.init_sample = None
 
@@ -140,14 +133,11 @@ def load_model(config_path, ckpt_path, optimized=False):
     return model_state
 
 
-def compute_current_prompt(C, image_index, F, v=15.0) :
+def tensor_multi_step_interpolation(C, image_index, F, prompt_frames, k=4.0) :
     C_s = len(C)
     if C_s == 1:
         return C[0]
     
-    prompt_frames = np.arange(C_s) * ( (F-1) / (C_s - 1)) #TODO cache this
-    #if len(C) = 2, F = 100, then prompt i will have prompt_frame = i * 99/1
-    #as expected prompt 0 will be prompt_frame 0, and prompt 1 will get frame 99.
     r = image_index / (F - 1)
     if(r >= 1):
         return C[C_s - 1]
@@ -157,17 +147,21 @@ def compute_current_prompt(C, image_index, F, v=15.0) :
     c1 = C[i1]
     c2 = C[i2]
     ip_ratio = (F - 1) / (C_s - 1)
-    f1 = i1 * ip_ratio #prompt_frames[i1]
+    f1 = i1 * ip_ratio
     f2 = i2 * ip_ratio
     t = (image_index - f1) / (f2 - f1)
-    s = 1 / (1 + math.exp(-v * (t - 0.5))) #v controls the stiffness of the sigmoid, essentially controlling the transition speed between 2 prompts
+
+    #k controls the stiffness of the sigmoid, essentially controlling the transition speed between 2 prompts
+    s = 1 / (1 + (1/t - 1) ** k) if t > 0.0 else 0.0
+
     c = slerp(s, c1, c2)
+
     return c
 
 
 
 #previous image processing (color coherency, noise, encoding)
-def process_previous_image(ms, previous_sample, xform, color_match=True, color_sample=None, noise=0.03, hsv=False): #TODO : look if that can be done in parallel (analyze runtime first to see if it's worth it)
+def process_previous_image(ms, previous_sample, xform, color_match=True, color_sample=None, noise=0.03, hsv=False):
     previous_img = sample_to_cv2(previous_sample)
     previous_img = cv2.warpPerspective(
         previous_img,
@@ -189,34 +183,94 @@ def save_image(x_new, output_path, model_state, upscale=True):
 
     for x_sample in x_new_clamp:
         x_sample = 255. * rearrange(x_sample.cpu().numpy(), 'c h w -> h w c')
-        #x_sample = 255. * rearrange(x_sample.cpu().numpy(), 'c h w -> c w h')
         if upscale:
             executeRealESRGAN(x_sample.astype(np.uint8), output_path, model_state.upsampler)
         else:
             Image.fromarray(x_sample.astype(np.uint8)).save(output_path)
 
-
 def generate_image (
     c = None,
     x = None,
-    uc = None,     #TODO see if I can get rid of this one
+    uc = None,
     ia = None,
     ms = None,
     t_enc = None,
     batch_size = 1
 ) :
-    if x is None:
+    if x is None: #doing txt2img with noise to be generated
         shape = [batch_size, ia.C, ia.H // ia.f, ia.W // ia.f]
         x = torch.randn(shape, device=ms.device)
         samples, _ = ms.sampler.sample(S=ia.steps, conditioning=c, unconditional_guidance_scale=ia.scale,
                                 unconditional_conditioning=uc, x_T=x)
     else:
-        #maybe adapt for batch size here if it's of any relevance : just a copy-cat operation ig
-        samples, _ = ms.sampler.sample(S=ia.steps, conditioning=c, unconditional_guidance_scale=ia.scale,
-                                unconditional_conditioning=uc, x_T=x, img2img=True, t_enc=t_enc)
-                    
-    os.system('nvidia-smi --query-gpu=memory.used --format=csv')
+        if t_enc is None: #doing noise walk
+            samples, _ = ms.sampler.sample(S=ia.steps, conditioning=c, unconditional_guidance_scale=ia.scale,
+                                unconditional_conditioning=uc, x_T=x)
+        else: #doing img2img
+            #maybe adapt for batch size here if it's of any relevance : just a copy-cat operation ig
+            samples, _ = ms.sampler.sample(S=ia.steps, conditioning=c, unconditional_guidance_scale=ia.scale,
+                                    unconditional_conditioning=uc, x_T=x, img2img=True, t_enc=t_enc)
+
     return ms.FS.decode_first_stage(samples)
+
+def init_video_gen(video_args, model_state, path_args):
+    #Negative seed means random seed
+    seed = video_args.seed
+    if seed < 0 :
+        seed = random.randint(0, 10 ** 6)
+    seed_everything(seed)
+    
+    model_state.sampler = KDiffusionSampler(model_state.model, video_args.sampler)
+
+    #
+    # Place here DIR variables if necessary
+    # #
+    os.makedirs(path_args.image_path, exist_ok=True)
+    os.makedirs(os.path.dirname(path_args.video_path), exist_ok=True)
+    base_count = len(os.listdir(path_args.image_path))
+    start_number = base_count
+
+    #
+    # Assertions about consistency of arguments
+    # #
+    n_prompts = len(video_args.prompts)
+    assert n_prompts > 0
+    assert video_args.frames >= n_prompts
+
+    return seed, base_count, start_number
+
+
+def generate_embeddings(prompts, model_state):
+    # 
+    # Generate the text embeddings with the language model
+    # #
+    model_state.CS.to(model_state.device)
+    uc = model_state.CS.get_learned_conditioning([""])
+    C = []
+    for prompt in prompts:
+        C.append(model_state.CS.get_learned_conditioning([prompt])) #TODO look if it can be done in parallel by handing a list of prompts
+    if model_state.device != "cpu":
+        mem = torch.cuda.memory_allocated() / 1e6
+        model_state.CS.to("cpu")
+        while torch.cuda.memory_allocated() / 1e6 >= mem:
+            time.sleep(0.1)
+    
+    return C, uc
+
+
+def compile_video(video_args, path_args, base_count):
+    if(video_args.video_name == None):
+        video_count = len(os.listdir(path_args.video_path))
+        video_name = f"video{video_count}"
+    else:
+        video_name = video_args.video_name
+    sample_regex = os.path.join(path_args.image_path, "%05d.png")
+    command = f"ffmpeg -r {video_args.fps} -start_number {base_count} -i {sample_regex} -c:v libx264 -r 30 -pix_fmt yuv420p {path_args.video_path}"                       
+    os.system(command)
+
+
+def frame_path(frame_number, path_args):
+    return os.path.join(path_args.image_path, f"{frame_number:05}.png")
 
 
 def generate_video (
@@ -227,52 +281,14 @@ def generate_video (
 ) -> str :
     #outline : compute embeddings, generate first image, send it to upscale (in parallel), then loop, do processings, compute interpolated prompt, call generate_image, send it to upscale
     
-    #Negative seed means random seed
-    seed = video_args.seed
-    if seed < 0 :
-        seed = random.randint(0, 10 ** 6)
-    seed_everything(seed)
-    
-    model_state.sampler = KDiffusionSampler(model_state.model, video_args.sampler) # TODO either we assume we receive a sampler, or it is reinstantiated at each call if we allow sampler choice
 
-    #
-    # Place here DIR variables if necessary #TODO probably should receive them from the server caller, cleaner to do that way than to have implicit convention
-    # #
-    #Idea : have an video or smtg folder, in it have a subdirectory for each user, and in that put images, and simply video, and then maybe a guest directory
-    os.makedirs(path_args.image_path, exist_ok=True)
-    os.makedirs(os.path.dirname(path_args.video_path), exist_ok=True)
-    base_count = len(os.listdir(path_args.image_path))
-    start_number = base_count
-
-    def frame_path(frame_number):
-        return os.path.join(path_args.image_path, f"{frame_number:05}.png")
-
-    #
-    # Assertions about consistency of arguments
-    # #
-    n_prompts = len(video_args.prompts)
-    assert n_prompts > 0
-    assert video_args.frames >= n_prompts
-
+    seed, base_count, start_number = init_video_gen(video_args, model_state, path_args)
 
     precision_scope = autocast
     with torch.no_grad():
         with precision_scope("cuda"):
-            #with model_state.model.ema_scope():
 
-            # 
-            # Generate the text embeddings with the language model
-            # #
-            model_state.CS.to(model_state.device)
-            uc = model_state.CS.get_learned_conditioning([""])
-            C = []
-            for prompt in video_args.prompts:
-                C.append(model_state.CS.get_learned_conditioning([prompt])) #look if it can be done in parallel by handing a list of prompts
-            if model_state.device != "cpu":
-                mem = torch.cuda.memory_allocated() / 1e6
-                model_state.CS.to("cpu")
-                while torch.cuda.memory_allocated() / 1e6 >= mem:
-                    time.sleep(1)
+            C, uc = generate_embeddings(video_args.prompts, model_state)
 
             model_state.FS.to(model_state.device)
 
@@ -287,7 +303,7 @@ def generate_video (
             first_sample = generate_image(c=C[0], uc=uc, ia=image_args, ms=model_state) if video_args.init_sample is None else video_args.init_sample
 
             #save it to disk
-            pool.submit(save_image, first_sample, frame_path(base_count), model_state, upscale=video_args.upscale)
+            pool.submit(save_image, first_sample, frame_path(base_count, path_args), model_state, upscale=video_args.upscale)
 
 
             #=====================SUBSEQUENT_IMAGES_GENERATION=========================#
@@ -298,8 +314,8 @@ def generate_video (
             previous_sample = first_sample
             color_sample = sample_to_cv2(previous_sample).copy()
 
-            #maybe some code to get the proper sampler
-
+            C_s = len(C)
+            prompt_frames = np.arange(C_s) * ( (video_args.frames - 1) / (C_s - 1)) if C_s > 1 else None
             for i in trange(video_args.frames-1, desc="Generating frames"):
 
                 #seeding
@@ -307,57 +323,99 @@ def generate_video (
                 seed_everything(seed)
 
                 #get the prompt interpolation point for the current image 
-                c = compute_current_prompt(C, i+1, video_args.frames)
+                c = tensor_multi_step_interpolation(C, i+1, video_args.frames, prompt_frames, k=1.0)
 
                 previous_latent = process_previous_image(model_state, previous_sample, xform, 
                                         video_args.color_match, color_sample, hsv= ((i % 2) == 0))
 
                 x_new = generate_image(c=c, x=previous_latent, uc=uc, ia=image_args, ms=model_state, t_enc=t_enc) 
-                pool.submit(save_image, x_new, frame_path(base_count + i + 1), model_state, upscale=video_args.upscale)
+                pool.submit(save_image, x_new, frame_path(base_count + i + 1, path_args), model_state, upscale=video_args.upscale)
                 previous_sample = x_new
+
+            #Free some video memory by pushing the auto-encoder to RAM 
+            model_state.FS.to("cpu")
 
             # Wait for upscaling/saving to finish
             pool.shutdown()
 
+            compile_video(video_args, path_args, base_count)
 
-            #==========COMPILING=THE=VIDEO==========
-            if(video_args.video_name == None):
-                video_count = len(os.listdir(path_args.video_path))
-                video_name = f"video{video_count}"
-            else:
-                video_name = video_args.video_name
-            sample_regex = os.path.join(path_args.image_path, "%05d.png")
-            command = f"ffmpeg -r {video_args.fps} -start_number {base_count} -i {sample_regex} -c:v libx264 -r 30 -pix_fmt yuv420p {path_args.video_path}"   #TODO do that stuff                         
-            os.system(command)
-
-            #TODO : do smtg like put the FS model to cpu at the end
 
     return
 
-def generate_initial_images(image_args, video_args, model_state, count=4) :
-    #I should really factorise this method and generate_video TODO
-    seed = video_args.seed
-    if seed < 0:
-        seed = random.randint(0, 10 ** 6)
 
+def generate_walk_video(    
+    image_args,
+    video_args,
+    path_args,
+    model_state,
+    n_noises=1
+    ):    
+
+    seed, base_count, start_number = init_video_gen(video_args, model_state, path_args)
+
+    precision_scope = autocast
+    with torch.no_grad():
+        with precision_scope("cuda"):
+
+            C, uc = generate_embeddings(video_args.prompts, model_state)
+
+            model_state.FS.to(model_state.device)
+
+            # Init thread pool
+            num_workers = 1
+            pool = ThreadPoolExecutor(num_workers)
+
+            shape = [1, image_args.C, image_args.H // image_args.f, image_args.W // image_args.f]
+            Noises = []
+            for i in range(n_noises):
+                Noises.append(torch.randn(shape, device=model_state.device))
+            
+            C_s = len(C)
+            prompt_frames = np.arange(C_s) * ( (video_args.frames - 1) / (C_s - 1))
+
+            #=====================IMAGES_GENERATION=========================#
+            for i in trange(video_args.frames, desc="Generating interpolation steps"):
+                x = tensor_multi_step_interpolation(Noises, i, video_args.frames, prompt_frames, k=1.0)
+                sample = generate_image(c=tensor_multi_step_interpolation(C, i, video_args.frames, prompt_frames, k=1.0), x=x, uc=uc, ia=image_args, ms=model_state)
+                #save it to disk
+                pool.submit(save_image, sample, frame_path(base_count+i, path_args), model_state, upscale=video_args.upscale)
+
+            #Free some video memory by pushing the auto-encoder to RAM 
+            model_state.FS.to("cpu")
+
+            # Wait for upscaling/saving to finish
+            pool.shutdown()
+
+            compile_video(video_args, path_args, base_count)
+
+    return
+
+
+def generateInitFrame(image_args, video_args, path_args, model_state, n=4) :
     model_state.sampler = KDiffusionSampler(model_state.model, video_args.sampler)
 
-    model_state.CS.to(model_state.device)
-    uc = model_state.CS.get_learned_conditioning([""])
-    prompt = video_args.prompts[0]
-    c = model_state.CS.get_learned_conditioning([prompt])
-    mem = torch.cuda.memory_allocated() / 1e6
-    model_state.CS.to("cpu")
-    while torch.cuda.memory_allocated() / 1e6 >= mem:
-            time.sleep(1)
-            
-    model_state.FS.to(model_state.device)
 
-    samples = generate_images(c=c, uc=uc, ia=image_args, ms=model_state, batch_size=count)
+    precision_scope = autocast
+    with torch.no_grad():
+        with precision_scope("cuda"):
+            C, uc = generate_embeddings([video_args.prompts[0]], model_state)
 
-    for sample in samples:
-        #do here the image-saving, returning
-        images = None
-    
-    return images, seed
+            model_state.FS.to(model_state.device)
+
+            seeds = [random.randint(0, 10 ** 6) for i in range(n)]
+
+            # Init thread pool
+            num_workers = n
+            pool = ThreadPoolExecutor(num_workers)
+
+            for seed in seeds:
+                seed_everything(seed)
+                samples = generate_image(c=C[0], uc=uc, ia=image_args, ms=model_state, batch_size=1)
+                pool.submit(save_image, samples, os.path.join(path_args.image_path, f'{seed}.png'), model_state, upscale=False)
+ 
+            model_state.FS.to("cpu")
+            pool.shutdown()
+
+    return seeds
 

@@ -86,6 +86,7 @@ ul {
   border-bottom: 3px solid var(--main-bg-light);
   font-family: 'Ubuntu Mono';
   font-size: 1.2em;
+  margin-right: 5px;
   /* border-radius: 10px 10px 0 0; */
 }
 
@@ -96,6 +97,55 @@ ul {
 
 .video {
   max-width: 1024px;
+}
+
+.promptsContainer {
+  display: grid;
+  grid-template-columns: auto auto auto auto;
+  grid-gap: 10px;
+  padding: 10px;
+  margin-top: 10px;
+}
+
+.promptsList {
+  display: flex;
+  align-items: center;
+  background-color: var(--main-bg-dark);
+  color: var(--main-bg-light);
+  border: 1px solid var(--main-bg-light);
+  border-radius: 100vmax;
+  font-family: 'Ubuntu Mono';
+  font-size: 1.2em;
+  padding: 10px;
+  grid-row: 1;
+}
+
+.removePrompt {
+  border: 1px solid var(--main-bg-light);
+  background-color: var(--main-bg-dark);
+  color: var(--main-bg-light);
+  font-family: 'Ubuntu Mono';
+  font-size: 1.2em;
+  border-radius: 100vmax;
+  width: 30px;
+  height: 30px;
+  margin-left: 5px;
+}
+
+.removePrompt:hover {
+  background-color:rgba(154,78,174,0.1);
+  color: var(--main-bg-dark);
+}
+
+.horizontal {
+  width: 90%;
+  height: 2px;
+  background-color: var(--main-bg-light);
+  border-radius: 100vmax;
+}
+
+.bg-dark {
+  background-color: var(--main-bg-dark);
 }
 
 
