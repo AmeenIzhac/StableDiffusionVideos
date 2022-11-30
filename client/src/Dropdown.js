@@ -5,25 +5,26 @@ import WalkOptions from "./WalkOptions"
 
 export default function Dropdown({
     frames,
-    slideFrameChange,
+    setFrames,
     isImg2Img,
     setisImg2Img,
     width,
-    slideWidthChange,
+    setWidth,
     height,
-    slideHeightChange,
+    setHeight,
     angle,
-    slideAngleChange,
+    setAngle,
     zoom,
-    slideZoomChange,
+    setZoom,
     fps,
-    slideFpsChange,
+    setFps,
     xShift,
-    slidexShiftChange,
+    setxShift,
     yShift,
-    slideyShiftChange,
+    setyShift,
     noNoises,
-    slideNoNoisesChange,
+    setNoNoises,
+    slideStateChange,
     dropOptions
 }) {
     
@@ -38,19 +39,19 @@ export default function Dropdown({
                         />
                         <div className='slideContainer alignCenter'>
                             <p>Number of Frames: <span id="demo">{frames}</span></p>
-                            <input type="range" min="1" max="120" value={frames} className='slider' id="myRange" onChange={slideFrameChange} />
+                            <input type="range" min="1" max="120" value={frames} className='slider' id="myRange" onChange={e => slideStateChange(e, setFrames)} />
                         </div>
                         <div className='alignCenter'>
                             <p>Width: <span id="demo">{width}</span></p>
-                            <input type="range" min="384" step="64" max="1024" value={width} className='slider' id="myRange" onChange={slideWidthChange} />
+                            <input type="range" min="384" step="64" max="1024" value={width} className='slider' id="myRange" onChange={e => slideStateChange(e, setWidth)} />
                         </div>
                         <div className='alignCenter'>
                             <p>Height: <span id="demo">{height}</span></p>
-                            <input type="range" min="384" step="64" max="1024" value={height} className='slider' id="myRange" onChange={slideHeightChange} />
+                            <input type="range" min="384" step="64" max="1024" value={height} className='slider' id="myRange" onChange={e => slideStateChange(e, setHeight)} />
                         </div>
                         <div className='slideContainer alignCenter'>
                             <p>Frames per second: <span id="demo">{fps}</span></p>
-                            <input type="range" min="1" max="30" value={fps} className='slider' id="myRange" onChange={slideFpsChange} />
+                            <input type="range" min="1" max="30" value={fps} className='slider' id="myRange" onChange={e => slideStateChange(e, setFps)} />
                         </div>
                         <div className="alignCenter">
                             <div className="checkBoxContainer">
@@ -61,13 +62,14 @@ export default function Dropdown({
                         { isImg2Img ? 
                             <Img2ImgOptions 
                                 angle={angle} 
-                                slideAngleChange={slideAngleChange}
+                                setAngle={setAngle}
                                 zoom={zoom}
-                                slideZoomChange={slideZoomChange}
+                                setZoom={setZoom}
                                 xShift={xShift}
-                                slidexShiftChange={slidexShiftChange}
+                                setxShift={setxShift}
                                 yShift={yShift}
-                                slideyShiftChange={slideyShiftChange}
+                                setyShift={setyShift}
+                                slideStateChange={slideStateChange}
                             /> 
                             : 
                             <></>
@@ -76,7 +78,8 @@ export default function Dropdown({
                         { !isImg2Img ?
                             <WalkOptions 
                                 noNoises={noNoises}
-                                slideNoNoisesChange={slideNoNoisesChange}
+                                setNoNoises={setNoNoises}
+                                slideStateChange={slideStateChange}
                             />
                             :
                             <></>

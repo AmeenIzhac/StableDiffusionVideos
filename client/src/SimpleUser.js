@@ -68,36 +68,8 @@ export default function SimpleUser() {
     button.classList.toggle("rotate")
   }
 
-  const slideFrameChange = (e) => {
-    setFrames(e.target.value);
-  }
-
-  const slideWidthChange = (e) => {
-    setWidth(e.target.value)
-  }
-  const slideHeightChange = (e) => {
-    setHeight(e.target.value)
-  }
-
-  const slideAngleChange = (e) => {
-    setAngle(e.target.value)
-  }
-
-  const slideZoomChange = (e) => {
-    setZoom(e.target.value)
-  }
-
-  const slideFpsChange = (e) => {
-    setFps(e.target.value)
-  }
-  const slidexShiftChange = (e) => {
-    setxShift(e.target.value)
-  }
-  const slideyShiftChange = (e) => {
-    setyShift(e.target.value)
-  }
-  const slideNoNoisesChange = (e) => {
-    setNoNoises(e.target.value)
+  const slideStateChange = (e, set) => {
+    set(e.target.value);
   }
 
   function handleKeyDown(event) {
@@ -106,34 +78,33 @@ export default function SimpleUser() {
     }
   }
 
-
-
   return (
     <div className='SimpleUser'>
       <Navbar loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
       <Dropdown
         frames={frames}
-        slideFrameChange={slideFrameChange}
+        setFrames={setFrames}
         isImg2Img={isImg2Img}
         setisImg2Img={setisImg2Img}
         isWalk={isWalk}
         setisWalk={setisWalk}
         width={width}
-        slideWidthChange={slideWidthChange}
+        setWidth={setWidth}
         height={height}
-        slideHeightChange={slideHeightChange}
+        setHeight={setHeight}
         zoom={zoom}
-        slideZoomChange={slideZoomChange}
+        setZoom={setZoom}
         angle={angle}
-        slideAngleChange={slideAngleChange}
+        setAngle={setAngle}
         fps={fps}
-        slideFpsChange={slideFpsChange}
+        setFps={setFps}
         xShift={xShift}
-        slidexShiftChange={slidexShiftChange}
+        setxShift={setxShift}
         yShift={yShift}
-        slideyShiftChange={slideyShiftChange}
+        setyShift={setyShift}
         noNoises={noNoises}
-        slideNoNoisesChange={slideNoNoisesChange}
+        setNoNoises={setNoNoises}
+        slideStateChange={slideStateChange}
         dropOptions={dropOptions}
       />
       <div className="mainDiv">

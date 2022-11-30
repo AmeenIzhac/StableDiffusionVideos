@@ -157,6 +157,7 @@ ul {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1em;
+  border-top: 1px solid var(--main-bg-dark);
 }
 
 .fullRow {
@@ -211,6 +212,7 @@ ul {
 
   .extraOptions {
     grid-column: 1 / span 1;
+    grid-template-columns: repeat(1, 1fr);
   }
 
   .dropdownOption::-webkit-scrollbar {
