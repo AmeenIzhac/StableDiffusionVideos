@@ -223,7 +223,7 @@ def generate_image (
     os.system('nvidia-smi --query-gpu=memory.used --format=csv')
     return ms.FS.decode_first_stage(samples)
 
-def factorise(video_args, model_state, path_args):
+def init_video_gen(video_args, model_state, path_args):
     #Negative seed means random seed
     seed = video_args.seed
     if seed < 0 :
@@ -250,15 +250,15 @@ def factorise(video_args, model_state, path_args):
     return seed, base_count, start_number
 
 
-def generate_embeddings(video_args, model_state):
+def generate_embeddings(prompts, model_state):
     # 
     # Generate the text embeddings with the language model
     # #
     model_state.CS.to(model_state.device)
     uc = model_state.CS.get_learned_conditioning([""])
     C = []
-    for prompt in video_args.prompts:
-        C.append(model_state.CS.get_learned_conditioning([prompt])) #look if it can be done in parallel by handing a list of prompts
+    for prompt in prompts:
+        C.append(model_state.CS.get_learned_conditioning([prompt])) #TODO look if it can be done in parallel by handing a list of prompts
     if model_state.device != "cpu":
         mem = torch.cuda.memory_allocated() / 1e6
         model_state.CS.to("cpu")
@@ -298,7 +298,7 @@ def generate_video (
     with torch.no_grad():
         with precision_scope("cuda"):
 
-            C, uc = generate_embeddings(video_args, model_state)
+            C, uc = generate_embeddings(video_args.prompts, model_state)
 
             model_state.FS.to(model_state.device)
 
@@ -370,7 +370,7 @@ def generate_walk_video(
     with torch.no_grad():
         with precision_scope("cuda"):
 
-            C, uc = generate_embeddings(video_args, model_state)
+            C, uc = generate_embeddings(video_args.prompts, model_state)
 
             model_state.FS.to(model_state.device)
 
@@ -409,25 +409,23 @@ def generateInitFrame(image_args, video_args, path_args, model_state, n=4) :
 
     model_state.sampler = KDiffusionSampler(model_state.model, video_args.sampler)
 
-    model_state.CS.to(model_state.device)
-    uc = model_state.CS.get_learned_conditioning([""])
-    prompt = video_args.prompts[0]
-    c = model_state.CS.get_learned_conditioning([prompt])
-    mem = torch.cuda.memory_allocated() / 1e6
-    model_state.CS.to("cpu")
-    while torch.cuda.memory_allocated() / 1e6 >= mem:
-            time.sleep(1)
+    C, uc = generate_embeddings([video_args.prompts[0]], model_state)
             
     model_state.FS.to(model_state.device)
 
-    max_batch_size = 4
-
     seeds = [random.randint(0, 10 ** 6) for i in range(n)]
 
+    # Init thread pool
+    num_workers = n
+    pool = ThreadPoolExecutor(num_workers)
+
     for seed in seeds:
-        samples = generate_images(c=c, uc=uc, ia=image_args, ms=model_state, batch_size=1)
+        samples = generate_images(c=C[0], uc=uc, ia=image_args, ms=model_state, batch_size=1)
         for sample in samples:
-            save_image(sample, os.path.join(path_args.image_path, f'{seed}.png'), model_state, upscale=False)
+            pool.submit(save_image, sample, os.path.join(path_args.image_path, f'{seed}.png'), model_state, upscale=False)
     
+    model_state.FS.to("cpu")
+    pool.shutdown()
+
     return seeds
 
