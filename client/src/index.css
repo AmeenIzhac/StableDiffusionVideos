@@ -191,8 +191,59 @@ ul {
   gap: 1em;
 }
 
+.dropdownVidOption {
+  border-bottom: 1px solid var(--main-bg-dark);
+  height: 5vh;
+}
+.vidOptionContainer {
+  margin: 0;
+  padding: 0;
+  height: inherit;
+  display: flex;
+}
+
+.extraOptions {
+  grid-column: 1 / span 2;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1em;
+  border-top: 1px solid var(--main-bg-dark);
+}
+
+.fullRow {
+  grid-column: 1 / span 2;
+  text-align: center;
+}
+
+.img2img, .walk {
+  width: 50%;
+  height: inherit;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform: translateX();
+}
+
+
+.vidOptionBtn {
+  border: none;
+  height: 100%;
+  width: 100%;
+  font-weight: bold;
+  font-size: 100%;
+  font-family: 'Ubuntu Mono';
+}
+
 @media screen and (min-width: 900px) {
   .dropdownOption {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1em;
+  }
+  .fullRow {
+    grid-column: 1 / span 3;
+  }
+  .extraOptions {
+    grid-column: 1 / span 3;
     grid-template-columns: repeat(3, 1fr);
     gap: 1em;
   }
@@ -202,7 +253,29 @@ ul {
   .dropdownOption {
     grid-template-columns: repeat(1, 1fr);
     gap: 1em;
+    overflow-y: scroll;
   }
+
+  .fullRow {
+    grid-column: 1 / span 1;
+  }
+
+  .extraOptions {
+    grid-column: 1 / span 1;
+    grid-template-columns: repeat(1, 1fr);
+  }
+
+  .dropdownOption::-webkit-scrollbar {
+    background-color: var(--main-bg-light);
+    width: 4px;
+  }
+
+  .dropdownOption::-webkit-scrollbar-thumb {
+    background-color: var(--main-bg-dark);
+    border-radius: 100vmax;
+  }
+
+
   .promptButton {
     padding: 12px;
     font-size: 3vw;
@@ -217,10 +290,11 @@ ul {
     margin-right: 1vw;
   }
 
+
 }
 
 .open {
-  height: 400px;
+  height: min(500px, 90vh);
 }
 
 .rotate {
@@ -232,6 +306,11 @@ ul {
   margin: 0;
 }
 
+.checkBoxContainer {
+  display: flex;
+  align-items: center;
+  font-size: 1.2em;
+}
 
 /* Slider Styles*/
 
@@ -241,7 +320,7 @@ ul {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-
+  height: min-content;
 }
 
 .slider {

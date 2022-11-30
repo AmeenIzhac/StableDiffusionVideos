@@ -8,14 +8,25 @@ import Dropdown from "./Dropdown";
 export default function SimpleUser() {
   const [src, setSrc] = useState("");
   const promptRef = useRef()
+  const [isImg2Img, setisImg2Img] = useState(true);
+  const [isWalk, setisWalk] = useState(false)
   const [loading, setLoading] = useState(false);
-  const [frames, setFrames] = useState("30")
-  const [width, setWidth] = useState("704")
-  const [height, setHeight] = useState("704")
+  const [frames, setFrames] = useState("60")
+  const [width, setWidth] = useState("512")
+  const [height, setHeight] = useState("512")
   const [angle, setAngle] = useState("0")
-  const [zoom, setZoom] = useState("1")
+  const [zoom, setZoom] = useState("1.1")
+  const [fps, setFps] = useState("20")
+  const [xShift,setxShift] = useState("1")
+  const [yShift,setyShift] = useState("1")
+  const [noNoises, setNoNoises] = useState("1")
   const [loggedIn, setLoggedIn] = useState(Cookies.get("loggedInUser") != null)
+
+  //we dont need a state to track the upscaling
+  //just use document.getElementById('upscale').checked which will return a boolean
+
   const [prompts, setPrompts] = useState([])
+
 
   function getVideo() {
     const prompt = promptRef.current.value
@@ -83,23 +94,8 @@ export default function SimpleUser() {
     button.classList.toggle("rotate")
   }
 
-  const slideFrameChange = (e) => {
-    setFrames(e.target.value);
-  }
-
-  const slideWidthChange = (e) => {
-    setWidth(e.target.value)
-  }
-  const slideHeightChange = (e) => {
-    setHeight(e.target.value)
-  }
-
-  const slideAngleChange = (e) => {
-    setAngle(e.target.value)
-  }
-
-  const slideZoomChange = (e) => {
-    setZoom(e.target.value)
+  const slideStateChange = (e, set) => {
+    set(e.target.value);
   }
 
   function handleKeyDown(event) {
@@ -109,21 +105,33 @@ export default function SimpleUser() {
   }
 
 
-
   return (
     <div className='SimpleUser'>
       <Navbar loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
       <Dropdown
         frames={frames}
-        slideFrameChange={slideFrameChange}
+        setFrames={setFrames}
+        isImg2Img={isImg2Img}
+        setisImg2Img={setisImg2Img}
+        isWalk={isWalk}
+        setisWalk={setisWalk}
         width={width}
-        slideWidthChange={slideWidthChange}
+        setWidth={setWidth}
         height={height}
-        slideHeightChange={slideHeightChange}
+        setHeight={setHeight}
         zoom={zoom}
-        slideZoomChange={slideZoomChange}
+        setZoom={setZoom}
         angle={angle}
-        slideAngleChange={slideAngleChange}
+        setAngle={setAngle}
+        fps={fps}
+        setFps={setFps}
+        xShift={xShift}
+        setxShift={setxShift}
+        yShift={yShift}
+        setyShift={setyShift}
+        noNoises={noNoises}
+        setNoNoises={setNoNoises}
+        slideStateChange={slideStateChange}
         dropOptions={dropOptions}
       />
       <div className="mainDiv">
