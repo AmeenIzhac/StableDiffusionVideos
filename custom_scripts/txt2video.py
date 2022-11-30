@@ -21,13 +21,6 @@ from ldm.util import instantiate_from_config
 import sys
 sys.path.append('../stable-diffusion-2/optimizedSD')
 
-#questions with raaif:
-#implement the server properly (with loading the model once)
-#the path question
-#the prompt list question
-#the init image format question
-#the init image saving question
-
 
 #TODO : find out how to properly comment in python
 
@@ -190,12 +183,10 @@ def save_image(x_new, output_path, model_state, upscale=True):
 
     for x_sample in x_new_clamp:
         x_sample = 255. * rearrange(x_sample.cpu().numpy(), 'c h w -> h w c')
-        #x_sample = 255. * rearrange(x_sample.cpu().numpy(), 'c h w -> c w h')
         if upscale:
             executeRealESRGAN(x_sample.astype(np.uint8), output_path, model_state.upsampler)
         else:
             Image.fromarray(x_sample.astype(np.uint8)).save(output_path)
-
 
 def generate_image (
     c = None,
@@ -219,8 +210,7 @@ def generate_image (
             #maybe adapt for batch size here if it's of any relevance : just a copy-cat operation ig
             samples, _ = ms.sampler.sample(S=ia.steps, conditioning=c, unconditional_guidance_scale=ia.scale,
                                     unconditional_conditioning=uc, x_T=x, img2img=True, t_enc=t_enc)
-                    
-    os.system('nvidia-smi --query-gpu=memory.used --format=csv')
+
     return ms.FS.decode_first_stage(samples)
 
 def init_video_gen(video_args, model_state, path_args):
@@ -292,7 +282,7 @@ def generate_video (
     #outline : compute embeddings, generate first image, send it to upscale (in parallel), then loop, do processings, compute interpolated prompt, call generate_image, send it to upscale
     
 
-    seed, base_count, start_number = factorise(video_args, model_state, path_args)
+    seed, base_count, start_number = init_video_gen(video_args, model_state, path_args)
 
     precision_scope = autocast
     with torch.no_grad():
@@ -324,10 +314,8 @@ def generate_video (
             previous_sample = first_sample
             color_sample = sample_to_cv2(previous_sample).copy()
 
-            #maybe some code to get the proper sampler
-
             C_s = len(C)
-            prompt_frames = np.arange(C_s) * ( (video_args.frames - 1) / (C_s - 1))
+            prompt_frames = np.arange(C_s) * ( (video_args.frames - 1) / (C_s - 1)) if C_s > 1 else None
             for i in trange(video_args.frames-1, desc="Generating frames"):
 
                 #seeding
@@ -364,7 +352,7 @@ def generate_walk_video(
     n_noises=1
     ):    
 
-    seed, base_count, start_number = factorise(video_args, model_state, path_args)
+    seed, base_count, start_number = init_video_gen(video_args, model_state, path_args)
 
     precision_scope = autocast
     with torch.no_grad():
@@ -389,9 +377,9 @@ def generate_walk_video(
             #=====================IMAGES_GENERATION=========================#
             for i in trange(video_args.frames, desc="Generating interpolation steps"):
                 x = tensor_multi_step_interpolation(Noises, i, video_args.frames, prompt_frames, k=1.0)
-                sample = generate_image(c=tensor_multi_step_interpolation(C, i, video_args.frames, k=1.0), x=x, uc=uc, ia=image_args, ms=model_state)
+                sample = generate_image(c=tensor_multi_step_interpolation(C, i, video_args.frames, prompt_frames, k=1.0), x=x, uc=uc, ia=image_args, ms=model_state)
                 #save it to disk
-                pool.submit(save_image, sample, frame_path(base_count+i), model_state, upscale=video_args.upscale)
+                pool.submit(save_image, sample, frame_path(base_count+i, path_args), model_state, upscale=video_args.upscale)
 
             #Free some video memory by pushing the auto-encoder to RAM 
             model_state.FS.to("cpu")
@@ -405,27 +393,29 @@ def generate_walk_video(
 
 
 def generateInitFrame(image_args, video_args, path_args, model_state, n=4) :
-    #I should really factorise this method and generate_video TODO
-
     model_state.sampler = KDiffusionSampler(model_state.model, video_args.sampler)
 
-    C, uc = generate_embeddings([video_args.prompts[0]], model_state)
-            
-    model_state.FS.to(model_state.device)
 
-    seeds = [random.randint(0, 10 ** 6) for i in range(n)]
+    precision_scope = autocast
+    with torch.no_grad():
+        with precision_scope("cuda"):
+            C, uc = generate_embeddings([video_args.prompts[0]], model_state)
 
-    # Init thread pool
-    num_workers = n
-    pool = ThreadPoolExecutor(num_workers)
+            model_state.FS.to(model_state.device)
 
-    for seed in seeds:
-        samples = generate_images(c=C[0], uc=uc, ia=image_args, ms=model_state, batch_size=1)
-        for sample in samples:
-            pool.submit(save_image, sample, os.path.join(path_args.image_path, f'{seed}.png'), model_state, upscale=False)
-    
-    model_state.FS.to("cpu")
-    pool.shutdown()
+            seeds = [random.randint(0, 10 ** 6) for i in range(n)]
+
+            # Init thread pool
+            num_workers = n
+            pool = ThreadPoolExecutor(num_workers)
+
+            for seed in seeds:
+                seed_everything(seed)
+                samples = generate_image(c=C[0], uc=uc, ia=image_args, ms=model_state, batch_size=1)
+                pool.submit(save_image, samples, os.path.join(path_args.image_path, f'{seed}.png'), model_state, upscale=False)
+ 
+            model_state.FS.to("cpu")
+            pool.shutdown()
 
     return seeds
 
