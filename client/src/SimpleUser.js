@@ -21,6 +21,8 @@ export default function SimpleUser() {
   const [yShift,setyShift] = useState("1")
   const [noNoises, setNoNoises] = useState("1")
   const [loggedIn, setLoggedIn] = useState(Cookies.get("loggedInUser") != null)
+  //we dont need a state to track the upscaling
+  //just use document.getElementById('upscale').checked which will return a boolean
 
   function getVideo() {
     const prompt = promptRef.current.value
@@ -77,6 +79,7 @@ export default function SimpleUser() {
       getVideo()
     }
   }
+
 
   return (
     <div className='SimpleUser'>
