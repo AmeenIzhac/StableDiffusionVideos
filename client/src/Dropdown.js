@@ -3,6 +3,12 @@ import Cookies from "js-cookie"
 export default function Dropdown({
     frames,
     slideFrameChange,
+    isImg2Img,
+    setisImg2Img,
+    isLatentWalk,
+    setisLatentWalk,
+    isSemanticWalk,
+    setisSemanticWalk,
     width,
     slideWidthChange,
     height,
@@ -19,11 +25,54 @@ export default function Dropdown({
     slideyShiftChange,
     dropOptions
 }) {
+    const dark = '#181818'
+    const light = '#9A4EAE'
+    const defaultStyle = {
+        backgroundColor: light,
+        color: dark
+    }
+    const chosenStyle = {
+        backgroundColor: dark,
+        color:light,
+        borderTop: '1px solid ' + light
+    }
+    const img2imgStyle = isImg2Img ? chosenStyle : defaultStyle 
+    const latentStyle = isLatentWalk ? chosenStyle : defaultStyle 
+    const semanticStyle = isSemanticWalk ? chosenStyle : defaultStyle 
+
+    const chooseImg2Img = () => {
+        setisImg2Img(true)
+        setisLatentWalk(false)
+        setisSemanticWalk(false)
+    }
+    const chooseLatent = () => {
+        setisImg2Img(false)
+        setisLatentWalk(true)
+        setisSemanticWalk(false)
+    }
+    const chooseSemantic = () => {
+        setisImg2Img(false)
+        setisLatentWalk(false)
+        setisSemanticWalk(true)
+    }
     return (
         <div className='slideOptions'>
             {Cookies.get("loggedInUser") ?
                 <>
                     <div className='dropdownOption' id="dropdown">
+                        <div className="dropdownVidOption">
+                            <ul className="vidOptionContainer">
+                                <li className="img2img">
+                                    <button className="vidOptionBtn" style={img2imgStyle} onClick={chooseImg2Img}>img2img</button>
+                                </li>
+                                <li className="latentWalk">
+                                    <button className="vidOptionBtn" style={latentStyle} onClick={chooseLatent}>Latent Walk</button>
+                                </li>
+                                <li className="semanticWalk">
+                                    <button className="vidOptionBtn" style={semanticStyle} onClick={chooseSemantic}>Semantic Walk</button>
+                                </li>
+                            </ul>
+                        </div>
                         <div className='slideContainer alignCenter'>
                             <p>Number of Frames: <span id="demo">{frames}</span></p>
                             <input type="range" min="1" max="120" value={frames} className='slider' id="myRange" onChange={slideFrameChange} />
@@ -50,11 +99,15 @@ export default function Dropdown({
                         </div>
                         <div className='alignCenter'>
                             <p>x-shift: <span id="demo">{xShift}</span></p>
-                            <input type="range" min="0" step="0.2" max="2" value={xShift} className='slider' id="myRange" onChange={slidexShiftChange} />
+                            <input type="range" min="-10" step="1" max="10" value={xShift} className='slider' id="myRange" onChange={slidexShiftChange} />
                         </div>
                         <div className='alignCenter'>
                             <p>y-shift: <span id="demo">{yShift}</span></p>
-                            <input type="range" min="0" step="0.2" max="2" value={yShift} className='slider' id="myRange" onChange={slideyShiftChange} />
+                            <input type="range" min="-10" step="1" max="10" value={yShift} className='slider' id="myRange" onChange={slideyShiftChange} />
+                        </div>
+                        <div className="alignCenter">
+                            <input type="checkbox" id="scales" name="scales"  />
+                            <label for="scales">Scales</label>
                         </div>
                     </div>
                     <button className='dropArrow' onClick={dropOptions} id="button"></button>

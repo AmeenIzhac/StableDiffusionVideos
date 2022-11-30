@@ -8,12 +8,15 @@ import Dropdown from "./Dropdown";
 export default function SimpleUser() {
   const [src, setSrc] = useState("");
   const promptRef = useRef()
+  const [isImg2Img, setisImg2Img] = useState(true);
+  const [isLatentWalk, setisLatentWalk] = useState(false)
+  const [isSemanticWalk, setisSemanticWalk] = useState(false)
   const [loading, setLoading] = useState(false);
   const [frames, setFrames] = useState("60")
-  const [width, setWidth] = useState("704")
-  const [height, setHeight] = useState("704")
+  const [width, setWidth] = useState("512")
+  const [height, setHeight] = useState("512")
   const [angle, setAngle] = useState("0")
-  const [zoom, setZoom] = useState("1")
+  const [zoom, setZoom] = useState("1.1")
   const [fps, setFps] = useState("20")
   const [xShift,setxShift] = useState("1")
   const [yShift,setyShift] = useState("1")
@@ -108,6 +111,12 @@ export default function SimpleUser() {
       <Dropdown
         frames={frames}
         slideFrameChange={slideFrameChange}
+        isImg2Img={isImg2Img}
+        setisImg2Img={setisImg2Img}
+        isLatentWalk={isLatentWalk}
+        setisLatentWalk={setisLatentWalk}
+        isSemanticWalk={isSemanticWalk}
+        setisSemanticWalk={setisSemanticWalk}
         width={width}
         slideWidthChange={slideWidthChange}
         height={height}
