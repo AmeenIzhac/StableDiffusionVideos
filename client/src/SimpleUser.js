@@ -18,10 +18,12 @@ export default function SimpleUser() {
   const [prompts, setPrompts] = useState([])
   const [progress, setProgress] = useState(0)
   var jobID;
+  var fileName = ""
 
   // Create a new job on server and set the current jobID
   function createJob() {
     const prompt = promptRef.current.value
+    fileName = [...prompts, prompt][0].replace(" ", "_")
     setLoading(true);
     axios({
       method: "get",
@@ -60,7 +62,7 @@ export default function SimpleUser() {
           // setProgress(status.progress)
           break;
         case "done":
-          //getVideo();
+          getCreatedVideo();
           return;
         case "error":
           setLoading(false);
@@ -96,6 +98,31 @@ export default function SimpleUser() {
       });
 
   }
+
+  function getCreatedVideo() {
+    axios({
+      method: "get",
+      // url: `https://stablediffusionvideoswebserver-production.up.railway.app/video`,
+      url: `http://localhost:3001/getCreatedVideo`,
+      params: {
+        jobID: jobID,
+        fileName: fileName
+      },
+      responseType: "blob",
+      timeout: 10000
+    })
+      .then((res) => {
+        console.log(res);
+        setSrc(URL.createObjectURL(res.data));
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.log(err);
+        setLoading(false);
+      });
+  }
+
+
 
   function getVideo() {
     const prompt = promptRef.current.value
