@@ -6,6 +6,7 @@ export default function Gallery() {
   const [video, setVideo] = useState("");
 
   useEffect(() => {
+    // gonna have to update this to get all the gallery from the backend which will have to get it all from google cloud
     const storage = getStorage();
     getDownloadURL(ref(storage, "some-dddchild2")).then((url) => {
       const xhr = new XMLHttpRequest();
