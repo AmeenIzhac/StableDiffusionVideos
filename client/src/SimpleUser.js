@@ -22,8 +22,8 @@ export default function SimpleUser() {
   const [angle, setAngle] = useState("0")
   const [zoom, setZoom] = useState("1.1")
   const [fps, setFps] = useState("20")
-  const [xShift, setxShift] = useState("1")
-  const [yShift, setyShift] = useState("1")
+  const [xShift, setxShift] = useState("0")
+  const [yShift, setyShift] = useState("0")
   const [noNoises, setNoNoises] = useState("1")
   const [loggedIn, setLoggedIn] = useState(Cookies.get("loggedInUser") != null)
 
@@ -31,6 +31,112 @@ export default function SimpleUser() {
   //just use document.getElementById('upscale').checked which will return a boolean
 
   const [prompts, setPrompts] = useState([])
+  const [progress, setProgress] = useState(0)
+  var jobID;
+  var fileName = ""
+
+  // Create a new job on server and set the current jobID
+  function createJob() {
+    const prompt = promptRef.current.value
+    fileName = [...prompts, prompt][0].replace(" ", "_")
+    setLoading(true);
+    axios({
+      method: "get",
+      // url: `https://stablediffusionvideoswebserver-production.up.railway.app/request`,
+      url: `http://localhost:3001/request`,
+      params: {
+        prompts: [...prompts, prompt].join(";"),
+        frames: frames,
+        width: width,
+        height: height,
+        angle: angle,
+        zoom: zoom
+      },
+      responseType: "application/json",
+      timeout: 10000
+    })
+      .then((res) => {
+        jobID = JSON.parse(res.data).id
+        console.log(jobID);
+        poll();
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+
+  async function poll() {
+    while (true) {
+      const status = await getJobStatus();
+      console.log(status);
+      switch (status.status) {
+        case "pending":
+          // setProgress(status.progress)
+          break;
+        case "generating":
+          // setProgress(status.progress)
+          break;
+        case "done":
+          getCreatedVideo();
+          return;
+        case "error":
+          setLoading(false);
+          alert("Error generating video");
+          return;
+        default:
+          console.log("Unknown status");
+      }
+      await new Promise((r) => setTimeout(r, 1000));
+    }
+  }
+
+  // get status of job
+  async function getJobStatus() {
+    console.log(jobID)
+    return axios({
+      method: "get",
+      // url: `https://stablediffusionvideoswebserver-production.up.railway.app/status`,
+      url: `http://localhost:3001/status`,
+      params: {
+        jobID: jobID
+      },
+      responseType: "text",
+      timeout: 10000
+    })
+      .then((res) => {
+        console.log(JSON.parse(res.data));
+        return JSON.parse(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+        return "error";
+      });
+
+  }
+
+  function getCreatedVideo() {
+    axios({
+      method: "get",
+      // url: `https://stablediffusionvideoswebserver-production.up.railway.app/getCreatedVideo`,
+      url: `http://localhost:3001/getCreatedVideo`,
+      params: {
+        jobID: jobID,
+        fileName: fileName
+      },
+      responseType: "blob",
+      timeout: 10000
+    })
+      .then((res) => {
+        console.log(res);
+        setSrc(URL.createObjectURL(res.data));
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.log(err);
+        setLoading(false);
+      });
+  }
+
 
 
   // temp for testing
@@ -62,7 +168,14 @@ export default function SimpleUser() {
         width: width,
         height: height,
         angle: angle,
-        zoom: zoom
+        zoom: zoom,
+        fps: fps,
+        xShift: xShift,
+        yShift: yShift,
+        noNoises: noNoises,
+        isImg2Img: isImg2Img,
+        isWalk: isWalk,
+        upscale: document.getElementById('upscale').checked
       },
       responseType: "blob",
       timeout: 10000000
@@ -164,7 +277,7 @@ export default function SimpleUser() {
           <div className='promptDiv'>
             <input className='prompt' ref={promptRef} placeholder='Enter Text Prompt...' onSubmit={getVideo} onKeyDown={handleKeyDown}></input>
             <button className='promptButton' onClick={addPrompt}>+</button>
-            <button className='promptButton' onClick={getVideo}>Generate Video</button>
+            <button className='promptButton' onClick={createJob}>Generate Video</button>
             {/* <button className='promptButton' onClick={getVideo} onSubmit={logger}>Generate Video</button> */}
           </div>
           <div className="promptsContainer">
