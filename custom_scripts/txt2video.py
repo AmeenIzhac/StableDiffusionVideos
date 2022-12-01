@@ -79,6 +79,9 @@ class PathArgs:
         self.video_path = 'outputs/videos'
 
 
+class float_wrapper:
+    x = 0.0
+
 
 def load_model(config_path, ckpt_path, optimized=False):
     model_state = ModelState()
@@ -290,11 +293,13 @@ def generate_video (
     video_args,
     path_args,
     model_state,
+    progress_var = None
 ) -> str :
     #outline : compute embeddings, generate first image, send it to upscale (in parallel), then loop, do processings, compute interpolated prompt, call generate_image, send it to upscale
     
 
     seed, base_count, start_number = init_video_gen(video_args, model_state, path_args)
+    progress_var.x = 0.0
 
     precision_scope = autocast
     with torch.no_grad():
@@ -316,7 +321,8 @@ def generate_video (
 
             #save it to disk
             pool.submit(save_image, first_sample, frame_path(base_count, path_args), model_state, upscale=video_args.upscale)
-
+            if progress_var is not None:
+                progress_var.x = 1 / video_args.frames
 
             #=====================SUBSEQUENT_IMAGES_GENERATION=========================#
             xform = make_xform_2d(  image_args.W, image_args.H, video_args.x, 
@@ -344,6 +350,9 @@ def generate_video (
                 pool.submit(save_image, x_new, frame_path(base_count + i + 1, path_args), model_state, upscale=video_args.upscale)
                 previous_sample = x_new
 
+                if progress_var is not None:
+                    progress_var.x = (i+2) / video_args.frames
+
             #Free some video memory by pushing the auto-encoder to RAM 
             model_state.FS.to("cpu")
 
@@ -361,10 +370,12 @@ def generate_walk_video(
     video_args,
     path_args,
     model_state,
-    n_noises=1
+    n_noises=1,
+    progress_var = None
     ):    
 
     seed, base_count, start_number = init_video_gen(video_args, model_state, path_args)
+    progress_var.x = 0
 
     precision_scope = autocast
     with torch.no_grad():
@@ -392,6 +403,9 @@ def generate_walk_video(
                 sample = generate_image(c=tensor_multi_step_interpolation(C, i, video_args.frames, prompt_frames, k=1.0), x=x, uc=uc, ia=image_args, ms=model_state)
                 #save it to disk
                 pool.submit(save_image, sample, frame_path(base_count+i, path_args), model_state, upscale=video_args.upscale)
+
+                if progress_var is not None:
+                    progress_var.x = (i+1) / video_args.frames
 
             #Free some video memory by pushing the auto-encoder to RAM 
             model_state.FS.to("cpu")
