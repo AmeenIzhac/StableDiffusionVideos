@@ -24,6 +24,15 @@ sys.path.append('../stable-diffusion-2/optimizedSD')
 
 #TODO : find out how to properly comment in python
 
+# Generatng the initial frames:
+#  1. Get(/generateInitFrames?numFrames=x)
+#       - clear the temp directory
+#       - Server generates 4 frames, stores the torchs in a dict, files in temp directory
+#       - returns code:200 upon completion
+#  2. x * Get(/getFrame?index=x)
+#       - each get request returns the frame x and it's respective id
+#  3.  finally user selects a frame on the client side and sends a post request with the id of the frame
+#      - server then gets the torch from the id and uses it to generate a video, returns video to client
 
 class ImageArgs:
     def __init__(self):
@@ -230,6 +239,9 @@ def init_video_gen(video_args, model_state, path_args):
     base_count = len(os.listdir(path_args.image_path))
     start_number = base_count
 
+    def frame_path(frame_number, ):
+        return os.path.join(path_args.image_path, f"{frame_number:05}.png")
+
     #
     # Assertions about consistency of arguments
     # #
@@ -391,6 +403,11 @@ def generate_walk_video(
 
     return
 
+def generate_initial_images(image_args, video_args, image_dir, model_state, count=4) :
+    #I should really factorise this method and generate_video TODO
+    seed = video_args.seed
+    if seed < 0:
+        seed = random.randint(0, 10 ** 6)
 
 def generateInitFrame(image_args, video_args, path_args, model_state, n=4) :
     model_state.sampler = KDiffusionSampler(model_state.model, video_args.sampler)
@@ -405,17 +422,10 @@ def generateInitFrame(image_args, video_args, path_args, model_state, n=4) :
 
             seeds = [random.randint(0, 10 ** 6) for i in range(n)]
 
-            # Init thread pool
-            num_workers = n
-            pool = ThreadPoolExecutor(num_workers)
+    for i,sample in enumerate(samples):
+        save_image(sample, output_path=os.join(image_dir, f"{frame_number:05}.png"), model_state=model_state, upscale=False)
+    samples_list = torch.split(samples, 1)
 
-            for seed in seeds:
-                seed_everything(seed)
-                samples = generate_image(c=C[0], uc=uc, ia=image_args, ms=model_state, batch_size=1)
-                pool.submit(save_image, samples, os.path.join(path_args.image_path, f'{seed}.png'), model_state, upscale=False)
- 
-            model_state.FS.to("cpu")
-            pool.shutdown()
-
-    return seeds
+    
+    return samples_list
 

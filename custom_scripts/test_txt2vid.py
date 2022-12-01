@@ -4,9 +4,9 @@ from txt2video import *
 sys.path.append('stable-diffusion-2/optimizedSD')
 
 #Placeholder "main" code
-cfg_path = 'stable-diffusion-2/configs/stable-diffusion/v1-inference.yaml'
-optimized_cfg_path = 'stable-diffusion-2/optimizedSD/v1-inference.yaml'
-ckpt_path = 'stable-diffusion-2/models/ldm/stable-diffusion-v1/model.ckpt'
+cfg_path = './stable-diffusion-2/configs/stable-diffusion/v1-inference.yaml'
+optimized_cfg_path = './stable-diffusion-2/optimizedSD/v1-inference.yaml'
+ckpt_path = './stable-diffusion-2/models/ldm/stable-diffusion-v1/model.ckpt'
 model_state = load_model(optimized_cfg_path, ckpt_path, optimized=True)
 
 image_args = ImageArgs()

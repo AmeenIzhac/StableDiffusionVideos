@@ -4,6 +4,11 @@ import axios from "axios";
 import loadingAnimation from "./assets/loading.gif";
 import Cookies from 'js-cookie'
 import Dropdown from "./Dropdown";
+import FrameSelect from "./components/FrameSelect";
+import a from "./assets/a.jpg";
+import b from "./assets/b.jpg";
+import c from "./assets/c.jpg";
+import d from "./assets/d.jpg";
 
 export default function SimpleUser() {
   const [src, setSrc] = useState("");
@@ -17,8 +22,8 @@ export default function SimpleUser() {
   const [angle, setAngle] = useState("0")
   const [zoom, setZoom] = useState("1.1")
   const [fps, setFps] = useState("20")
-  const [xShift,setxShift] = useState("1")
-  const [yShift,setyShift] = useState("1")
+  const [xShift, setxShift] = useState("1")
+  const [yShift, setyShift] = useState("1")
   const [noNoises, setNoNoises] = useState("1")
   const [loggedIn, setLoggedIn] = useState(Cookies.get("loggedInUser") != null)
 
@@ -27,6 +32,16 @@ export default function SimpleUser() {
 
   const [prompts, setPrompts] = useState([])
 
+
+  // temp for testing
+  const framesT = [a, b, c, d];
+  const selectFunction = (index) => {
+    console.log(`Frame ${index} Selected`);
+  }
+  const getNewFrame = () => {
+    console.log("Get new frame");
+  }
+  // end temp testing
 
   function getVideo() {
     const prompt = promptRef.current.value
@@ -164,6 +179,9 @@ export default function SimpleUser() {
               </div>
             })}
           </div>
+        </div>
+        <div className='frameDiv'>
+          <FrameSelect srcs={frames} selectFunction={selectFunction} getNewFrame={getNewFrame}></FrameSelect>
         </div>
       </div>
     </div>
