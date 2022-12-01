@@ -22,8 +22,8 @@ export default function SimpleUser() {
   const [angle, setAngle] = useState("0")
   const [zoom, setZoom] = useState("1.1")
   const [fps, setFps] = useState("20")
-  const [xShift, setxShift] = useState("1")
-  const [yShift, setyShift] = useState("1")
+  const [xShift, setxShift] = useState("0")
+  const [yShift, setyShift] = useState("0")
   const [noNoises, setNoNoises] = useState("1")
   const [loggedIn, setLoggedIn] = useState(Cookies.get("loggedInUser") != null)
 
@@ -42,7 +42,7 @@ export default function SimpleUser() {
     setLoading(true);
     axios({
       method: "get",
-      // url: `https://stablediffusionvideoswebserver-production.up.railway.app/generate`,
+      // url: `https://stablediffusionvideoswebserver-production.up.railway.app/request`,
       url: `http://localhost:3001/request`,
       params: {
         prompts: [...prompts, prompt].join(";"),
@@ -117,7 +117,7 @@ export default function SimpleUser() {
   function getCreatedVideo() {
     axios({
       method: "get",
-      // url: `https://stablediffusionvideoswebserver-production.up.railway.app/video`,
+      // url: `https://stablediffusionvideoswebserver-production.up.railway.app/getCreatedVideo`,
       url: `http://localhost:3001/getCreatedVideo`,
       params: {
         jobID: jobID,
@@ -136,7 +136,6 @@ export default function SimpleUser() {
         setLoading(false);
       });
   }
-
 
 
 
@@ -169,7 +168,14 @@ export default function SimpleUser() {
         width: width,
         height: height,
         angle: angle,
-        zoom: zoom
+        zoom: zoom,
+        fps: fps,
+        xShift: xShift,
+        yShift: yShift,
+        noNoises: noNoises,
+        isImg2Img: isImg2Img,
+        isWalk: isWalk,
+        upscale: document.getElementById('upscale').checked
       },
       responseType: "blob",
       timeout: 10000000
@@ -271,9 +277,7 @@ export default function SimpleUser() {
           <div className='promptDiv'>
             <input className='prompt' ref={promptRef} placeholder='Enter Text Prompt...' onSubmit={getVideo} onKeyDown={handleKeyDown}></input>
             <button className='promptButton' onClick={addPrompt}>+</button>
-            <button className='promptButton' onClick={getVideo}>Generate Video</button>
-            <button className='promptButton' onClick={createJob}>new job</button>
-            <button className='promptButton' onClick={getJobStatus}>poll</button>
+            <button className='promptButton' onClick={createJob}>Generate Video</button>
             {/* <button className='promptButton' onClick={getVideo} onSubmit={logger}>Generate Video</button> */}
           </div>
           <div className="promptsContainer">
