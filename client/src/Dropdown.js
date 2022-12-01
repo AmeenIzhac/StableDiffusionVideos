@@ -27,13 +27,13 @@ export default function Dropdown({
     slideStateChange,
     dropOptions
 }) {
-    
+
     return (
         <div className='slideOptions'>
             {Cookies.get("loggedInUser") ?
                 <>
                     <div className='dropdownOption' id="dropdown">
-                        <DropdownOptions 
+                        <DropdownOptions
                             isImg2Img={isImg2Img}
                             setisImg2Img={setisImg2Img}
                         />
@@ -59,9 +59,9 @@ export default function Dropdown({
                                 <input type="checkbox" id="upscale" name="upscale" />
                             </div>
                         </div>
-                        { isImg2Img ? 
-                            <Img2ImgOptions 
-                                angle={angle} 
+                        {isImg2Img ?
+                            <Img2ImgOptions
+                                angle={angle}
                                 setAngle={setAngle}
                                 zoom={zoom}
                                 setZoom={setZoom}
@@ -70,22 +70,14 @@ export default function Dropdown({
                                 yShift={yShift}
                                 setyShift={setyShift}
                                 slideStateChange={slideStateChange}
-                            /> 
-                            : 
-                            <></>
-                        }
-
-                        { !isImg2Img ?
-                            <WalkOptions 
+                            />
+                            :
+                            <WalkOptions
                                 noNoises={noNoises}
                                 setNoNoises={setNoNoises}
                                 slideStateChange={slideStateChange}
                             />
-                            :
-                            <></>
                         }
-                        
-                        
                     </div>
                     <button className='dropArrow' onClick={dropOptions} id="button"></button>
                 </>
