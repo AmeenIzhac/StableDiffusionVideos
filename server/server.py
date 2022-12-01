@@ -31,6 +31,15 @@ def test():
 def getProgress():
     return jsonify({"progress": progress})
 
+@app.route('/getVideo')
+def getVideo():
+    args = request.args
+    for arg in args:
+        print(arg, args[arg])
+    file_name = args.get('fileName').replace(' ', '_')
+    file_path = os.path.abspath(f'./outputs/videos/{file_name}.mp4')
+    return send_file(file_path, mimetype='video/mp4')
+
 
 @app.route('/api')
 def api():
