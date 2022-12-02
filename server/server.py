@@ -5,7 +5,7 @@ from flask_cors import CORS
 import subprocess
 
 sys.path.append('../custom_scripts/')
-from txt2video import load_model, generate_video, ImageArgs, VideoArgs, PathArgs
+from txt2video import load_model, generate_video, ImageArgs, VideoArgs, PathArgs, FloatWrapper
 
 # Load model
 cfg_path = '../stable-diffusion-2/configs/stable-diffusion/v1-inference.yaml'
@@ -17,7 +17,7 @@ model = load_model(optimized_cfg_path, ckpt_path, optimized=True)
 app = Flask(__name__)
 cors = CORS(app)
 
-progress = 0
+progress = FloatWrapper()
 
 @app.route('/')
 def index():
@@ -55,25 +55,33 @@ def api():
     # Prepare options
     image_args = ImageArgs()
     image_args.steps = 50
-    image_args.W = int(args.get('width')) if ("width" in args) else 512
-    image_args.H = int(args.get('height')) if ("height" in args) else 512
+    image_args.W = int(args.get('width')) 
+    image_args.H = int(args.get('height')) 
 
     video_args = VideoArgs()
-    video_args.video_name = video_name
+
     video_args.prompts = prompts
-    video_args.fps = 20
-    video_args.strength = 0.375
-    video_args.zoom = 1.005
-    video_args.x = -5
-    video_args.frames = int(args.get('frames')) if ("frames" in args) else 60
-    video_args.upscale = True
+
+    video_args.x = float(args.get('xShift'))
+    video_args.y = float(args.get('yShift'))
+    video_args.zoom = float(args.get('zoom'))
+    video_args.angle = float(args.get('angle'))
+
+    video_args.frames = int(args.get('frames'))
+    video_args.fps = int(args.get('fps'))
+
+    video_args.upscale = bool(args.get('upscale'))
+    video_args.video_name = video_name
 
     path_args = PathArgs()
     path_args.image_path = os.path.abspath('./outputs/frames/')
     path_args.video_path = os.path.abspath(f'./outputs/videos/{video_name}.mp4')
 
     # Generate video
-    generate_video(image_args, video_args, path_args, model)
+    if bool(args.get('isImg2Img')):
+        generate_video(image_args, video_args, path_args, model, progress)
+    else:
+        generate_walk_video(image_args, video_args, path_args, model, int(args.get('noNoises')), progress)
 
     # Respond with the video contents
     return send_file(path_args.video_path, mimetype='video/mp4')

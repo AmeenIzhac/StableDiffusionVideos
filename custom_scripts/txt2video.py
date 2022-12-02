@@ -79,7 +79,7 @@ class PathArgs:
         self.video_path = 'outputs/videos'
 
 
-class float_wrapper:
+class FloatWrapper:
     x = 0.0
 
 
