@@ -42,8 +42,8 @@ export default function SimpleUser() {
     setLoading(true);
     axios({
       method: "get",
-      // url: `https://stablediffusionvideoswebserver-production.up.railway.app/request`,
-      url: `http://localhost:3001/request`,
+      url: `https://stablediffusionvideoswebserver-production.up.railway.app/request`,
+      // url: `http://localhost:3001/request`,
       params: {
         prompts: [...prompts, prompt].join(";"),
         frames: frames,
@@ -95,8 +95,8 @@ export default function SimpleUser() {
     console.log(jobID)
     return axios({
       method: "get",
-      // url: `https://stablediffusionvideoswebserver-production.up.railway.app/status`,
-      url: `http://localhost:3001/status`,
+      url: `https://stablediffusionvideoswebserver-production.up.railway.app/status`,
+      // url: `http://localhost:3001/status`,
       params: {
         jobID: jobID
       },
@@ -117,8 +117,8 @@ export default function SimpleUser() {
   function getCreatedVideo() {
     axios({
       method: "get",
-      // url: `https://stablediffusionvideoswebserver-production.up.railway.app/getCreatedVideo`,
-      url: `http://localhost:3001/getCreatedVideo`,
+      url: `https://stablediffusionvideoswebserver-production.up.railway.app/getCreatedVideo`,
+      // url: `http://localhost:3001/getCreatedVideo`,
       params: {
         jobID: jobID,
         fileName: fileName
@@ -160,8 +160,8 @@ export default function SimpleUser() {
     setLoading(true);
     axios({
       method: "get",
-      // url: `https://stablediffusionvideoswebserver-production.up.railway.app/generate`,
-      url: `http://localhost:3001/generate`,
+      url: `https://stablediffusionvideoswebserver-production.up.railway.app/generate`,
+      // url: `http://localhost:3001/generate`,
       params: {
         prompts: [...prompts, prompt].join(";"),
         frames: frames,
@@ -275,7 +275,7 @@ export default function SimpleUser() {
         </div>
         <div className='promptContainerDiv'>
           <div className='promptDiv'>
-            <input className='prompt' ref={promptRef} placeholder='Enter Text Prompt...' onSubmit={getVideo} onKeyDown={handleKeyDown}></input>
+            <input className='prompt' ref={promptRef} placeholder='Enter Text Prompt...' onSubmit={createJob} onKeyDown={handleKeyDown}></input>
             <button className='promptButton' onClick={addPrompt}>+</button>
             <button className='promptButton' onClick={createJob}>Generate Video</button>
             {/* <button className='promptButton' onClick={getVideo} onSubmit={logger}>Generate Video</button> */}
@@ -293,9 +293,9 @@ export default function SimpleUser() {
             })}
           </div>
         </div>
-        <div className='frameDiv'>
+        {/* <div className='frameDiv'>
           <FrameSelect srcs={frames} selectFunction={selectFunction} getNewFrame={getNewFrame}></FrameSelect>
-        </div>
+        </div> */}
       </div>
     </div>
   );
