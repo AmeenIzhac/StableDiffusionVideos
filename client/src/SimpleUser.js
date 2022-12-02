@@ -14,7 +14,6 @@ export default function SimpleUser() {
   const [src, setSrc] = useState("");
   const promptRef = useRef()
   const [isImg2Img, setisImg2Img] = useState(true);
-  const [isWalk, setisWalk] = useState(false)
   const [loading, setLoading] = useState(false);
   const [frames, setFrames] = useState("60")
   const [width, setWidth] = useState("512")
@@ -50,7 +49,13 @@ export default function SimpleUser() {
         width: width,
         height: height,
         angle: angle,
-        zoom: zoom
+        zoom: zoom,
+        fps: fps,
+        xShift: xShift,
+        yShift: yShift,
+        noNoises: noNoises,
+        isImg2Img: isImg2Img,
+        upscale: document.getElementById('upscale').checked
       },
       responseType: "application/json",
       timeout: 10000
@@ -74,6 +79,7 @@ export default function SimpleUser() {
           // setProgress(status.progress)
           break;
         case "generating":
+          setProgress(status.progress.progress);
           // setProgress(status.progress)
           break;
         case "done":
@@ -174,7 +180,6 @@ export default function SimpleUser() {
         yShift: yShift,
         noNoises: noNoises,
         isImg2Img: isImg2Img,
-        isWalk: isWalk,
         upscale: document.getElementById('upscale').checked
       },
       responseType: "blob",
@@ -241,8 +246,6 @@ export default function SimpleUser() {
         setFrames={setFrames}
         isImg2Img={isImg2Img}
         setisImg2Img={setisImg2Img}
-        isWalk={isWalk}
-        setisWalk={setisWalk}
         width={width}
         setWidth={setWidth}
         height={height}
@@ -270,7 +273,15 @@ export default function SimpleUser() {
             </video>
             :
             (loading ?
-              <img className="loading" src={loadingAnimation} alt='loading thingy' /> : null)
+              <div className="loading">
+                <img className="loading" src={loadingAnimation} alt='loading thingy' />
+                <div className="progress-bar">
+                  <div className="progress" style={{ width: `${progress * 100}%` }}></div>
+                </div>
+                <p style={{ color: `var(--main-bg-light)` }}> Progress: {Math.round(progress * 10000) / 100}%</p>
+              </div>
+
+              : null)
           }
         </div>
         <div className='promptContainerDiv'>

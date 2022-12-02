@@ -576,3 +576,20 @@ ul {
   font-size: xx-large;
   color: var(--main-bg-light);
 }
+
+.progress {
+  background-color: var(--main-bg-light);
+  height: 1ch;
+}
+
+.progress-bar {
+  background-color: var(--main-bg-dark);
+  border: 1px solid var(--main-bg-light);
+  width: 50vw;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
