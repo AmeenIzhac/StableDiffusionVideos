@@ -330,10 +330,20 @@ def generate_video (
 
             t_enc = int(video_args.strength * image_args.steps)
             previous_sample = first_sample
-            color_sample = sample_to_cv2(previous_sample).copy()
+            #color_sample = sample_to_cv2(previous_sample).copy()
 
             C_s = len(C)
+
+            color_samples = []
+            color_sample.append(cv2.cvtColor(sample_to_cv2(first_sample), cv2.COLOR_RGB2HSV)) #put hsv or something here
+            if C_s > 1 and color_match:
+                for i in range(1, C_s):
+                    #generate new sample here
+                    color_sample = generate_image(c=C[i], uc=uc, ia=image_args, ms=model_state)
+                    color_samples.append(cv2.cvtColor(sample_to_cv2(previous_sample), cv2.COLOR_RGB2HSV))
+
             prompt_frames = np.arange(C_s) * ( (video_args.frames - 1) / (C_s - 1)) if C_s > 1 else None
+            
             for i in trange(video_args.frames-1, desc="Generating frames"):
 
                 #seeding
@@ -343,8 +353,10 @@ def generate_video (
                 #get the prompt interpolation point for the current image 
                 c = tensor_multi_step_interpolation(C, i+1, video_args.frames, prompt_frames, k=1.0)
 
+                if color_match : color_sample = tensor_multi_step_interpolation(color_samples, i+1, video_args.frames, prompt_frames, k=1.0)
+                
                 previous_latent = process_previous_image(model_state, previous_sample, xform, 
-                                        video_args.color_match, color_sample, hsv= ((i % 2) == 0))
+                                        video_args.color_match, color_sample if color_match else None, hsv= ((i % 2) == 0))
 
                 x_new = generate_image(c=c, x=previous_latent, uc=uc, ia=image_args, ms=model_state, t_enc=t_enc) 
                 pool.submit(save_image, x_new, frame_path(base_count + i + 1, path_args), model_state, upscale=video_args.upscale)

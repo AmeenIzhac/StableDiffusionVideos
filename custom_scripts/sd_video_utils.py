@@ -30,14 +30,12 @@ def load_model_from_config(ckpt, config=None, verbose=False, return_only_sd=Fals
         return sd, model
 
 #taken from deforum's video repo
-def maintain_colors(prev_img, color_match_sample, hsv=False):
-    if hsv:
-        prev_img_hsv = cv2.cvtColor(prev_img, cv2.COLOR_RGB2HSV)
-        color_match_hsv = cv2.cvtColor(color_match_sample, cv2.COLOR_RGB2HSV)
-        matched_hsv = match_histograms(prev_img_hsv, color_match_hsv, multichannel=True)
-        return cv2.cvtColor(matched_hsv, cv2.COLOR_HSV2RGB)
-    else:
-        return match_histograms(prev_img, color_match_sample, multichannel=True)
+def maintain_colors(prev_img, color_match_hsv):
+    prev_img_hsv = cv2.cvtColor(prev_img, cv2.COLOR_RGB2HSV)
+    matched_hsv = match_histograms(prev_img_hsv, color_match_hsv, multichannel=True)
+
+    return cv2.cvtColor(matched_hsv, cv2.COLOR_HSV2RGB)
+
 
 def sample_to_cv2(sample: torch.Tensor) -> np.ndarray:
     sample_f32 = rearrange(sample.squeeze().cpu().numpy(), "c h w -> h w c").astype(
