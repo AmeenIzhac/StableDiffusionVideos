@@ -78,7 +78,7 @@ def api():
     path_args.video_path = os.path.abspath(f'./outputs/videos/{video_name}.mp4')
 
     # Generate video
-    if bool(args.get('isImg2Img')):
+    if args.get('isImg2Img') == 'true':
         generate_video(image_args, video_args, path_args, model, progress)
     else:
         generate_walk_video(image_args, video_args, path_args, model, int(args.get('noNoises')), progress)

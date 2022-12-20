@@ -44,7 +44,7 @@ export default function SimpleUser() {
       url: `https://stablediffusionvideoswebserver-production.up.railway.app/request`,
       // url: `http://localhost:3001/request`,
       params: {
-        prompts: [...prompts, prompt].join(";"),
+        prompts: (prompt.length == 0 ? [...prompts] : [...prompts, prompt]).join(";"),
         frames: frames,
         width: width,
         height: height,
