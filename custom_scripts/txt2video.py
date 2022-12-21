@@ -297,9 +297,10 @@ def generate_video (
 ) -> str :
     #outline : compute embeddings, generate first image, send it to upscale (in parallel), then loop, do processings, compute interpolated prompt, call generate_image, send it to upscale
     
+    print("Generating walk video with prompts : ", video_args.prompts)
 
     seed, base_count, start_number = init_video_gen(video_args, model_state, path_args)
-    progress_var.x = 0.0
+    if progress_var is not None : progress_var.x = 0.0
 
     precision_scope = autocast
     with torch.no_grad():
@@ -387,7 +388,10 @@ def generate_walk_video(
     ):    
 
     seed, base_count, start_number = init_video_gen(video_args, model_state, path_args)
-    progress_var.x = 0
+    if progress_var is not None : 
+        progress_var.x = 0
+
+    print("Generating walk video with prompts : ", video_args.prompts)
 
     precision_scope = autocast
     with torch.no_grad():
