@@ -336,7 +336,7 @@ def generate_video (
 
             C_s = len(C)
 
-            interpolate_colors = False
+            interpolate_colors = True
             color_samples = []
             color_samples.append(sample_to_cv2(first_sample)) #put hsv or something here
             if C_s > 1 and video_args.color_match and interpolate_colors:
