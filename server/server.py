@@ -29,7 +29,7 @@ def test():
 
 @app.route('/getProgress')
 def getProgress():
-    return jsonify({"progress": progress})
+    return jsonify({"progress": progress.x})
 
 @app.route('/getVideo')
 def getVideo():
@@ -44,7 +44,7 @@ def getVideo():
 @app.route('/api')
 def api():
     # reset progress
-    progress = 0
+    progress.x = 0
     
     # Extract options
     args = request.args
