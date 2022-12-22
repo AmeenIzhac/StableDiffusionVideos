@@ -145,7 +145,7 @@ def load_model(config_path, ckpt_path, optimized=False):
     return model_state
 
 
-def tensor_multi_step_interpolation(C, image_index, F, prompt_frames, k=4.0) :
+def tensor_multi_step_interpolation(C, image_index, F, prompt_frames, k=4.0, is_slerp=True) :
     C_s = len(C)
     if C_s == 1:
         return C[0]
@@ -166,7 +166,8 @@ def tensor_multi_step_interpolation(C, image_index, F, prompt_frames, k=4.0) :
     #k controls the stiffness of the sigmoid, essentially controlling the transition speed between 2 prompts
     s = 1 / (1 + (1/t - 1) ** k) if t > 0.0 else 0.0
 
-    c = slerp(s, c1, c2)
+    if not is_slerp : print(f'type of the array : {C[0].dtype}')
+    c = slerp(s, c1, c2) if is_slerp else lerp(s, c1, c2).astype(np.uint8)
 
     return c
 
@@ -297,7 +298,7 @@ def generate_video (
 ) -> str :
     #outline : compute embeddings, generate first image, send it to upscale (in parallel), then loop, do processings, compute interpolated prompt, call generate_image, send it to upscale
     
-    print("Generating walk video with prompts : ", video_args.prompts)
+    print("Generating img2img video with prompts : ", video_args.prompts)
 
     seed, base_count, start_number = init_video_gen(video_args, model_state, path_args)
     if progress_var is not None : progress_var.x = 0.0
@@ -335,13 +336,14 @@ def generate_video (
 
             C_s = len(C)
 
+            interpolate_colors = False
             color_samples = []
-            color_sample.append(cv2.cvtColor(sample_to_cv2(first_sample), cv2.COLOR_RGB2HSV)) #put hsv or something here
-            if C_s > 1 and color_match:
+            color_samples.append(sample_to_cv2(first_sample)) #put hsv or something here
+            if C_s > 1 and video_args.color_match and interpolate_colors:
                 for i in range(1, C_s):
                     #generate new sample here
                     color_sample = generate_image(c=C[i], uc=uc, ia=image_args, ms=model_state)
-                    color_samples.append(cv2.cvtColor(sample_to_cv2(previous_sample), cv2.COLOR_RGB2HSV))
+                    color_samples.append(sample_to_cv2(color_sample))
 
             prompt_frames = np.arange(C_s) * ( (video_args.frames - 1) / (C_s - 1)) if C_s > 1 else None
             
@@ -352,12 +354,13 @@ def generate_video (
                 seed_everything(seed)
 
                 #get the prompt interpolation point for the current image 
-                c = tensor_multi_step_interpolation(C, i+1, video_args.frames, prompt_frames, k=1.0)
+                c = tensor_multi_step_interpolation(C, i+1, video_args.frames, prompt_frames, k=2.0)
 
-                if color_match : color_sample = tensor_multi_step_interpolation(color_samples, i+1, video_args.frames, prompt_frames, k=1.0)
+                if video_args.color_match : 
+                    color_sample = tensor_multi_step_interpolation(color_samples, i+1, video_args.frames, prompt_frames, k=2.0, is_slerp=False)
                 
                 previous_latent = process_previous_image(model_state, previous_sample, xform, 
-                                        video_args.color_match, color_sample if color_match else None, hsv= ((i % 2) == 0))
+                                        video_args.color_match, color_sample if video_args.color_match else None, hsv= ((i % 2) == 0))
 
                 x_new = generate_image(c=c, x=previous_latent, uc=uc, ia=image_args, ms=model_state, t_enc=t_enc) 
                 pool.submit(save_image, x_new, frame_path(base_count + i + 1, path_args), model_state, upscale=video_args.upscale)
