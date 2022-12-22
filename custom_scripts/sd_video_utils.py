@@ -30,14 +30,13 @@ def load_model_from_config(ckpt, config=None, verbose=False, return_only_sd=Fals
         return sd, model
 
 #taken from deforum's video repo
-def maintain_colors(prev_img, color_match_sample, hsv=False):
+def maintain_colors(prev_img, color_match, hsv=False):
     if hsv:
-        prev_img_hsv = cv2.cvtColor(prev_img, cv2.COLOR_RGB2HSV)
-        color_match_hsv = cv2.cvtColor(color_match_sample, cv2.COLOR_RGB2HSV)
-        matched_hsv = match_histograms(prev_img_hsv, color_match_hsv, multichannel=True)
-        return cv2.cvtColor(matched_hsv, cv2.COLOR_HSV2RGB)
-    else:
-        return match_histograms(prev_img, color_match_sample, multichannel=True)
+        prev_img = cv2.cvtColor(prev_img, cv2.COLOR_RGB2HSV)
+        color_match = cv2.cvtColor(color_match, cv2.COLOR_RGB2HSV)
+    matched = match_histograms(prev_img, color_match, channel_axis=-1)
+    return cv2.cvtColor(matched, cv2.COLOR_HSV2RGB) if hsv else matched
+
 
 def sample_to_cv2(sample: torch.Tensor) -> np.ndarray:
     sample_f32 = rearrange(sample.squeeze().cpu().numpy(), "c h w -> h w c").astype(
@@ -62,6 +61,8 @@ def add_noise(sample: torch.Tensor, noise_amt: float):
 def slerp(t, v0, v1, DOT_THRESHOLD=0.9995):
     """helper function to spherically interpolate two arrays v1 v2"""
 
+    inputs_are_torch = False
+
     if not isinstance(v0, np.ndarray):
         inputs_are_torch = True
         input_device = v0.device
@@ -84,6 +85,9 @@ def slerp(t, v0, v1, DOT_THRESHOLD=0.9995):
         v2 = torch.from_numpy(v2).to(input_device)
 
     return v2
+
+def lerp(t, v0, v1, DOT_THRESHOLD=0.9995):
+    return (1-t) * v0 + t * v1
 
 
 def make_callback(sampler, dynamic_threshold=None, static_threshold=None):

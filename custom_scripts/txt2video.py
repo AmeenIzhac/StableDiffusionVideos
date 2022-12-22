@@ -145,7 +145,7 @@ def load_model(config_path, ckpt_path, optimized=False):
     return model_state
 
 
-def tensor_multi_step_interpolation(C, image_index, F, prompt_frames, k=4.0) :
+def tensor_multi_step_interpolation(C, image_index, F, prompt_frames, k=4.0, is_slerp=True) :
     C_s = len(C)
     if C_s == 1:
         return C[0]
@@ -166,7 +166,8 @@ def tensor_multi_step_interpolation(C, image_index, F, prompt_frames, k=4.0) :
     #k controls the stiffness of the sigmoid, essentially controlling the transition speed between 2 prompts
     s = 1 / (1 + (1/t - 1) ** k) if t > 0.0 else 0.0
 
-    c = slerp(s, c1, c2)
+    if not is_slerp : print(f'type of the array : {C[0].dtype}')
+    c = slerp(s, c1, c2) if is_slerp else lerp(s, c1, c2).astype(np.uint8)
 
     return c
 
@@ -297,9 +298,10 @@ def generate_video (
 ) -> str :
     #outline : compute embeddings, generate first image, send it to upscale (in parallel), then loop, do processings, compute interpolated prompt, call generate_image, send it to upscale
     
+    print("Generating img2img video with prompts : ", video_args.prompts)
 
     seed, base_count, start_number = init_video_gen(video_args, model_state, path_args)
-    progress_var.x = 0.0
+    if progress_var is not None : progress_var.x = 0.0
 
     precision_scope = autocast
     with torch.no_grad():
@@ -330,10 +332,21 @@ def generate_video (
 
             t_enc = int(video_args.strength * image_args.steps)
             previous_sample = first_sample
-            color_sample = sample_to_cv2(previous_sample).copy()
+            #color_sample = sample_to_cv2(previous_sample).copy()
 
             C_s = len(C)
+
+            interpolate_colors = False
+            color_samples = []
+            color_samples.append(sample_to_cv2(first_sample)) #put hsv or something here
+            if C_s > 1 and video_args.color_match and interpolate_colors:
+                for i in range(1, C_s):
+                    #generate new sample here
+                    color_sample = generate_image(c=C[i], uc=uc, ia=image_args, ms=model_state)
+                    color_samples.append(sample_to_cv2(color_sample))
+
             prompt_frames = np.arange(C_s) * ( (video_args.frames - 1) / (C_s - 1)) if C_s > 1 else None
+            
             for i in trange(video_args.frames-1, desc="Generating frames"):
 
                 #seeding
@@ -341,10 +354,13 @@ def generate_video (
                 seed_everything(seed)
 
                 #get the prompt interpolation point for the current image 
-                c = tensor_multi_step_interpolation(C, i+1, video_args.frames, prompt_frames, k=1.0)
+                c = tensor_multi_step_interpolation(C, i+1, video_args.frames, prompt_frames, k=2.0)
 
+                if video_args.color_match : 
+                    color_sample = tensor_multi_step_interpolation(color_samples, i+1, video_args.frames, prompt_frames, k=2.0, is_slerp=False)
+                
                 previous_latent = process_previous_image(model_state, previous_sample, xform, 
-                                        video_args.color_match, color_sample, hsv= ((i % 2) == 0))
+                                        video_args.color_match, color_sample if video_args.color_match else None, hsv= ((i % 2) == 0))
 
                 x_new = generate_image(c=c, x=previous_latent, uc=uc, ia=image_args, ms=model_state, t_enc=t_enc) 
                 pool.submit(save_image, x_new, frame_path(base_count + i + 1, path_args), model_state, upscale=video_args.upscale)
@@ -375,7 +391,10 @@ def generate_walk_video(
     ):    
 
     seed, base_count, start_number = init_video_gen(video_args, model_state, path_args)
-    progress_var.x = 0
+    if progress_var is not None : 
+        progress_var.x = 0
+
+    print("Generating walk video with prompts : ", video_args.prompts)
 
     precision_scope = autocast
     with torch.no_grad():

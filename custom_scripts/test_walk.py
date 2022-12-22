@@ -15,25 +15,17 @@ video_path = 'outputs/videos'
 image_args = ImageArgs()
 video_args = VideoArgs()
 
-video_args.prompts = ["a picture of a cat",
-                        "a picture of a dog",
-                            "a picture of a lion",
-                                "a picture of giraffe",
-                                    "a picture of a bear",
-                                        "a picture of a tiger",
-                                            "a picture of a hippopothamus",
-                                                "a picture of buffalo",
-                                                    "a picture of an eagle"]
+video_args.prompts = ["a car", "a submarine"]
 
 video_args.fps = 20
-video_args.frames = 400
-image_args.steps = 35
+video_args.frames = 60
+image_args.steps = 30
 image_args.W = 512
 image_args.H = 512
 image_args.scale = 10
 video_args.upscale = True
-video_args.video_name = "animals.mp4"
+video_args.video_name = "carsubmarine.mp4"
 
 path_args.video_path = os.path.join(video_path, video_args.video_name)
-generate_walk_video(image_args, video_args, path_args, model_state, n_noises=4)
+generate_walk_video(image_args, video_args, path_args, model_state, n_noises=1)
 

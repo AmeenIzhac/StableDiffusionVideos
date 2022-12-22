@@ -5,7 +5,7 @@ from flask_cors import CORS
 import subprocess
 
 sys.path.append('../custom_scripts/')
-from txt2video import load_model, generate_video, ImageArgs, VideoArgs, PathArgs, FloatWrapper
+from txt2video import load_model, generate_video, generate_walk_video, ImageArgs, VideoArgs, PathArgs, FloatWrapper
 
 # Load model
 cfg_path = '../stable-diffusion-2/configs/stable-diffusion/v1-inference.yaml'
@@ -29,7 +29,7 @@ def test():
 
 @app.route('/getProgress')
 def getProgress():
-    return jsonify({"progress": progress})
+    return jsonify({"progress": progress.x})
 
 @app.route('/getVideo')
 def getVideo():
@@ -44,7 +44,7 @@ def getVideo():
 @app.route('/api')
 def api():
     # reset progress
-    progress = 0
+    progress.x = 0
     
     # Extract options
     args = request.args
@@ -78,7 +78,7 @@ def api():
     path_args.video_path = os.path.abspath(f'./outputs/videos/{video_name}.mp4')
 
     # Generate video
-    if bool(args.get('isImg2Img')):
+    if args.get('isImg2Img') == 'true':
         generate_video(image_args, video_args, path_args, model, progress)
     else:
         generate_walk_video(image_args, video_args, path_args, model, int(args.get('noNoises')), progress)
