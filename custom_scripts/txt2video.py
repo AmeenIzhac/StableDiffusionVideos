@@ -50,6 +50,7 @@ class VideoArgs:
         self.prompts = ["A cartoon drawing of a sun wearing sunglasses"]
         self.strength = 0.4
         self.frames = 60
+        self.inter_frames = 4
         self.fps = 15
         self.x = 0.0
         self.y = 0.0
@@ -395,8 +396,6 @@ def generate_walk_video(
     if progress_var is not None : 
         progress_var.x = 0
 
-    inter_frames = 0
-
     print("Generating walk video with prompts : ", video_args.prompts)
 
     precision_scope = autocast
@@ -408,7 +407,7 @@ def generate_walk_video(
             model_state.FS.to(model_state.device)
 
             # Init thread pool
-            num_workers = inter_frames + 1
+            num_workers = video_args.inter_frames + 1
             pool = ThreadPoolExecutor(num_workers)
 
             shape = [1, image_args.C, image_args.H // image_args.f, image_args.W // image_args.f]
@@ -423,17 +422,17 @@ def generate_walk_video(
             #=====================IMAGES_GENERATION=========================#
             for i in trange(video_args.frames, desc="Generating interpolation steps"):
                 x = tensor_multi_step_interpolation(Noises, i, video_args.frames, prompt_frames, k=1.0)
-                sample = generate_image(c=tensor_multi_step_interpolation(C, i, video_args.frames, prompt_frames, k=1.0), x=x, uc=uc, ia=image_args, ms=model_state)
+                sample = generate_image(c=tensor_multi_step_interpolation(C, i, video_args.frames, prompt_frames, k=1.0), x=x, uc=uc, ia=image_args, ms=model_state, decode=False)
                 #save it to disk
                 if previous_sample is not None:
-                    for k in range(1, inter_frames + 1):
-                        t = k / (inter_frames + 1)
-                        interp_sample = lerp(previous_sample, sample, t)
+                    for k in range(1, video_args.inter_frames + 1):
+                        t = k / (video_args.inter_frames + 1)
+                        interp_sample = slerp(t, previous_sample, sample)
                         decoded = model_state.FS.decode_first_stage(interp_sample)
-                        pool.submit(save_image, decoded, frame_path(base_count + (i-1)*(inter_frames+1) + k, path_args), model_state, upscale=video_args.upscale)
+                        pool.submit(save_image, decoded, frame_path(base_count + (i-1)*(video_args.inter_frames+1) + k, path_args), model_state, upscale=video_args.upscale)
                 
                 decoded = model_state.FS.decode_first_stage(sample)
-                pool.submit(save_image, decoded, frame_path(base_count + i * (inter_frames + 1), path_args), model_state, upscale=video_args.upscale)
+                pool.submit(save_image, decoded, frame_path(base_count + i * (video_args.inter_frames + 1), path_args), model_state, upscale=video_args.upscale)
 
                 previous_sample = sample
                 if progress_var is not None:
