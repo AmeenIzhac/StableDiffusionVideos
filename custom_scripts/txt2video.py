@@ -146,6 +146,10 @@ def load_model(config_path, ckpt_path, optimized=False):
     return model_state
 
 
+def extremise(t, k):
+    #k controls the stiffness of the sigmoid, essentially controlling the transition speed between 2 prompts
+    return 1 / (1 + (1/t - 1) ** k) if t > 0.0 else 0.0
+
 def tensor_multi_step_interpolation(C, image_index, F, prompt_frames, k=4.0, is_slerp=True) :
     C_s = len(C)
     if C_s == 1:
@@ -164,8 +168,7 @@ def tensor_multi_step_interpolation(C, image_index, F, prompt_frames, k=4.0, is_
     f2 = i2 * ip_ratio
     t = (image_index - f1) / (f2 - f1)
 
-    #k controls the stiffness of the sigmoid, essentially controlling the transition speed between 2 prompts
-    s = 1 / (1 + (1/t - 1) ** k) if t > 0.0 else 0.0
+    s = extremise(t, k)
 
     if not is_slerp : print(f'type of the array : {C[0].dtype}')
     c = slerp(s, c1, c2) if is_slerp else lerp(s, c1, c2).astype(np.uint8)
@@ -201,6 +204,24 @@ def save_image(x_new, output_path, model_state, upscale=True):
             executeRealESRGAN(x_sample.astype(np.uint8), output_path, model_state.upsampler)
         else:
             Image.fromarray(x_sample.astype(np.uint8)).save(output_path)
+
+def frame_interp_images(ms, image1, image2, inter_frames):
+    latent1 = ms.FS.encode_first_stage(image1) #encode first stage
+    latent2 = ms.FS.encode_first_stage(image2)
+
+    return autoencoder_frame_interp(ms, latent1, latent2, inter_frames)
+
+
+def autoencoder_frame_interp(ms, latent1, latent2, inter_frames):
+    interpolated = []
+    for i in range(1, inter_frames + 1):
+        t = i / (inter_frames + 1)
+        latent = slerp(t, latent1, latent2) # maybe lerp?
+        interpolated.append(ms.FS.decode_first_stage(latent)) #decode
+
+    return interpolated
+
+    
 
 def generate_image (
     c = None,
@@ -313,6 +334,8 @@ def generate_video (
 
             model_state.FS.to(model_state.device)
 
+            try_to_correct = True
+
             # Init thread pool
             num_workers = 1
             pool = ThreadPoolExecutor(num_workers)
@@ -332,6 +355,7 @@ def generate_video (
             xform = make_xform_2d(  image_args.W, image_args.H, video_args.x, 
                                     video_args.y, video_args.angle, video_args.zoom )
 
+
             t_enc = int(video_args.strength * image_args.steps)
             previous_sample = first_sample
             #color_sample = sample_to_cv2(previous_sample).copy()
@@ -344,32 +368,52 @@ def generate_video (
             if C_s > 1 and video_args.color_match and interpolate_colors:
                 for i in range(1, C_s):
                     #generate new sample here
-                    color_sample = generate_image(c=C[i], uc=uc, ia=image_args, ms=model_state)
+                    color_sample = generate_image(c=C[i], uc=uc, ia=image_args, ms=model_state) #TODO make it fast (small steps and resolution, fast sampler)
                     color_samples.append(sample_to_cv2(color_sample))
+
+            previous_color_sample = color_samples[0]
 
             prompt_frames = np.arange(C_s) * ( (video_args.frames - 1) / (C_s - 1)) if C_s > 1 else None
             
-            for i in trange(video_args.frames-1, desc="Generating frames"):
+            for i in trange(1, video_args.frames, desc="Generating frames"):
 
                 #seeding
                 seed += 1
                 seed_everything(seed)
 
                 #get the prompt interpolation point for the current image 
-                c = tensor_multi_step_interpolation(C, i+1, video_args.frames, prompt_frames, k=2.0)
+                c = tensor_multi_step_interpolation(C, i, video_args.frames, prompt_frames, k=2.0)
 
                 if video_args.color_match : 
-                    color_sample = tensor_multi_step_interpolation(color_samples, i+1, video_args.frames, prompt_frames, k=2.0, is_slerp=False)
+                    color_sample = tensor_multi_step_interpolation(color_samples, i, video_args.frames, prompt_frames, k=2.0, is_slerp=False)
                 
                 previous_latent = process_previous_image(model_state, previous_sample, xform, 
-                                        video_args.color_match, color_sample if video_args.color_match else None, hsv= ((i % 2) == 0))
+                                        video_args.color_match, color_sample if video_args.color_match else None, hsv= (((i-1) % 2) == 0))
 
-                x_new = generate_image(c=c, x=previous_latent, uc=uc, ia=image_args, ms=model_state, t_enc=t_enc) 
-                pool.submit(save_image, x_new, frame_path(base_count + i + 1, path_args), model_state, upscale=video_args.upscale)
+                new_latent = generate_image(c=c, x=previous_latent, uc=uc, ia=image_args, ms=model_state, t_enc=t_enc, decode=False) 
+                x_new = model_state.FS.decode_first_stage(new_latent)
+                if try_to_correct:
+                    for k, image in enumerate(autoencoder_frame_interp(model_state, previous_latent, new_latent, video_args.inter_frames)):
+                        correct_factor = (k - inter_frames) / inter_frames
+                        xform_backward = make_xform_2d(
+                            image_args.W, image_args.H, 
+                            video_args.x * correct_factor, video_args.y * correct_factor,
+                            video_args.angle * correct_factor, video_args.zoom * correct_factor
+                        )
+                        if video_args.color_match: correct_color_sample = slerp( k / (interframes+1) , previous_color_sample, color_sample)
+                        corrected = process_previous_image(model_state, image, xform_backward, video_args.color_match,
+                            correct_color_sample if video_args.color_match else None, hsv=True) #correct image
+                        pool.submit(save_image, corrected, frame_path(base_count + (i-1)*(video_args.inter_frames+1) + k, path_args), model_state, upscale=video_args.upscale) #save image
+                else:
+                    for k, image in enumerate(frame_interp_images(model_state, previous_sample, x_new, video_args.inter_frames)):
+                        pool.submit(save_image, image, frame_path(base_count + (i-1)*(video_args.inter_frames+1) + k, path_args), model_state, upscale=video_args.upscale) #save image
+                
+                pool.submit(save_image, x_new, frame_path(base_count + i, path_args), model_state, upscale=video_args.upscale)
                 previous_sample = x_new
+                if video_args.color_match: previous_color_sample = color_sample 
 
                 if progress_var is not None:
-                    progress_var.x = (i+2) / video_args.frames
+                    progress_var.x = (i+1) / video_args.frames
 
             #Free some video memory by pushing the auto-encoder to RAM 
             model_state.FS.to("cpu")
@@ -425,10 +469,7 @@ def generate_walk_video(
                 sample = generate_image(c=tensor_multi_step_interpolation(C, i, video_args.frames, prompt_frames, k=1.0), x=x, uc=uc, ia=image_args, ms=model_state, decode=False)
                 #save it to disk
                 if previous_sample is not None:
-                    for k in range(1, video_args.inter_frames + 1):
-                        t = k / (video_args.inter_frames + 1)
-                        interp_sample = slerp(t, previous_sample, sample)
-                        decoded = model_state.FS.decode_first_stage(interp_sample)
+                    for k, image in enumerate(autoencoder_frame_interp(model_state, previous_sample, sample, video_args.inter_frames)):
                         pool.submit(save_image, decoded, frame_path(base_count + (i-1)*(video_args.inter_frames+1) + k, path_args), model_state, upscale=video_args.upscale)
                 
                 decoded = model_state.FS.decode_first_stage(sample)
