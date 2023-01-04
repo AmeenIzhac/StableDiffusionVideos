@@ -16,7 +16,15 @@ from model.pytorch_msssim import ssim_matlab
 
 warnings.filterwarnings("ignore")
 
-def motion_interpolation(frames_dir, output_dir, fps, exp=1, scale=1.0, model_dir='ECCV2022-RIFE/train_log', fp16=False, ext='mp4'):
+#assumes videogen is sorted, returns a subarray with all the frames whose index is >= starting_frame
+def find_frames(videogen, starting_frame, frames_count):
+    start = 0
+    while int(videogen[start][:-4]) < starting_frame:
+        start+=1
+    return videogen[start : start + frames_count]
+    
+
+def motion_interpolation(frames_dir, output_dir, fps, frames_count, exp=1, scale=1.0, starting_frame=0,model_dir='ECCV2022-RIFE/train_log', fp16=False, ext='mp4'):
 
     assert (not frames_dir is None)
     assert scale in [0.25, 0.5, 1.0, 2.0, 4.0]
@@ -61,6 +69,8 @@ def motion_interpolation(frames_dir, output_dir, fps, exp=1, scale=1.0, model_di
             videogen.append(f)
     tot_frame = len(videogen)
     videogen.sort(key= lambda x:int(x[:-4]))
+    assert (starting_frame < tot_frame)
+    videogen = find_frames(videogen, starting_frame, frames_count)
     lastframe = cv2.imread(os.path.join(frames_dir, videogen[0]), cv2.IMREAD_UNCHANGED)[:, :, ::-1].copy()
     videogen = videogen[1:]
     h, w, _ = lastframe.shape
