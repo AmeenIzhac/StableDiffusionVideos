@@ -24,7 +24,7 @@ def find_frames(videogen, starting_frame, frames_count):
     return videogen[start : start + frames_count]
     
 
-def motion_interpolation(frames_dir, output_dir, fps, frames_count, exp=1, scale=1.0, starting_frame=0,model_dir='ECCV2022-RIFE/train_log', fp16=False, ext='mp4', codec='acv1'):
+def motion_interpolation(frames_dir, output_dir, fps, frames_count, exp=1, scale=1.0, starting_frame=0,model_dir='ECCV2022-RIFE/train_log', fp16=False, ext='mp4', codec='vp09'):
 
     assert (not frames_dir is None)
     assert scale in [0.25, 0.5, 1.0, 2.0, 4.0]

@@ -312,7 +312,7 @@ def compile_video(video_args, path_args, base_count):
 
     if video_args.interp_exp > 0: #we perform motion interpolation
         #TODO make the interp_exp a interp_factor parameter, ensure it is a multiple of 2 and do some log to get it (probably bit shift)
-        motion_interpolation(path_args.image_path, path_args.video_path, video_args.fps, frames_count=video_args.frames, exp=video_args.interp_exp, starting_frame=base_count, model_dir=path_args.rife_path, scale=1.0) #TODO add the feature to start at some image
+        motion_interpolation(path_args.image_path, path_args.video_path, video_args.fps, frames_count=video_args.frames, exp=video_args.interp_exp, starting_frame=base_count, model_dir=path_args.rife_path, scale=1.0, codec='vp09') #TODO add the feature to start at some image
     else:
         sample_regex = os.path.join(path_args.image_path, "%05d.png")
         command = f"ffmpeg -r {video_args.fps} -start_number {base_count} -i {sample_regex} -c:v libx264 -r 30 -pix_fmt yuv420p {path_args.video_path}"                       
