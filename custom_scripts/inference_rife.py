@@ -16,7 +16,7 @@ from model.pytorch_msssim import ssim_matlab
 
 warnings.filterwarnings("ignore")
 
-def motion_interpolation(frames_dir, output_dir, fps, exp=1, scale=1.0, model_dir='ECCV2022-RIFE/train_log', fp16=False, ext='mp4'):
+def motion_interpolation(frames_dir, output_dir, fps, exp=1, scale=1.0, model_dir='ECCV2022-RIFE/train_log', fp16=False, ext='mp4', codec='acv1'):
 
     assert (not frames_dir is None)
     assert scale in [0.25, 0.5, 1.0, 2.0, 4.0]
@@ -72,7 +72,7 @@ def motion_interpolation(frames_dir, output_dir, fps, exp=1, scale=1.0, model_di
     else:
         #vid_out_name = '{}_{}X_{}fps.{}'.format(video_path_wo_ext, (2 ** exp), int(np.round(fps)), ext)
         vid_out_name = '{}_{}X_{}fps.{}'.format('hein', (2 ** exp), int(np.round(fps)), ext)
-    fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
+    fourcc = cv2.VideoWriter_fourcc(codec[0], codec[1], codec[2], codec[3])
     vid_out = cv2.VideoWriter(vid_out_name, fourcc, fps, (w, h))
 
     def clear_write_buffer(write_buffer):
