@@ -28,13 +28,12 @@ video_args.upscale = True
 video_args.color_match = True
 video_args.seed = 57194
 
-video_args.prompts = ["a forest in autumn, with leaves falling, small blue river, greg rutkowski, 4k"]
+video_args.prompts = ["a surrealist cubist painting about a child dream, cartoony sun and moon smiling, comforting colors, 19th century child art vibe, artstation 4k"]
 
 video_args.fps = 30
-video_args.frames = 30
-video_args.inter_frames = 0
-video_args.correct = True
-video_args.video_name = "forest_autumn_plain.mp4"
+video_args.frames = 20
+video_args.interp_exp = 2
+video_args.video_name = "child_dream_hehe.mp4"
 path_args.video_path = os.path.join(video_path, video_args.video_name)
 generate_video(image_args, video_args, path_args, model_state)
 

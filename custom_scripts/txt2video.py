@@ -51,6 +51,7 @@ class VideoArgs:
         self.strength = 0.4
         self.frames = 60
         self.inter_frames = 4
+        self.interp_exp = 0
         self.fps = 15
         self.x = 0.0
         self.y = 0.0
@@ -79,6 +80,7 @@ class PathArgs:
     def __init__(self):
         self.image_path = 'outputs/images'
         self.video_path = 'outputs/videos'
+        self.rife_path = '.'
 
 
 class FloatWrapper:
@@ -304,9 +306,13 @@ def compile_video(video_args, path_args, base_count):
         video_name = f"video{video_count}"
     else:
         video_name = video_args.video_name
-    sample_regex = os.path.join(path_args.image_path, "%05d.png")
-    command = f"ffmpeg -r {video_args.fps} -start_number {base_count} -i {sample_regex} -c:v libx264 -r 30 -pix_fmt yuv420p {path_args.video_path}"                       
-    os.system(command)
+
+    if video_args.interp_exp > 0: #we perform motion interpolation
+        command = f"python3 {os.path.join(path_args.rife_path, 'inference_video.py')} --exp={video_args.interp_exp} --img=\"{path_args.image_path}\"/ --fps={video_args.fps} --output={path_args.video_path}"
+    else:
+        sample_regex = os.path.join(path_args.image_path, "%05d.png")
+        command = f"ffmpeg -r {video_args.fps} -start_number {base_count} -i {sample_regex} -c:v libx264 -r 30 -pix_fmt yuv420p {path_args.video_path}"                       
+        os.system(command)
 
 
 def frame_path(frame_number, path_args):
@@ -487,12 +493,6 @@ def generate_walk_video(
             compile_video(video_args, path_args, base_count)
 
     return
-
-def generate_initial_images(image_args, video_args, image_dir, model_state, count=4) :
-    #I should really factorise this method and generate_video TODO
-    seed = video_args.seed
-    if seed < 0:
-        seed = random.randint(0, 10 ** 6)
 
 def generateInitFrame(image_args, video_args, path_args, model_state, n=4) :
     model_state.sampler = KDiffusionSampler(model_state.model, video_args.sampler)
