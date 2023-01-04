@@ -1,5 +1,5 @@
 import sys
-sys.path.append('ECCV2022-RIFE')
+sys.path.append('../ECCV2022-RIFE')
 
 import os
 import cv2
@@ -16,7 +16,7 @@ from model.pytorch_msssim import ssim_matlab
 
 warnings.filterwarnings("ignore")
 
-def motion_interpolation(frames_dir, output_dir, fps, exp=1, scale=1.0, model_dir='train_log', fp16=False, ext='mp4'):
+def motion_interpolation(frames_dir, output_dir, fps, exp=1, scale=1.0, model_dir='ECCV2022-RIFE/train_log', fp16=False, ext='mp4'):
 
     assert (not frames_dir is None)
     assert scale in [0.25, 0.5, 1.0, 2.0, 4.0]

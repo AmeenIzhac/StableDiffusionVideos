@@ -80,29 +80,32 @@ class PathArgs:
     def __init__(self):
         self.image_path = 'outputs/images'
         self.video_path = 'outputs/videos'
-        self.rife_path = 'ECCV2022-RIFE'
+        self.cfg_path = './stable-diffusion-2/configs/stable-diffusion/v1-inference.yaml'
+        self.optimized_cfg_path = './stable-diffusion-2/optimizedSD/v1-inference.yaml'
+        self.ckpt_path = './model_weights/stable-diffusion/model.ckpt'
+        self.rife_path = './model_weights/RIFE/train_log'
 
 
 class FloatWrapper:
     x = 0.0
 
 
-def load_model(config_path, ckpt_path, optimized=False):
+def load_model(path_args, optimized=False):
     model_state = ModelState()
 
     model_state.upsampler = load_ESRGAN_model(model_name='RealESRGAN_x2plus')
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
     if not optimized:
-        config = OmegaConf.load(f"{config_path}")
-        _, model = load_model_from_config(ckpt_path, config, return_only_sd=False)
+        config = OmegaConf.load(f"{path_args.cfg_path}")
+        _, model = load_model_from_config(path_args.ckpt_path, config, return_only_sd=False)
         model = model.to(device)
         model_state.model = model
         model_state.CS = model
         model_state.FS = model
 
     else:
-        sd, _ = load_model_from_config(f"{ckpt_path}", return_only_sd=True)
+        sd, _ = load_model_from_config(f"{path_args.ckpt_path}", return_only_sd=True)
         li, lo = [], []
         for key, value in sd.items():
             sp = key.split(".")
@@ -120,7 +123,7 @@ def load_model(config_path, ckpt_path, optimized=False):
         for key in lo:
             sd["model2." + key[6:]] = sd.pop(key)
 
-        config = OmegaConf.load(f"{config_path}")
+        config = OmegaConf.load(f"{path_args.optimized_cfg_path}")
 
         model = instantiate_from_config(config.modelUNet)
         _, _ = model.load_state_dict(sd, strict=False)
@@ -308,7 +311,8 @@ def compile_video(video_args, path_args, base_count):
         video_name = video_args.video_name
 
     if video_args.interp_exp > 0: #we perform motion interpolation
-        motion_interpolation(path_args.image_path, path_args.video_path, video_args.fps, video_args.interp_exp, scale=1.0) #TODO add the feature to start at some image
+        #TODO make the interp_exp a interp_factor parameter, ensure it is a multiple of 2 and do some log to get it (probably bit shift)
+        motion_interpolation(path_args.image_path, path_args.video_path, video_args.fps, video_args.interp_exp, model_dir=path_args.rife_path, scale=1.0) #TODO add the feature to start at some image
     else:
         sample_regex = os.path.join(path_args.image_path, "%05d.png")
         command = f"ffmpeg -r {video_args.fps} -start_number {base_count} -i {sample_regex} -c:v libx264 -r 30 -pix_fmt yuv420p {path_args.video_path}"                       
