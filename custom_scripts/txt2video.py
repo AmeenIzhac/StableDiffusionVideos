@@ -20,7 +20,7 @@ from ldm.util import instantiate_from_config
 from inference_rife import motion_interpolation
 
 import sys
-sys.path.append('../stable-diffusion-2/optimizedSD')
+sys.path.append('stable-diffusion-2/optimizedSD')
 
 
 
