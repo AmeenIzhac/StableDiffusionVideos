@@ -17,12 +17,12 @@ from sd_video_utils import *
 from kdiffusion import KDiffusionSampler
 from inference_realesrgan import *
 from ldm.util import instantiate_from_config
+from inference_rife import motion_interpolation
 
 import sys
 sys.path.append('../stable-diffusion-2/optimizedSD')
 
 
-#TODO : find out how to properly comment in python
 
 # Generatng the initial frames:
 #  1. Get(/generateInitFrames?numFrames=x)
@@ -50,7 +50,7 @@ class VideoArgs:
         self.prompts = ["A cartoon drawing of a sun wearing sunglasses"]
         self.strength = 0.4
         self.frames = 60
-        self.inter_frames = 4
+        self.inter_frames = 0
         self.interp_exp = 0
         self.fps = 15
         self.x = 0.0
@@ -80,7 +80,7 @@ class PathArgs:
     def __init__(self):
         self.image_path = 'outputs/images'
         self.video_path = 'outputs/videos'
-        self.rife_path = '.'
+        self.rife_path = 'ECCV2022-RIFE'
 
 
 class FloatWrapper:
@@ -308,7 +308,7 @@ def compile_video(video_args, path_args, base_count):
         video_name = video_args.video_name
 
     if video_args.interp_exp > 0: #we perform motion interpolation
-        command = f"python3 {os.path.join(path_args.rife_path, 'inference_video.py')} --exp={video_args.interp_exp} --img=\"{path_args.image_path}\"/ --fps={video_args.fps} --output={path_args.video_path}"
+        motion_interpolation(path_args.image_path, path_args.video_path, video_args.fps, video_args.interp_exp, scale=1.0) #TODO add the feature to start at some image
     else:
         sample_regex = os.path.join(path_args.image_path, "%05d.png")
         command = f"ffmpeg -r {video_args.fps} -start_number {base_count} -i {sample_regex} -c:v libx264 -r 30 -pix_fmt yuv420p {path_args.video_path}"                       
