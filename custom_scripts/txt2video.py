@@ -62,6 +62,7 @@ class VideoArgs:
         self.sampler = 'dpm_2'
         self.upscale = True
         self.init_sample = None
+        self.correct = True
 
 
 class ModelState:
@@ -178,7 +179,7 @@ def tensor_multi_step_interpolation(C, image_index, F, prompt_frames, k=4.0, is_
 
 
 #previous image processing (color coherency, noise, encoding)
-def process_previous_image(ms, previous_sample, xform, color_match=True, color_sample=None, noise=0.03, hsv=False):
+def process_previous_image(ms, previous_sample, xform, color_match=True, color_sample=None, noise=0.03, hsv=False, encode=True):
     previous_img = sample_to_cv2(previous_sample)
     previous_img = cv2.warpPerspective(
         previous_img,
@@ -192,7 +193,7 @@ def process_previous_image(ms, previous_sample, xform, color_match=True, color_s
     previous_sample = sample_from_cv2(previous_img)
 
     previous_noised = add_noise(previous_sample, noise).half().to(ms.device)
-    return ms.FS.get_first_stage_encoding(ms.FS.encode_first_stage(previous_noised))
+    return ms.FS.get_first_stage_encoding(ms.FS.encode_first_stage(previous_noised)) if encode else previous_noised
 
 
 def save_image(x_new, output_path, model_state, upscale=True):
@@ -206,8 +207,8 @@ def save_image(x_new, output_path, model_state, upscale=True):
             Image.fromarray(x_sample.astype(np.uint8)).save(output_path)
 
 def frame_interp_images(ms, image1, image2, inter_frames):
-    latent1 = ms.FS.encode_first_stage(image1) #encode first stage
-    latent2 = ms.FS.encode_first_stage(image2)
+    latent1 = ms.FS.get_first_stage_encoding(ms.FS.encode_first_stage(image1)) #encode first stage
+    latent2 = ms.FS.get_first_stage_encoding(ms.FS.encode_first_stage(image2))
 
     return autoencoder_frame_interp(ms, latent1, latent2, inter_frames)
 
@@ -334,8 +335,6 @@ def generate_video (
 
             model_state.FS.to(model_state.device)
 
-            try_to_correct = True
-
             # Init thread pool
             num_workers = 1
             pool = ThreadPoolExecutor(num_workers)
@@ -392,23 +391,23 @@ def generate_video (
 
                 new_latent = generate_image(c=c, x=previous_latent, uc=uc, ia=image_args, ms=model_state, t_enc=t_enc, decode=False) 
                 x_new = model_state.FS.decode_first_stage(new_latent)
-                if try_to_correct:
+                if video_args.correct:
                     for k, image in enumerate(autoencoder_frame_interp(model_state, previous_latent, new_latent, video_args.inter_frames)):
-                        correct_factor = (k - inter_frames) / inter_frames
+                        correct_factor = (k + 1 - video_args.inter_frames) / video_args.inter_frames
                         xform_backward = make_xform_2d(
                             image_args.W, image_args.H, 
                             video_args.x * correct_factor, video_args.y * correct_factor,
-                            video_args.angle * correct_factor, video_args.zoom * correct_factor
+                            video_args.angle * correct_factor, (video_args.zoom - 1) * correct_factor + 1
                         )
-                        if video_args.color_match: correct_color_sample = slerp( k / (interframes+1) , previous_color_sample, color_sample)
+                        if video_args.color_match: correct_color_sample = lerp( k / (video_args.inter_frames+1) , previous_color_sample, color_sample).astype(np.uint8)
                         corrected = process_previous_image(model_state, image, xform_backward, video_args.color_match,
-                            correct_color_sample if video_args.color_match else None, hsv=True) #correct image
-                        pool.submit(save_image, corrected, frame_path(base_count + (i-1)*(video_args.inter_frames+1) + k, path_args), model_state, upscale=video_args.upscale) #save image
+                            correct_color_sample if video_args.color_match else None, noise=0, hsv=True, encode=False) #correct image
+                        pool.submit(save_image, corrected, frame_path(base_count + (i-1)*(video_args.inter_frames+1) + k+1, path_args), model_state, upscale=video_args.upscale) #save image
                 else:
                     for k, image in enumerate(frame_interp_images(model_state, previous_sample, x_new, video_args.inter_frames)):
-                        pool.submit(save_image, image, frame_path(base_count + (i-1)*(video_args.inter_frames+1) + k, path_args), model_state, upscale=video_args.upscale) #save image
+                        pool.submit(save_image, image, frame_path(base_count + (i-1)*(video_args.inter_frames+1) + k+1, path_args), model_state, upscale=video_args.upscale) #save image
                 
-                pool.submit(save_image, x_new, frame_path(base_count + i, path_args), model_state, upscale=video_args.upscale)
+                pool.submit(save_image, x_new, frame_path(base_count + i * (video_args.inter_frames + 1), path_args), model_state, upscale=video_args.upscale)
                 previous_sample = x_new
                 if video_args.color_match: previous_color_sample = color_sample 
 
