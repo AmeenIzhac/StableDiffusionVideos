@@ -2,8 +2,6 @@ import sys
 import os
 from txt2video import *
 from sd_video_utils import *
-sys.path.append('stable-diffusion-2/optimizedSD')
-sys.path.append('ECCV2022-RIFE')
 
 image_args = ImageArgs()
 video_args = VideoArgs()
@@ -23,7 +21,7 @@ video_args.y = -2.0
 video_args.upscale = True
 video_args.color_match = True
 
-video_args.prompts = ["a surrealist cubist painting about a child dream, cartoony sun and moon smiling, comforting colors, 19th century child art vibe, artstation 4k"]
+video_args.prompts = ["a surrealist cubist digital art about a child dream, cartoony sun and moon smiling, comforting colors, artstation 4k"]
 
 video_args.fps = 15
 video_args.frames = 10
