@@ -7,3 +7,6 @@
 [submodule "StableDiffusionVideosWebServer"]
 	path = StableDiffusionVideosWebServer
 	url = https://github.com/raaifhadadi/StableDiffusionVideosWebServer
+[submodule "ECCV2022-RIFE"]
+	path = ECCV2022-RIFE
+	url = git@github.com:megvii-research/ECCV2022-RIFE.git
