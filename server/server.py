@@ -4,7 +4,7 @@ from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import subprocess
 
-sys.path.append('../custom_scripts/')
+sys.path.append('custom_scripts/')
 from txt2video import load_model, generate_video, generate_walk_video, ImageArgs, VideoArgs, PathArgs, FloatWrapper
 
 # Load model

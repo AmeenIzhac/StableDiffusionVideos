@@ -1,5 +1,5 @@
 import sys
-sys.path.append('../ECCV2022-RIFE')
+sys.path.append('ECCV2022-RIFE')
 
 import os
 import cv2
