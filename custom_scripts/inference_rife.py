@@ -192,7 +192,6 @@ def motion_interpolation(frames_dir, output_dir, fps, frames_count, exp=1, scale
         if break_flag:
             break
 
-    print("we got there?? but I'm sad")
     write_buffer.put(lastframe)
     import time
     while(not write_buffer.empty()):
