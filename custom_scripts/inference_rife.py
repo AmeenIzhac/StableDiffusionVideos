@@ -67,10 +67,12 @@ def motion_interpolation(frames_dir, output_dir, fps, frames_count, exp=1, scale
     for f in os.listdir(frames_dir):
         if 'png' in f:
             videogen.append(f)
-    tot_frame = len(videogen)
+    tot_images = len(videogen)
     videogen.sort(key= lambda x:int(x[:-4]))
-    assert (starting_frame < tot_frame)
+    assert (starting_frame < tot_images)
     videogen = find_frames(videogen, starting_frame, frames_count)
+    tot_frame = frames_count
+    print(f'videogen is {videogen}, tot_frame is {tot_frame}')
     lastframe = cv2.imread(os.path.join(frames_dir, videogen[0]), cv2.IMREAD_UNCHANGED)[:, :, ::-1].copy()
     videogen = videogen[1:]
     h, w, _ = lastframe.shape
@@ -190,7 +192,7 @@ def motion_interpolation(frames_dir, output_dir, fps, frames_count, exp=1, scale
         if break_flag:
             break
 
-
+    print("we got there?? but I'm sad")
     write_buffer.put(lastframe)
     import time
     while(not write_buffer.empty()):
