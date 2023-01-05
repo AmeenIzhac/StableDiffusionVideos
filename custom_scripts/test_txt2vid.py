@@ -24,7 +24,7 @@ video_args.strength = 0.46
 video_args.prompts = ["a 3d render of the green grass hills in scotland", "a digital art about timesquare in the future, greg rutkowski", "a comfortable child room with teddy bears and toys, artstation"]
 
 video_args.fps = 30
-video_args.frames = 200
+video_args.frames = 30
 video_args.interp_exp = 2
 video_args.video_name = "multiple_colors.mp4"
 path_args.video_path = os.path.join(video_path, video_args.video_name)
