@@ -227,6 +227,12 @@ def autoencoder_frame_interp(ms, latent1, latent2, inter_frames):
 
     return interpolated
 
+def cheap_image_args():
+    ia = ImageArgs()
+    steps = 8
+    self.H = 384
+    self.W = 384
+    self.scale = 8.0
     
 
 def generate_image (
@@ -373,11 +379,12 @@ def generate_video (
 
             interpolate_colors = True
             color_samples = []
-            color_samples.append(sample_to_cv2(first_sample)) #put hsv or something here
+            color_samples.append(cv2.resize(sample_to_cv2(first_sample), (384,384))) #put hsv or something here
             if C_s > 1 and video_args.color_match and interpolate_colors:
+                cia = cheap_image_args()
                 for i in range(1, C_s):
                     #generate new sample here
-                    color_sample = generate_image(c=C[i], uc=uc, ia=image_args, ms=model_state) #TODO make it fast (small steps and resolution, fast sampler)
+                    color_sample = generate_image(c=C[i], uc=uc, ia=cia, ms=model_state) #TODO make it fast (small steps and resolution, fast sampler)
                     color_samples.append(sample_to_cv2(color_sample))
 
             previous_color_sample = color_samples[0]
