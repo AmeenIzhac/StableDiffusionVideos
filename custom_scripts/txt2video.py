@@ -83,7 +83,7 @@ class PathArgs:
         self.cfg_path = './stable-diffusion-2/configs/stable-diffusion/v1-inference.yaml'
         self.optimized_cfg_path = './stable-diffusion-2/optimizedSD/v1-inference.yaml'
         self.ckpt_path = './model_weights/stable-diffusion/model.ckpt'
-        self.rife_path = './model_weights/RIFE/train_log'
+        self.rife_path = './ECCV2022-RIFE/train_log'
 
 
 class FloatWrapper:
@@ -478,8 +478,8 @@ def generate_walk_video(
                 Noises.append(torch.randn(shape, device=model_state.device))
             
             C_s = len(C)
-            prompt_frames = np.arange(C_s) * ( (video_args.frames - 1) / (C_s - 1))
-
+            prompt_frames = np.arange(C_s) * ( (video_args.frames - 1) / (C_s - 1)) if C_s > 1 else None
+            
             previous_sample = None
             #=====================IMAGES_GENERATION=========================#
             for i in trange(video_args.frames, desc="Generating interpolation steps"):
