@@ -140,7 +140,8 @@ export default function SimpleUser() {
       timeout: 10000,
     })
       .then((res) => {
-        console.log(res);
+        console.log("res.data");
+        console.log(res.data);
         setSrc(URL.createObjectURL(res.data));
         setLoading(false);
       })
