@@ -1,9 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Ubuntu+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Ubuntu+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap");
 
 body {
   margin: 0;
-  font-family: 'Ubuntu Mono', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans',
-    'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-family: "Ubuntu Mono", "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
+    "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -11,7 +11,7 @@ body {
 :root {
   --main-bg-dark: #181818;
   /*363945*/
-  --main-bg-light: #9A4EAE;
+  --main-bg-light: #9a4eae;
 }
 
 body {
@@ -24,7 +24,7 @@ input:focus::placeholder {
 
 hr {
   border: none;
-  border-bottom: .5px solid var(--main-bg-dark);
+  border-bottom: 0.5px solid var(--main-bg-dark);
 }
 
 ul {
@@ -63,7 +63,7 @@ ul {
   padding: 5px 20px;
   background-color: var(--main-bg-dark);
   caret-color: var(--main-bg-light);
-  font-family: 'Ubuntu Mono';
+  font-family: "Ubuntu Mono";
   font-size: 2em;
   text-align: center;
   overflow: auto;
@@ -87,7 +87,7 @@ ul {
   color: var(--main-bg-light);
   border: none;
   border-bottom: 3px solid var(--main-bg-light);
-  font-family: 'Ubuntu Mono';
+  font-family: "Ubuntu Mono";
   font-size: 1.2em;
   margin-right: 5px;
   /* border-radius: 10px 10px 0 0; */
@@ -120,7 +120,7 @@ ul {
   color: var(--main-bg-light);
   border: 1px solid var(--main-bg-light);
   border-radius: 100vmax;
-  font-family: 'Ubuntu Mono';
+  font-family: "Ubuntu Mono";
   font-size: 1.2em;
   padding: 10px;
   grid-row: 1;
@@ -130,7 +130,7 @@ ul {
   border: 1px solid var(--main-bg-light);
   background-color: var(--main-bg-dark);
   color: var(--main-bg-light);
-  font-family: 'Ubuntu Mono';
+  font-family: "Ubuntu Mono";
   font-size: 1.2em;
   border-radius: 100vmax;
   width: 30px;
@@ -154,7 +154,6 @@ ul {
   background-color: var(--main-bg-dark);
 }
 
-
 /* Dropdown settings */
 
 .flex {
@@ -177,7 +176,7 @@ ul {
 }
 
 .dropArrow {
-  background-image: url('./assets/drop-arrow.svg');
+  background-image: url("./assets/drop-arrow.svg");
   background-color: var(--main-bg-dark);
   width: 30px;
   height: 12px;
@@ -232,14 +231,13 @@ ul {
   transform: translateX();
 }
 
-
 .vidOptionBtn {
   border: none;
   height: 100%;
   width: 100%;
   font-weight: bold;
   font-size: 100%;
-  font-family: 'Ubuntu Mono';
+  font-family: "Ubuntu Mono";
 }
 
 @media screen and (min-width: 900px) {
@@ -257,7 +255,6 @@ ul {
     grid-template-columns: repeat(3, 1fr);
     gap: 1em;
   }
-
 }
 
 @media screen and (max-width: 700px) {
@@ -286,7 +283,6 @@ ul {
     border-radius: 100vmax;
   }
 
-
   .promptButton {
     padding: 12px;
     font-size: 3vw;
@@ -301,8 +297,6 @@ ul {
     font-size: 4vw;
     margin-right: 1vw;
   }
-
-
 }
 
 .open {
@@ -343,8 +337,8 @@ ul {
   background: var(--main-bg-dark);
   outline: none;
   opacity: 0.7;
-  -webkit-transition: .2s;
-  transition: opacity .2s;
+  -webkit-transition: 0.2s;
+  transition: opacity 0.2s;
   margin-top: 0px;
   margin-bottom: 10px;
 }
@@ -367,7 +361,7 @@ ul {
   width: 25px;
   height: 25px;
   border-radius: 50%;
-  background: #04AA6D;
+  background: #04aa6d;
   cursor: pointer;
 }
 
@@ -378,7 +372,7 @@ ul {
   padding: 5px 20px;
   background-color: var(--main-bg-light);
   caret-color: var(--main-bg-dark);
-  font-family: 'Ubuntu Mono';
+  font-family: "Ubuntu Mono";
   font-size: 1.1em;
   text-align: center;
   overflow: auto;
@@ -393,7 +387,6 @@ ul {
   outline-width: 0;
   color: var(--main-bg-dark);
 }
-
 
 /* Frame Selection Styles*/
 
@@ -413,7 +406,7 @@ ul {
   display: block;
   width: 100%;
   height: auto;
-  font-family: 'Ubuntu Mono';
+  font-family: "Ubuntu Mono";
   font-size: 12em;
   color: var(--main-bg-light);
 }
@@ -427,9 +420,9 @@ ul {
   height: 100%;
   width: 100%;
   opacity: 0;
-  transition: .5s ease;
+  transition: 0.5s ease;
   background-color: #000000;
-  font-family: 'Ubuntu Mono';
+  font-family: "Ubuntu Mono";
   font-size: 1.2em;
 }
 
@@ -443,7 +436,7 @@ ul {
   margin: 0;
   padding: 0;
   cursor: pointer;
-  font-family: 'Ubuntu Mono';
+  font-family: "Ubuntu Mono";
   font-size: 12em;
   color: var(--main-bg-light);
 }
@@ -470,7 +463,7 @@ ul {
   margin-bottom: 20px;
   text-align: center;
   font-size: large;
-  font-family: 'Ubuntu Mono';
+  font-family: "Ubuntu Mono";
   caret-color: var(--main-bg-light);
   width: 60%;
   color: white;
@@ -481,7 +474,7 @@ ul {
 }
 
 .btn {
-  font-family: 'Ubuntu Mono';
+  font-family: "Ubuntu Mono";
   font-size: large;
   background-color: var(--main-bg-dark);
   border: 1px solid var(--main-bg-light);
@@ -513,7 +506,6 @@ ul {
   color: var(--main-bg-light);
 }
 
-
 /* Login and styling code */
 
 .container {
@@ -536,7 +528,7 @@ ul {
   margin-bottom: 20px;
   text-align: center;
   font-size: large;
-  font-family: 'Ubuntu Mono';
+  font-family: "Ubuntu Mono";
   caret-color: var(--main-bg-light);
   width: 60%;
 }
@@ -546,7 +538,7 @@ ul {
 }
 
 .btn {
-  font-family: 'Ubuntu Mono';
+  font-family: "Ubuntu Mono";
   font-size: large;
   background-color: var(--main-bg-dark);
   border: 1px solid var(--main-bg-light);
