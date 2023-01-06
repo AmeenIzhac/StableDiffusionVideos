@@ -4,15 +4,12 @@ from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import subprocess
 
-sys.path.append('../custom_scripts/')
+sys.path.append('custom_scripts/')
 from txt2video import load_model, generate_video, generate_walk_video, ImageArgs, VideoArgs, PathArgs, FloatWrapper
 
 # Load model
-cfg_path = '../stable-diffusion-2/configs/stable-diffusion/v1-inference.yaml'
-optimized_cfg_path = '../stable-diffusion-2/optimizedSD/v1-inference.yaml'
-ckpt_path = '../stable-diffusion-2/models/ldm/stable-diffusion-v1/model.ckpt'
-model = load_model(optimized_cfg_path, ckpt_path, optimized=True)
-
+path_args = PathArgs()
+model = load_model(path_args, optimized=True)
 
 app = Flask(__name__)
 cors = CORS(app)
@@ -73,7 +70,6 @@ def api():
     video_args.upscale = bool(args.get('upscale'))
     video_args.video_name = video_name
 
-    path_args = PathArgs()
     path_args.image_path = os.path.abspath('./outputs/frames/')
     path_args.video_path = os.path.abspath(f'./outputs/videos/{video_name}.mp4')
 

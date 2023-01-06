@@ -34,8 +34,30 @@ export default function SimpleUser() {
   var jobID;
   var fileName = "";
 
+  function resetParams() {
+    setSrc("");
+    setProgress(0);
+    setPrompts([]);
+    promptRef.current.value = "";
+    setisImg2Img(true);
+    setFrames("60");
+    setWidth("512");
+    setHeight("512");
+    setAngle("0");
+    setZoom("1.1");
+    setFps("20");
+    setxShift("0");
+    setyShift("0");
+    setNoNoises("1");
+    document.getElementById("upscale").checked = false;
+  }
+
   // Create a new job on server and set the current jobID
   function createJob() {
+    if (promptRef.current.value === "") {
+      alert("Please enter a prompt");
+      return;
+    }
     const prompt = promptRef.current.value;
     fileName = [...prompts, prompt][0].replace(" ", "_");
     setLoading(true);
@@ -71,6 +93,8 @@ export default function SimpleUser() {
       .catch((err) => {
         console.log(err);
       });
+
+    resetParams();
   }
 
   async function poll() {
