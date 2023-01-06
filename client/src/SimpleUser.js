@@ -34,6 +34,24 @@ export default function SimpleUser() {
   var jobID;
   var fileName = ""
 
+  function resetParams() {
+    setSrc("");
+    setProgress(0);
+    setPrompts([]);
+    promptRef.current.value = "";
+    setisImg2Img(true);
+    setFrames("60")
+    setWidth("512")
+    setHeight("512")
+    setAngle("0")
+    setZoom("1.1")
+    setFps("20")
+    setxShift("0")
+    setyShift("0")
+    setNoNoises("1")
+    document.getElementById('upscale').checked = false
+  }
+
   // Create a new job on server and set the current jobID
   function createJob() {
     const prompt = promptRef.current.value
@@ -68,6 +86,8 @@ export default function SimpleUser() {
       .catch((err) => {
         console.log(err);
       });
+
+    resetParams();
   }
 
   async function poll() {
@@ -288,7 +308,7 @@ export default function SimpleUser() {
           <div className='promptDiv'>
             <input className='prompt' ref={promptRef} placeholder='Enter Text Prompt...' onSubmit={createJob} onKeyDown={handleKeyDown}></input>
             <button className='promptButton' onClick={addPrompt}>+</button>
-            <button className='promptButton' onClick={createJob}>Generate Video</button>
+            <button disbabled={loading} className='promptButton' onClick={createJob}>Generate Video</button>
             {/* <button className='promptButton' onClick={getVideo} onSubmit={logger}>Generate Video</button> */}
           </div>
           <div className="promptsContainer">
