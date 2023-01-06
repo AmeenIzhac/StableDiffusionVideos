@@ -33,6 +33,10 @@ ul {
 }
 
 .mainDiv {
+  position: fixed;
+  top: 55%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -43,11 +47,12 @@ ul {
   display: flex;
   flex-direction: column;
   align-items: center;
+  height: min-content;
 }
 
 .promptDiv {
   display: flex;
-  margin-top: 10%;
+  margin-top: 5%;
 }
 
 .prompt {
@@ -84,6 +89,7 @@ ul {
   border-bottom: 3px solid var(--main-bg-light);
   font-family: 'Ubuntu Mono';
   font-size: 1.2em;
+  margin-right: 5px;
   /* border-radius: 10px 10px 0 0; */
 }
 
@@ -93,9 +99,59 @@ ul {
 }
 
 .video {
+  max-width: 1024px;
   position: relative;
   margin-top: 5vh;
   width: 600px;
+}
+
+.promptsContainer {
+  display: grid;
+  grid-template-columns: auto auto auto auto;
+  grid-gap: 10px;
+  padding: 10px;
+  margin-top: 10px;
+}
+
+.promptsList {
+  display: flex;
+  align-items: center;
+  background-color: var(--main-bg-dark);
+  color: var(--main-bg-light);
+  border: 1px solid var(--main-bg-light);
+  border-radius: 100vmax;
+  font-family: 'Ubuntu Mono';
+  font-size: 1.2em;
+  padding: 10px;
+  grid-row: 1;
+}
+
+.removePrompt {
+  border: 1px solid var(--main-bg-light);
+  background-color: var(--main-bg-dark);
+  color: var(--main-bg-light);
+  font-family: 'Ubuntu Mono';
+  font-size: 1.2em;
+  border-radius: 100vmax;
+  width: 30px;
+  height: 30px;
+  margin-left: 5px;
+}
+
+.removePrompt:hover {
+  background-color: rgba(154, 78, 174, 0.1);
+  color: var(--main-bg-dark);
+}
+
+.horizontal {
+  width: 90%;
+  height: 2px;
+  background-color: var(--main-bg-light);
+  border-radius: 100vmax;
+}
+
+.bg-dark {
+  background-color: var(--main-bg-dark);
 }
 
 
@@ -103,17 +159,21 @@ ul {
 
 .flex {
   display: flex;
-  /* flex-direction: column; */
-  /* align-items: center; */
+  flex-direction: column;
+  align-items: center;
   justify-content: right;
   margin-left: -13%;
 }
 
 .slideOptions {
+  position: absolute;
   display: flex;
   flex-direction: column;
   align-items: center;
   margin-bottom: 5vh;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
 }
 
 .dropArrow {
@@ -121,40 +181,163 @@ ul {
   background-color: var(--main-bg-dark);
   width: 30px;
   height: 12px;
-  margin-top: 20px;
+  margin-top: 10px;
   border: none;
   transition: height 0.5s ease;
 }
 
 .dropdownOption {
-  margin-top: 10px;
   background-color: var(--main-bg-light);
-  width: 40vw;
+  width: 95vw;
   height: 0px;
   overflow: hidden;
   transition: height 0.5s ease;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1em;
+}
+
+.dropdownVidOption {
+  border-bottom: 1px solid var(--main-bg-dark);
+  height: 5vh;
+}
+
+.vidOptionContainer {
+  margin: 0;
+  padding: 0;
+  height: inherit;
   display: flex;
-  flex-direction: column;
+}
+
+.extraOptions {
+  grid-column: 1 / span 2;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1em;
+  border-top: 1px solid var(--main-bg-dark);
+}
+
+.fullRow {
+  grid-column: 1 / span 2;
+  text-align: center;
+}
+
+.img2img,
+.walk {
+  width: 50%;
+  height: inherit;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform: translateX();
+}
+
+
+.vidOptionBtn {
+  border: none;
+  height: 100%;
+  width: 100%;
+  font-weight: bold;
+  font-size: 100%;
+  font-family: 'Ubuntu Mono';
+}
+
+@media screen and (min-width: 900px) {
+  .dropdownOption {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1em;
+  }
+
+  .fullRow {
+    grid-column: 1 / span 3;
+  }
+
+  .extraOptions {
+    grid-column: 1 / span 3;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1em;
+  }
+
+}
+
+@media screen and (max-width: 700px) {
+  .dropdownOption {
+    grid-template-columns: repeat(1, 1fr);
+    gap: 1em;
+    overflow-y: scroll;
+  }
+
+  .fullRow {
+    grid-column: 1 / span 1;
+  }
+
+  .extraOptions {
+    grid-column: 1 / span 1;
+    grid-template-columns: repeat(1, 1fr);
+  }
+
+  .dropdownOption::-webkit-scrollbar {
+    background-color: var(--main-bg-light);
+    width: 4px;
+  }
+
+  .dropdownOption::-webkit-scrollbar-thumb {
+    background-color: var(--main-bg-dark);
+    border-radius: 100vmax;
+  }
+
+
+  .promptButton {
+    padding: 12px;
+    font-size: 3vw;
+    /* border-radius: 10px 10px 0 0; */
+  }
+
+  .prompt {
+    width: 70vw;
+    border: none;
+    border-bottom: 3px solid var(--main-bg-light);
+    padding: 1vh 1vw;
+    font-size: 4vw;
+    margin-right: 1vw;
+  }
+
+
 }
 
 .open {
-  height: 400px;
+  height: min(500px, 90vh);
 }
 
 .rotate {
   transform: rotate(180deg);
 }
 
+.loading {
+  max-width: 150px;
+  margin: 0;
+}
+
+.checkBoxContainer {
+  display: flex;
+  align-items: center;
+  font-size: 1.2em;
+}
 
 /* Slider Styles*/
 
 .alignCenter {
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: min-content;
 }
 
 .slider {
   -webkit-appearance: none;
-  width: 70%;
+  width: min(90%, 75rem);
   height: 2px;
   border-radius: 5px;
   background: var(--main-bg-dark);
@@ -212,6 +395,58 @@ ul {
 }
 
 
+/* Frame Selection Styles*/
+
+.frameSelect {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.frameContainer {
+  position: relative;
+  width: 50%;
+}
+
+.frameImage {
+  display: block;
+  width: 100%;
+  height: auto;
+  font-family: 'Ubuntu Mono';
+  font-size: 12em;
+  color: var(--main-bg-light);
+}
+
+.frameOverlay {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  width: 100%;
+  opacity: 0;
+  transition: .5s ease;
+  background-color: #000000;
+  font-family: 'Ubuntu Mono';
+  font-size: 1.2em;
+}
+
+.frameContainer:hover .frameOverlay {
+  opacity: 0.8;
+}
+
+.newFrameButton {
+  background: none;
+  border: none;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  font-family: 'Ubuntu Mono';
+  font-size: 12em;
+  color: var(--main-bg-light);
+}
 
 /* Login and sign up styling code */
 
@@ -341,4 +576,21 @@ ul {
 .back-to-search {
   font-size: xx-large;
   color: var(--main-bg-light);
+}
+
+.progress {
+  background-color: var(--main-bg-light);
+  height: 1ch;
+}
+
+.progress-bar {
+  background-color: var(--main-bg-dark);
+  border: 1px solid var(--main-bg-light);
+  width: 50vw;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }

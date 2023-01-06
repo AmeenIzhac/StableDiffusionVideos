@@ -4,19 +4,17 @@ from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import subprocess
 
-sys.path.append('../custom_scripts/')
-from txt2video import load_model, generate_video, ImageArgs, VideoArgs, PathArgs
+sys.path.append('custom_scripts/')
+from txt2video import load_model, generate_video, generate_walk_video, ImageArgs, VideoArgs, PathArgs, FloatWrapper
 
 # Load model
-cfg_path = '../stable-diffusion-2/configs/stable-diffusion/v1-inference.yaml'
-optimized_cfg_path = '../stable-diffusion-2/optimizedSD/v1-inference.yaml'
-ckpt_path = '../stable-diffusion-2/models/ldm/stable-diffusion-v1/model.ckpt'
-model = load_model(optimized_cfg_path, ckpt_path, optimized=True)
-
+path_args = PathArgs()
+model = load_model(path_args, optimized=True)
 
 app = Flask(__name__)
 cors = CORS(app)
 
+progress = FloatWrapper()
 
 @app.route('/')
 def index():
@@ -26,36 +24,60 @@ def index():
 def test():
     return send_file('./outputs/videos/Lego_man_committing_seppuku.mp4', mimetype='video/mp4')
 
+@app.route('/getProgress')
+def getProgress():
+    return jsonify({"progress": progress.x})
+
+@app.route('/getVideo')
+def getVideo():
+    args = request.args
+    for arg in args:
+        print(arg, args[arg])
+    file_name = args.get('fileName').replace(' ', '_')
+    file_path = os.path.abspath(f'./outputs/videos/{file_name}.mp4')
+    return send_file(file_path, mimetype='video/mp4')
+
 
 @app.route('/api')
 def api():
+    # reset progress
+    progress.x = 0
+    
     # Extract options
     args = request.args
-    prompt = args.get('prompt')
-    video_name = str(prompt).replace(" ", "_")
+    
+    prompts = args.get('prompts').split(';')
+    video_name = str(prompts[0]).replace(" ", "_")
     
     # Prepare options
     image_args = ImageArgs()
     image_args.steps = 50
-    image_args.W = int(args.get('width')) if ("width" in args) else 512
-    image_args.H = int(args.get('height')) if ("height" in args) else 512
+    image_args.W = int(args.get('width')) 
+    image_args.H = int(args.get('height')) 
 
     video_args = VideoArgs()
-    video_args.video_name = video_name
-    video_args.prompts = [prompt]
-    video_args.fps = 20
-    video_args.strength = 0.375
-    video_args.zoom = 1.005
-    video_args.x = -5
-    video_args.frames = int(args.get('frames')) if ("frames" in args) else 60
-    video_args.upscale = True
 
-    path_args = PathArgs()
+    video_args.prompts = prompts
+
+    video_args.x = float(args.get('xShift'))
+    video_args.y = float(args.get('yShift'))
+    video_args.zoom = float(args.get('zoom'))
+    video_args.angle = float(args.get('angle'))
+
+    video_args.frames = int(args.get('frames'))
+    video_args.fps = int(args.get('fps'))
+
+    video_args.upscale = bool(args.get('upscale'))
+    video_args.video_name = video_name
+
     path_args.image_path = os.path.abspath('./outputs/frames/')
     path_args.video_path = os.path.abspath(f'./outputs/videos/{video_name}.mp4')
 
     # Generate video
-    generate_video(image_args, video_args, path_args, model)
+    if args.get('isImg2Img') == 'true':
+        generate_video(image_args, video_args, path_args, model, progress)
+    else:
+        generate_walk_video(image_args, video_args, path_args, model, int(args.get('noNoises')), progress)
 
     # Respond with the video contents
     return send_file(path_args.video_path, mimetype='video/mp4')

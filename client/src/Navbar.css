@@ -4,6 +4,8 @@
     padding: 15px;
     background-color: var(--main-bg-dark);
     height: 5vh;
+    box-shadow: 0px 1px var(--main-bg-light);
+    align-items: center;
 }
 
 .Navbar .logo {
@@ -13,39 +15,56 @@
     margin-left: 10px;
 }
 
-.Navbar .pageLink {
-    list-style: none;
-    margin-right: 2em;
+li {
+    list-style-type: none;
 }
 
-.Navbar .link {
-    text-decoration: none;
-    list-style: none;
-    font-size: 1.5rem;
+.buttonLink, .pageLink, .link {
+    margin: 0;
+    padding: 0;
+    border: none;
+    font-family: 'Ubuntu Mono';
+    font-size: 1.2em;
     color: white;
 }
 
-.Navbar .superTag {
-    display: inline;
-    color: var(--main-bg-dark); 
-    font-weight: 100;
-    font-size: 0.7em;
-}
 
-.Navbar .video {
-    position: relative;
-}
-
-button.pageLink, a.link {
-    margin: 0;
+.pageLink {
     background-color: var(--main-bg-dark);
-    border: none;
-    font-family: 'Ubuntu Mono';
-    font-size: 2em;
     border-bottom: 2px solid var(--main-bg-light);
-    padding: 0px 10px;
 }
 
-button.pageLink:hover, a.link:hover {
+.buttonLink {
+    background-color: inherit;
+}
+
+.link:hover, .buttonLink:hover,.pageLink:hover {
     background-color: var(--main-bg-light);
+}
+
+.pageLink {
+    margin-right: 1em;
+    padding: 5px 10px;
+}
+
+@media screen and (max-width: 700px) {
+    .Navbar .logo {
+        font-size: 1.8em;
+        margin-left: 10px;
+    }
+    .buttonLink, .pageLink, .link {
+        font-size: 1.1em;
+    }
+
+}
+
+@media screen and (max-width: 540px) {
+    .Navbar .logo {
+        font-size: 1em;
+        margin-left: 10px;
+    }
+    .buttonLink, .pageLink, .link {
+        font-size: 1em;
+    }
+
 }
