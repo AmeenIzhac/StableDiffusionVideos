@@ -54,6 +54,10 @@ export default function SimpleUser() {
 
   // Create a new job on server and set the current jobID
   function createJob() {
+    if (promptRef.current.value === "") {
+      alert("Please enter a prompt");
+      return;
+    }
     const prompt = promptRef.current.value
     fileName = [...prompts, prompt][0].replace(" ", "_")
     setLoading(true);
