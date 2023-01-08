@@ -315,7 +315,7 @@ ul {
 .checkBoxContainer {
   display: flex;
   align-items: center;
-  font-size: 1.2em;
+  font-size: 1.1em;
 }
 
 /* Slider Styles*/
@@ -595,7 +595,7 @@ ul {
 
 .tooltip .tooltiptext {
   visibility: hidden;
-  width: 120px;
+  width: 240px;
   background-color: black;
   color: #fff;
   text-align: center;
@@ -621,4 +621,5 @@ ul {
 
 .tooltip:hover .tooltiptext {
   visibility: visible;
+  font-size: 0.8em;
 }
