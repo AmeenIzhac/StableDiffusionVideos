@@ -37,6 +37,7 @@ export default function SimpleUser() {
   var fileName = "";
 
   function resetParams() {
+    console.log(`strength is ${strength}`);
     setSrc("");
     setProgress(0);
     setPrompts([]);
@@ -61,6 +62,7 @@ export default function SimpleUser() {
       return;
     }
     const prompt = promptRef.current.value;
+    console.log(`prompt is ${prompt}`);
     fileName = [...prompts, prompt][0].replace(" ", "_");
     setLoading(true);
     axios({
@@ -87,7 +89,7 @@ export default function SimpleUser() {
         upscale: document.getElementById("upscale").checked,
       },
       responseType: "application/json",
-      timeout: 10000,
+      timeout: 100000,
     })
       .then((res) => {
         jobID = JSON.parse(res.data).id;

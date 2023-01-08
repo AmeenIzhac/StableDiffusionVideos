@@ -69,7 +69,7 @@ def api():
 
     video_args.interp_exp = 2**int(args.get('fMult'))
 
-    video_args.strength = int(args.get('strength'))
+    video_args.strength = float(args.get('strength'))
 
     video_args.upscale = bool(args.get('upscale'))
     video_args.video_name = video_name
