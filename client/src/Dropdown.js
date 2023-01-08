@@ -24,6 +24,10 @@ export default function Dropdown({
     setyShift,
     noNoises,
     setNoNoises,
+    fMult,
+    setfMult,
+    strength,
+    setStrength,
     slideStateChange,
     dropOptions
 }) {
@@ -53,6 +57,10 @@ export default function Dropdown({
                             <p>Frames per second: <span id="demo">{fps}</span></p>
                             <input type="range" min="1" max="30" value={fps} className='slider' id="myRange" onChange={e => slideStateChange(e, setFps)} />
                         </div>
+                        <div className='slideContainer alignCenter'>
+                            <p>Frames Multiplier: <span id="demo">{Math.pow(2,fMult)}</span></p>
+                            <input type="range" min="0" max="4" value={fMult} className='slider' id="myRange" onChange={e => slideStateChange(e, setfMult)} />
+                        </div>
                         <div className="alignCenter">
                             <div className="checkBoxContainer">
                                 <label htmlFor="upscale">Upscales? </label>
@@ -69,6 +77,8 @@ export default function Dropdown({
                                 setxShift={setxShift}
                                 yShift={yShift}
                                 setyShift={setyShift}
+                                strength={strength}
+                                setStrength={setStrength}
                                 slideStateChange={slideStateChange}
                             />
                             :

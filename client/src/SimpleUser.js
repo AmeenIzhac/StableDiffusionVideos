@@ -19,6 +19,8 @@ export default function SimpleUser() {
   const [width, setWidth] = useState("512");
   const [height, setHeight] = useState("512");
   const [angle, setAngle] = useState("0");
+  const [fMult, setfMult] = useState("2");
+  const [strength, setStrength] = useState("0.4");
   const [zoom, setZoom] = useState("1.1");
   const [fps, setFps] = useState("20");
   const [xShift, setxShift] = useState("0");
@@ -66,7 +68,7 @@ export default function SimpleUser() {
       // url: `https://stablediffusionvideoswebserver-production.up.railway.app/request`,
       url: `http://localhost:3001/request`,
       params: {
-        prompts: (prompt.length == 0
+        prompts: (prompt.length === 0
           ? [...prompts]
           : [...prompts, prompt]
         ).join(";"),
@@ -80,6 +82,8 @@ export default function SimpleUser() {
         yShift: yShift,
         noNoises: noNoises,
         isImg2Img: isImg2Img,
+        fMult: fMult,
+        strength: strength,
         upscale: document.getElementById("upscale").checked,
       },
       responseType: "application/json",
@@ -292,6 +296,10 @@ export default function SimpleUser() {
         setyShift={setyShift}
         noNoises={noNoises}
         setNoNoises={setNoNoises}
+        fMult={fMult}
+        setfMult={setfMult}
+        strength={strength}
+        setStrength={setStrength}
         slideStateChange={slideStateChange}
         dropOptions={dropOptions}
       />
