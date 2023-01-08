@@ -34,6 +34,9 @@ sys.path.append('stable-diffusion-2/optimizedSD')
 #  3.  finally user selects a frame on the client side and sends a post request with the id of the frame
 #      - server then gets the torch from the id and uses it to generate a video, returns video to client
 
+class Constants:
+    color_sample_resolution = 448
+
 class ImageArgs:
     def __init__(self):
         self.steps = 50
@@ -58,6 +61,7 @@ class VideoArgs:
         self.zoom = 1.0
         self.angle = 0.0
         self.color_match = True
+        self.several_color_match = True
         self.seed = -1
         self.video_name = None
         self.sampler = 'dpm_2'
@@ -229,9 +233,9 @@ def autoencoder_frame_interp(ms, latent1, latent2, inter_frames):
 
 def cheap_image_args():
     ia = ImageArgs()
-    ia.steps = 8
-    ia.H = 384
-    ia.W = 384
+    ia.steps = 20
+    ia.H = Constants.color_sample_resolution
+    ia.W = Constants.color_sample_resolution
     ia.scale = 8.0
 
     return ia
@@ -379,15 +383,16 @@ def generate_video (
 
             C_s = len(C)
 
-            interpolate_colors = True
+            interpolate_colors = video_args.several_color_match
             color_samples = []
-            color_samples.append(cv2.resize(sample_to_cv2(first_sample), (384,384))) #put hsv or something here
+            color_samples.append(cv2.resize(sample_to_cv2(first_sample), (Constants.color_sample_resolution,Constants.color_sample_resolution))) #put hsv or something here
             if C_s > 1 and video_args.color_match and interpolate_colors:
                 cia = cheap_image_args()
                 for i in range(1, C_s):
                     #generate new sample here
                     color_sample = generate_image(c=C[i], uc=uc, ia=cia, ms=model_state) #TODO make it fast (small steps and resolution, fast sampler)
                     color_samples.append(sample_to_cv2(color_sample))
+                    pool.submit(save_image, color_sample, f"../color_sample_{base_count+i}.png", model_state, upscale=False)
 
             previous_color_sample = color_samples[0]
 
@@ -521,7 +526,7 @@ def generateInitFrame(image_args, video_args, path_args, model_state, n=4) :
             seeds = [random.randint(0, 10 ** 6) for i in range(n)]
 
     for i,sample in enumerate(samples):
-        save_image(sample, output_path=os.join(image_dir, f"{frame_number:05}.png"), model_state=model_state, upscale=False)
+        save_image(sample, output_path=os.join(image_dir, f"{video_args.seed}.png"), model_state=model_state, upscale=False)
     samples_list = torch.split(samples, 1)
 
     
