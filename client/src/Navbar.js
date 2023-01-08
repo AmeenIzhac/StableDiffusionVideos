@@ -10,7 +10,7 @@ export default function Navbar({loggedIn, setLoggedIn}) {
     return (
         <div className="Navbar">
             <nav className='navbar'>
-                <label className='logo'>AI VidGen</label>
+                <label className='logo'>SD VidGen</label>
                 { loggedIn ? 
                 <ul>
                     <li className="pageLink"><a className='link' href='gallery'>Gallery</a></li>
