@@ -67,6 +67,12 @@ def api():
     video_args.frames = int(args.get('frames'))
     video_args.fps = int(args.get('fps'))
 
+    fMult = int(args.get('fMult'))
+    print(f'\n\n\n===================\nfMult is {fMult}\n===================\n\n\n')
+    video_args.interp_exp = fMult
+
+    video_args.strength = float(args.get('strength'))
+
     video_args.upscale = bool(args.get('upscale'))
     video_args.video_name = video_name
 
@@ -86,5 +92,5 @@ def api():
 if __name__ == '__main__':
     # ssl_context = ('./certicates/server.crt', './certicates/server.key')
     app.run(
-        host='192.168.1.125', 
+        host='192.168.1.108', 
         port=8080)

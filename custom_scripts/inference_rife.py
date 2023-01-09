@@ -14,6 +14,8 @@ import skvideo.io
 from queue import Queue, Empty
 from model.pytorch_msssim import ssim_matlab
 
+#from txt2video import ModelState
+
 warnings.filterwarnings("ignore")
 
 #assumes videogen is sorted, returns a subarray with all the frames whose index is >= starting_frame
@@ -23,19 +25,12 @@ def find_frames(videogen, starting_frame, frames_count):
         start+=1
     return videogen[start : start + frames_count]
     
-
-def motion_interpolation(frames_dir, output_dir, fps, frames_count, exp=1, scale=1.0, starting_frame=0,model_dir='ECCV2022-RIFE/train_log', fp16=False, ext='mp4', codec='vp09'):
-
-    assert (not frames_dir is None)
-    assert scale in [0.25, 0.5, 1.0, 2.0, 4.0]
-
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+def load_RIFE_model(ms, model_dir):
+    device = ms.device
     torch.set_grad_enabled(False)
     if torch.cuda.is_available():
         torch.backends.cudnn.enabled = True
         torch.backends.cudnn.benchmark = True
-        if(fp16):
-            torch.set_default_tensor_type(torch.cuda.HalfTensor)
 
     try:
         try:
@@ -61,7 +56,49 @@ def motion_interpolation(frames_dir, output_dir, fps, frames_count, exp=1, scale
         print("Loaded ArXiv-RIFE model")
     model.eval()
     model.device()
+    ms.rife_model = model
 
+def motion_interpolation(frames_dir, output_dir, fps, frames_count, exp=1, scale=1.0, starting_frame=0, ext='mp4', codec='vp09', ms=None):
+
+    assert (not frames_dir is None)
+    assert scale in [0.25, 0.5, 1.0, 2.0, 4.0]
+    assert ms is not None
+
+    #device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    #torch.set_grad_enabled(False)
+    #if torch.cuda.is_available():
+    #    torch.backends.cudnn.enabled = True
+    #    torch.backends.cudnn.benchmark = True
+    #    if(fp16):
+    #        torch.set_default_tensor_type(torch.cuda.HalfTensor)
+
+    #try:
+    #    try:
+    #        try:
+    #            from model.RIFE_HDv2 import Model
+    #            model = Model()
+    #            model.load_model(model_dir, -1)
+    #            print("Loaded v2.x HD model.")
+    #        except:
+    #            from train_log.RIFE_HDv3 import Model
+    #            model = Model()
+    #            model.load_model(model_dir, -1)
+    #            print("Loaded v3.x HD model.")
+    #    except:
+    #        from model.RIFE_HD import Model
+    #        model = Model()
+    #        model.load_model(model_dir, -1)
+    #        print("Loaded v1.x HD model")
+    #except:
+    #    from model.RIFE import Model
+    #    model = Model()
+    #    model.load_model(model_dir, -1)
+    #    print("Loaded ArXiv-RIFE model")
+    #model.eval()
+    #model.device()
+
+    model = ms.rife_model
+    device = ms.device
 
     videogen = []
     for f in os.listdir(frames_dir):
@@ -69,10 +106,8 @@ def motion_interpolation(frames_dir, output_dir, fps, frames_count, exp=1, scale
             videogen.append(f)
     tot_images = len(videogen)
     videogen.sort(key= lambda x:int(x[:-4]))
-    assert (starting_frame < tot_images)
     videogen = find_frames(videogen, starting_frame, frames_count)
     tot_frame = frames_count
-    print(f'videogen is {videogen}, tot_frame is {tot_frame}')
     lastframe = cv2.imread(os.path.join(frames_dir, videogen[0]), cv2.IMREAD_UNCHANGED)[:, :, ::-1].copy()
     videogen = videogen[1:]
     h, w, _ = lastframe.shape
@@ -117,80 +152,79 @@ def motion_interpolation(frames_dir, output_dir, fps, frames_count, exp=1, scale
             return [*first_half, *second_half]
 
     def pad_image(img):
-        if(fp16):
-            return F.pad(img, padding).half()
-        else:
-            return F.pad(img, padding)
+        return F.pad(img, padding)
 
-    tmp = max(32, int(32 / scale))
-    ph = ((h - 1) // tmp + 1) * tmp
-    pw = ((w - 1) // tmp + 1) * tmp
-    padding = (0, pw - w, 0, ph - h)
-    pbar = tqdm(total=tot_frame)
-    write_buffer = Queue(maxsize=500)
-    read_buffer = Queue(maxsize=500)
-    _thread.start_new_thread(build_read_buffer, (read_buffer, videogen))
-    _thread.start_new_thread(clear_write_buffer, (write_buffer,))
+    with torch.no_grad():
+        tmp = max(32, int(32 / scale))
+        ph = ((h - 1) // tmp + 1) * tmp
+        pw = ((w - 1) // tmp + 1) * tmp
+        padding = (0, pw - w, 0, ph - h)
+        pbar = tqdm(total=tot_frame)
+        write_buffer = Queue(maxsize=500)
+        read_buffer = Queue(maxsize=500)
+        _thread.start_new_thread(build_read_buffer, (read_buffer, videogen))
+        _thread.start_new_thread(clear_write_buffer, (write_buffer,))
 
-    I1 = torch.from_numpy(np.transpose(lastframe, (2,0,1))).to(device, non_blocking=True).unsqueeze(0).float() / 255.
-    I1 = pad_image(I1)
-    temp = None # save lastframe when processing static frame
-
-    while True:
-        if temp is not None:
-            frame = temp
-            temp = None
-        else:
-            frame = read_buffer.get()
-        if frame is None:
-            break
-        I0 = I1
-        I1 = torch.from_numpy(np.transpose(frame, (2,0,1))).to(device, non_blocking=True).unsqueeze(0).float() / 255.
+        I1 = torch.from_numpy(np.transpose(lastframe, (2,0,1))).to(device, non_blocking=True).unsqueeze(0).float() / 255.
         I1 = pad_image(I1)
-        I0_small = F.interpolate(I0, (32, 32), mode='bilinear', align_corners=False)
-        I1_small = F.interpolate(I1, (32, 32), mode='bilinear', align_corners=False)
-        ssim = ssim_matlab(I0_small[:, :3], I1_small[:, :3])
+        temp = None # save lastframe when processing static frame
 
-        break_flag = False
-        if ssim > 0.996:
-            frame = read_buffer.get() # read a new frame
-            if frame is None:
-                break_flag = True
-                frame = lastframe
+        while True:
+            if temp is not None:
+                frame = temp
+                temp = None
             else:
-                temp = frame
+                frame = read_buffer.get()
+            if frame is None:
+                break
+            I0 = I1
             I1 = torch.from_numpy(np.transpose(frame, (2,0,1))).to(device, non_blocking=True).unsqueeze(0).float() / 255.
             I1 = pad_image(I1)
-            I1 = model.inference(I0, I1, scale)
+            I0_small = F.interpolate(I0, (32, 32), mode='bilinear', align_corners=False)
             I1_small = F.interpolate(I1, (32, 32), mode='bilinear', align_corners=False)
             ssim = ssim_matlab(I0_small[:, :3], I1_small[:, :3])
-            frame = (I1[0] * 255).byte().cpu().numpy().transpose(1, 2, 0)[:h, :w]
 
-        if ssim < 0.2:
-            output = []
-            for i in range((2 ** exp) - 1):
-                output.append(I0)
-            '''
-            output = []
-            step = 1 / (2 ** args.exp)
-            alpha = 0
-            for i in range((2 ** args.exp) - 1):
-                alpha += step
-                beta = 1-alpha
-                output.append(torch.from_numpy(np.transpose((cv2.addWeighted(frame[:, :, ::-1], alpha, lastframe[:, :, ::-1], beta, 0)[:, :, ::-1].copy()), (2,0,1))).to(device, non_blocking=True).unsqueeze(0).float() / 255.)
-            '''
-        else:
-            output = make_inference(I0, I1, 2**exp-1) if exp else []
+            break_flag = False
+            if ssim > 0.996:
+                frame = read_buffer.get() # read a new frame
+                if frame is None:
+                    break_flag = True
+                    frame = lastframe
+                else:
+                    temp = frame
+                I1 = torch.from_numpy(np.transpose(frame, (2,0,1))).to(device, non_blocking=True).unsqueeze(0).float() / 255.
+                I1 = pad_image(I1)
+                I1 = model.inference(I0, I1, scale)
+                I1_small = F.interpolate(I1, (32, 32), mode='bilinear', align_corners=False)
+                ssim = ssim_matlab(I0_small[:, :3], I1_small[:, :3])
+                frame = (I1[0] * 255).byte().cpu().numpy().transpose(1, 2, 0)[:h, :w]
 
-        
-        write_buffer.put(lastframe)
-        for mid in output:
-            mid = (((mid[0] * 255.).byte().cpu().numpy().transpose(1, 2, 0)))
-            write_buffer.put(mid[:h, :w])
-        pbar.update(1)
-        lastframe = frame
-        if break_flag:
-            break
+            if ssim < 0.2:
+                output = []
+                for i in range((2 ** exp) - 1):
+                    output.append(I0)
+                '''
+                output = []
+                step = 1 / (2 ** args.exp)
+                alpha = 0
+                for i in range((2 ** args.exp) - 1):
+                    alpha += step
+                    beta = 1-alpha
+                    output.append(torch.from_numpy(np.transpose((cv2.addWeighted(frame[:, :, ::-1], alpha, lastframe[:, :, ::-1], beta, 0)[:, :, ::-1].copy()), (2,0,1))).to(device, non_blocking=True).unsqueeze(0).float() / 255.)
+                '''
+            else:
+                output = make_inference(I0, I1, 2**exp-1) if exp else []
+
+            I1.to("cpu")
+            I0.to("cpu")
+            write_buffer.put(lastframe)
+            for mid in output:
+                mid = (((mid[0] * 255.).byte().cpu().numpy().transpose(1, 2, 0)))
+                write_buffer.put(mid[:h, :w])
+            pbar.update(1)
+            lastframe = frame
+            if break_flag:
+                break
 
     write_buffer.put(lastframe)
     import time

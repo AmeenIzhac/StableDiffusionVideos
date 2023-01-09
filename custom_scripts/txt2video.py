@@ -17,7 +17,7 @@ from sd_video_utils import *
 from kdiffusion import KDiffusionSampler
 from inference_realesrgan import *
 from ldm.util import instantiate_from_config
-from inference_rife import motion_interpolation
+from inference_rife import motion_interpolation, load_RIFE_model
 
 import sys
 sys.path.append('stable-diffusion-2/optimizedSD')
@@ -33,6 +33,9 @@ sys.path.append('stable-diffusion-2/optimizedSD')
 #       - each get request returns the frame x and it's respective id
 #  3.  finally user selects a frame on the client side and sends a post request with the id of the frame
 #      - server then gets the torch from the id and uses it to generate a video, returns video to client
+
+class Constants:
+    color_sample_resolution = 448
 
 class ImageArgs:
     def __init__(self):
@@ -58,6 +61,7 @@ class VideoArgs:
         self.zoom = 1.0
         self.angle = 0.0
         self.color_match = True
+        self.several_color_match = True
         self.seed = -1
         self.video_name = None
         self.sampler = 'dpm_2'
@@ -74,6 +78,7 @@ class ModelState:
         self.FS = None
         self.CS = None
         self.upsampler = None
+        self.rife_model = None
 
 
 class PathArgs:
@@ -94,6 +99,7 @@ def load_model(path_args, optimized=False):
     model_state = ModelState()
 
     model_state.upsampler = load_ESRGAN_model(model_name='RealESRGAN_x2plus')
+    load_RIFE_model(model_state, path_args.rife_path)
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
     if not optimized:
@@ -229,9 +235,9 @@ def autoencoder_frame_interp(ms, latent1, latent2, inter_frames):
 
 def cheap_image_args():
     ia = ImageArgs()
-    ia.steps = 8
-    ia.H = 384
-    ia.W = 384
+    ia.steps = 20
+    ia.H = Constants.color_sample_resolution
+    ia.W = Constants.color_sample_resolution
     ia.scale = 8.0
 
     return ia
@@ -311,7 +317,7 @@ def generate_embeddings(prompts, model_state):
     return C, uc
 
 
-def compile_video(video_args, path_args, base_count):
+def compile_video(video_args, path_args, base_count, model_state):
     if(video_args.video_name == None):
         video_count = len(os.listdir(path_args.video_path))
         video_name = f"video{video_count}"
@@ -320,7 +326,7 @@ def compile_video(video_args, path_args, base_count):
 
     if video_args.interp_exp > 0: #we perform motion interpolation
         #TODO make the interp_exp a interp_factor parameter, ensure it is a multiple of 2 and do some log to get it (probably bit shift)
-        motion_interpolation(path_args.image_path, path_args.video_path, video_args.fps, frames_count=video_args.frames, exp=video_args.interp_exp, starting_frame=base_count, model_dir=path_args.rife_path, scale=1.0, codec='avc1') #TODO add the feature to start at some image
+        motion_interpolation(path_args.image_path, path_args.video_path, video_args.fps, frames_count=video_args.frames, exp=video_args.interp_exp, starting_frame=base_count, ms=model_state, scale=1.0, codec='avc1') #TODO add the feature to start at some image
     else:
         sample_regex = os.path.join(path_args.image_path, "%05d.png")
         command = f"ffmpeg -r {video_args.fps} -start_number {base_count} -i {sample_regex} -c:v libx264 -r 30 -pix_fmt yuv420p {path_args.video_path}"                       
@@ -329,6 +335,18 @@ def compile_video(video_args, path_args, base_count):
 
 def frame_path(frame_number, path_args):
     return os.path.join(path_args.image_path, f"{frame_number:05}.png")
+
+def move_FS_UN_to_gpu(model_state):
+    model_state.model.to(model_state.device, non_blocking=False) #move the UNet model to gpu
+    model_state.FS.to(model_state.device, non_blocking=False) #move the autoencoder to gpu
+
+def move_FS_UN_to_cpu(model_state):
+    if model_state.device != "cpu":
+        mem = torch.cuda.memory_allocated() / 1e6
+        model_state.FS.to("cpu", non_blocking=False)
+        model_state.model.to("cpu", non_blocking=False)
+        while torch.cuda.memory_allocated() / 1e6 >= mem:
+            time.sleep(0.1)
 
 
 def generate_video (
@@ -351,7 +369,7 @@ def generate_video (
 
             C, uc = generate_embeddings(video_args.prompts, model_state)
 
-            model_state.FS.to(model_state.device)
+            move_FS_UN_to_gpu(model_state)
 
             # Init thread pool
             num_workers = 1
@@ -369,7 +387,7 @@ def generate_video (
                 progress_var.x = 1 / video_args.frames
 
             #=====================SUBSEQUENT_IMAGES_GENERATION=========================#
-            xform = make_xform_2d(  image_args.W, image_args.H, video_args.x, 
+            xform = make_xform_2d(  image_args.W, image_args.H, -video_args.x, 
                                     video_args.y, video_args.angle, video_args.zoom )
 
 
@@ -379,15 +397,16 @@ def generate_video (
 
             C_s = len(C)
 
-            interpolate_colors = True
+            interpolate_colors = video_args.several_color_match
             color_samples = []
-            color_samples.append(cv2.resize(sample_to_cv2(first_sample), (384,384))) #put hsv or something here
+            color_samples.append(cv2.resize(sample_to_cv2(first_sample), (Constants.color_sample_resolution,Constants.color_sample_resolution))) #put hsv or something here
             if C_s > 1 and video_args.color_match and interpolate_colors:
                 cia = cheap_image_args()
                 for i in range(1, C_s):
                     #generate new sample here
                     color_sample = generate_image(c=C[i], uc=uc, ia=cia, ms=model_state) #TODO make it fast (small steps and resolution, fast sampler)
                     color_samples.append(sample_to_cv2(color_sample))
+                    pool.submit(save_image, color_sample, f"../color_sample_{base_count+i}.png", model_state, upscale=False)
 
             previous_color_sample = color_samples[0]
 
@@ -403,7 +422,7 @@ def generate_video (
                 c = tensor_multi_step_interpolation(C, i, video_args.frames, prompt_frames, k=2.0)
 
                 if video_args.color_match : 
-                    color_sample = tensor_multi_step_interpolation(color_samples, i, video_args.frames, prompt_frames, k=2.0, is_slerp=False)
+                    color_sample = tensor_multi_step_interpolation(color_samples, i, video_args.frames, prompt_frames, k=4.0, is_slerp=False)
                 
                 previous_latent = process_previous_image(model_state, previous_sample, xform, 
                                         video_args.color_match, color_sample if video_args.color_match else None, hsv= (((i-1) % 2) == 0))
@@ -433,13 +452,13 @@ def generate_video (
                 if progress_var is not None:
                     progress_var.x = (i+1) / video_args.frames
 
-            #Free some video memory by pushing the auto-encoder to RAM 
-            model_state.FS.to("cpu")
+            #Free some video memory by pushing the auto-encoder and the UNet to RAM 
+            move_FS_UN_to_cpu
 
             # Wait for upscaling/saving to finish
             pool.shutdown()
 
-            compile_video(video_args, path_args, base_count)
+            compile_video(video_args, path_args, base_count, model_state)
 
 
     return
@@ -466,7 +485,7 @@ def generate_walk_video(
 
             C, uc = generate_embeddings(video_args.prompts, model_state)
 
-            model_state.FS.to(model_state.device)
+            move_FS_UN_to_gpu(model_state)
 
             # Init thread pool
             num_workers = video_args.inter_frames + 1
@@ -498,12 +517,12 @@ def generate_walk_video(
                     progress_var.x = (i+1) / video_args.frames
 
             #Free some video memory by pushing the auto-encoder to RAM 
-            model_state.FS.to("cpu")
+            move_FS_UN_to_cpu(model_state)
 
             # Wait for upscaling/saving to finish
             pool.shutdown()
 
-            compile_video(video_args, path_args, base_count)
+            compile_video(video_args, path_args, base_count, model_state)
 
     return
 
@@ -521,7 +540,7 @@ def generateInitFrame(image_args, video_args, path_args, model_state, n=4) :
             seeds = [random.randint(0, 10 ** 6) for i in range(n)]
 
     for i,sample in enumerate(samples):
-        save_image(sample, output_path=os.join(image_dir, f"{frame_number:05}.png"), model_state=model_state, upscale=False)
+        save_image(sample, output_path=os.join(image_dir, f"{video_args.seed}.png"), model_state=model_state, upscale=False)
     samples_list = torch.split(samples, 1)
 
     
