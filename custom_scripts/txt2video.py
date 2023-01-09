@@ -337,14 +337,16 @@ def frame_path(frame_number, path_args):
     return os.path.join(path_args.image_path, f"{frame_number:05}.png")
 
 def move_FS_UN_to_gpu(model_state):
-    model_state.model.to(model_state.device) #move the UNet model to gpu
-    model_state.FS.to(model_state.device) #move the autoencoder to gpu
-    model_state.model.cuda()
-    model_state.FS.cuda()
+    model_state.model.to(model_state.device, non_blocking=False) #move the UNet model to gpu
+    model_state.FS.to(model_state.device, non_blocking=False) #move the autoencoder to gpu
 
 def move_FS_UN_to_cpu(model_state):
-    model_state.FS.to("cpu")
-    model_state.model.to("cpu")
+    if model_state.device != "cpu":
+        mem = torch.cuda.memory_allocated() / 1e6
+        model_state.FS.to("cpu", non_blocking=False)
+        model_state.model.to("cpu", non_blocking=False)
+        while torch.cuda.memory_allocated() / 1e6 >= mem:
+            time.sleep(0.1)
 
 
 def generate_video (
