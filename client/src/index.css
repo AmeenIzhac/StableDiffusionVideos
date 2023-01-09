@@ -596,16 +596,18 @@ ul {
 .tooltip .tooltiptext {
   visibility: hidden;
   width: 240px;
-  background-color: black;
+  background-color:var(--main-bg-dark);
+  border: 1px solid var(--main-bg-light);
   color: #fff;
   text-align: center;
   border-radius: 6px;
   padding: 5px 0;
   position: absolute;
   z-index: 1;
-  bottom: 150%;
-  left: 50%;
+  bottom: 120%;
+  left: -10%;
   margin-left: -60px;
+  padding: 5px 5px;
 }
 
 .tooltip .tooltiptext::after {
@@ -616,7 +618,7 @@ ul {
   margin-left: -5px;
   border-width: 5px;
   border-style: solid;
-  border-color: black transparent transparent transparent;
+  border-color: var(--main-bg-light) transparent transparent transparent;
 }
 
 .tooltip:hover .tooltiptext {
