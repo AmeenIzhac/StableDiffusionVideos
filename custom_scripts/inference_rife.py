@@ -14,6 +14,8 @@ import skvideo.io
 from queue import Queue, Empty
 from model.pytorch_msssim import ssim_matlab
 
+from txt2video import ModelState
+
 warnings.filterwarnings("ignore")
 
 #assumes videogen is sorted, returns a subarray with all the frames whose index is >= starting_frame
@@ -23,19 +25,12 @@ def find_frames(videogen, starting_frame, frames_count):
         start+=1
     return videogen[start : start + frames_count]
     
-
-def motion_interpolation(frames_dir, output_dir, fps, frames_count, exp=1, scale=1.0, starting_frame=0,model_dir='ECCV2022-RIFE/train_log', fp16=False, ext='mp4', codec='vp09'):
-
-    assert (not frames_dir is None)
-    assert scale in [0.25, 0.5, 1.0, 2.0, 4.0]
-
+def load_RIFE_model(ms, model_dir)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     torch.set_grad_enabled(False)
     if torch.cuda.is_available():
         torch.backends.cudnn.enabled = True
         torch.backends.cudnn.benchmark = True
-        if(fp16):
-            torch.set_default_tensor_type(torch.cuda.HalfTensor)
 
     try:
         try:
@@ -61,7 +56,48 @@ def motion_interpolation(frames_dir, output_dir, fps, frames_count, exp=1, scale
         print("Loaded ArXiv-RIFE model")
     model.eval()
     model.device()
+    ms.rife_model = model
 
+def motion_interpolation(frames_dir, output_dir, fps, frames_count, exp=1, scale=1.0, starting_frame=0, ext='mp4', codec='vp09', ms=None):
+
+    assert (not frames_dir is None)
+    assert scale in [0.25, 0.5, 1.0, 2.0, 4.0]
+    assert ms is not None
+
+    #device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    #torch.set_grad_enabled(False)
+    #if torch.cuda.is_available():
+    #    torch.backends.cudnn.enabled = True
+    #    torch.backends.cudnn.benchmark = True
+    #    if(fp16):
+    #        torch.set_default_tensor_type(torch.cuda.HalfTensor)
+
+    #try:
+    #    try:
+    #        try:
+    #            from model.RIFE_HDv2 import Model
+    #            model = Model()
+    #            model.load_model(model_dir, -1)
+    #            print("Loaded v2.x HD model.")
+    #        except:
+    #            from train_log.RIFE_HDv3 import Model
+    #            model = Model()
+    #            model.load_model(model_dir, -1)
+    #            print("Loaded v3.x HD model.")
+    #    except:
+    #        from model.RIFE_HD import Model
+    #        model = Model()
+    #        model.load_model(model_dir, -1)
+    #        print("Loaded v1.x HD model")
+    #except:
+    #    from model.RIFE import Model
+    #    model = Model()
+    #    model.load_model(model_dir, -1)
+    #    print("Loaded ArXiv-RIFE model")
+    #model.eval()
+    #model.device()
+
+    model = ms.rife_model
 
     videogen = []
     for f in os.listdir(frames_dir):
@@ -115,10 +151,7 @@ def motion_interpolation(frames_dir, output_dir, fps, frames_count, exp=1, scale
             return [*first_half, *second_half]
 
     def pad_image(img):
-        if(fp16):
-            return F.pad(img, padding).half()
-        else:
-            return F.pad(img, padding)
+        return F.pad(img, padding)
 
     tmp = max(32, int(32 / scale))
     ph = ((h - 1) // tmp + 1) * tmp

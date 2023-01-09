@@ -17,7 +17,7 @@ from sd_video_utils import *
 from kdiffusion import KDiffusionSampler
 from inference_realesrgan import *
 from ldm.util import instantiate_from_config
-from inference_rife import motion_interpolation
+from inference_rife import motion_interpolation, load_RIFE_model
 
 import sys
 sys.path.append('stable-diffusion-2/optimizedSD')
@@ -78,6 +78,7 @@ class ModelState:
         self.FS = None
         self.CS = None
         self.upsampler = None
+        self.rife_model = None
 
 
 class PathArgs:
@@ -98,6 +99,7 @@ def load_model(path_args, optimized=False):
     model_state = ModelState()
 
     model_state.upsampler = load_ESRGAN_model(model_name='RealESRGAN_x2plus')
+    model_state.rife_model = load_RIFE_model(model_state, path_args.rife_path)
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
     if not optimized:
@@ -315,7 +317,7 @@ def generate_embeddings(prompts, model_state):
     return C, uc
 
 
-def compile_video(video_args, path_args, base_count):
+def compile_video(video_args, path_args, base_count, model_state):
     if(video_args.video_name == None):
         video_count = len(os.listdir(path_args.video_path))
         video_name = f"video{video_count}"
@@ -324,7 +326,7 @@ def compile_video(video_args, path_args, base_count):
 
     if video_args.interp_exp > 0: #we perform motion interpolation
         #TODO make the interp_exp a interp_factor parameter, ensure it is a multiple of 2 and do some log to get it (probably bit shift)
-        motion_interpolation(path_args.image_path, path_args.video_path, video_args.fps, frames_count=video_args.frames, exp=video_args.interp_exp, starting_frame=base_count, model_dir=path_args.rife_path, scale=1.0, codec='avc1') #TODO add the feature to start at some image
+        motion_interpolation(path_args.image_path, path_args.video_path, video_args.fps, frames_count=video_args.frames, exp=video_args.interp_exp, starting_frame=base_count, ms=model_state, scale=1.0, codec='avc1') #TODO add the feature to start at some image
     else:
         sample_regex = os.path.join(path_args.image_path, "%05d.png")
         command = f"ffmpeg -r {video_args.fps} -start_number {base_count} -i {sample_regex} -c:v libx264 -r 30 -pix_fmt yuv420p {path_args.video_path}"                       
@@ -355,7 +357,8 @@ def generate_video (
 
             C, uc = generate_embeddings(video_args.prompts, model_state)
 
-            model_state.FS.to(model_state.device)
+            model_state.model.to(model_state.device) #move the UNet model to gpu
+            model_state.FS.to(model_state.device) #move the autoencoder to gpu
 
             # Init thread pool
             num_workers = 1
@@ -408,7 +411,7 @@ def generate_video (
                 c = tensor_multi_step_interpolation(C, i, video_args.frames, prompt_frames, k=2.0)
 
                 if video_args.color_match : 
-                    color_sample = tensor_multi_step_interpolation(color_samples, i, video_args.frames, prompt_frames, k=2.0, is_slerp=False)
+                    color_sample = tensor_multi_step_interpolation(color_samples, i, video_args.frames, prompt_frames, k=4.0, is_slerp=False)
                 
                 previous_latent = process_previous_image(model_state, previous_sample, xform, 
                                         video_args.color_match, color_sample if video_args.color_match else None, hsv= (((i-1) % 2) == 0))
@@ -438,13 +441,14 @@ def generate_video (
                 if progress_var is not None:
                     progress_var.x = (i+1) / video_args.frames
 
-            #Free some video memory by pushing the auto-encoder to RAM 
+            #Free some video memory by pushing the auto-encoder and the UNet to RAM 
             model_state.FS.to("cpu")
+            model_state.model.to("cpu")
 
             # Wait for upscaling/saving to finish
             pool.shutdown()
 
-            compile_video(video_args, path_args, base_count)
+            compile_video(video_args, path_args, base_count, model_state)
 
 
     return
@@ -508,7 +512,7 @@ def generate_walk_video(
             # Wait for upscaling/saving to finish
             pool.shutdown()
 
-            compile_video(video_args, path_args, base_count)
+            compile_video(video_args, path_args, base_count, model_state)
 
     return
 
