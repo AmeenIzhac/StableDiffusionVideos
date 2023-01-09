@@ -67,7 +67,7 @@ def api():
     video_args.frames = int(args.get('frames'))
     video_args.fps = int(args.get('fps'))
 
-    fMult = args.get('fMult')
+    fMult = int(args.get('fMult'))
     print(f'\n\n\n===================\nfMult is {fMult}\n===================\n\n\n')
     video_args.interp_exp = fMult
 
