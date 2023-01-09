@@ -17,7 +17,7 @@ from sd_video_utils import *
 from kdiffusion import KDiffusionSampler
 from inference_realesrgan import *
 from ldm.util import instantiate_from_config
-from inference_rife import motion_interpolation, load_RIFE_model
+#from inference_rife import motion_interpolation, load_RIFE_model
 
 import sys
 sys.path.append('stable-diffusion-2/optimizedSD')
@@ -99,7 +99,7 @@ def load_model(path_args, optimized=False):
     model_state = ModelState()
 
     model_state.upsampler = load_ESRGAN_model(model_name='RealESRGAN_x2plus')
-    model_state.rife_model = load_RIFE_model(model_state, path_args.rife_path)
+    #load_RIFE_model(model_state, path_args.rife_path)
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
     if not optimized:
@@ -324,7 +324,7 @@ def compile_video(video_args, path_args, base_count, model_state):
     else:
         video_name = video_args.video_name
 
-    if video_args.interp_exp > 0: #we perform motion interpolation
+    if False and video_args.interp_exp > 0: #we perform motion interpolation
         #TODO make the interp_exp a interp_factor parameter, ensure it is a multiple of 2 and do some log to get it (probably bit shift)
         motion_interpolation(path_args.image_path, path_args.video_path, video_args.fps, frames_count=video_args.frames, exp=video_args.interp_exp, starting_frame=base_count, ms=model_state, scale=1.0, codec='avc1') #TODO add the feature to start at some image
     else:
@@ -335,6 +335,16 @@ def compile_video(video_args, path_args, base_count, model_state):
 
 def frame_path(frame_number, path_args):
     return os.path.join(path_args.image_path, f"{frame_number:05}.png")
+
+def move_FS_UN_to_gpu(model_state):
+    model_state.model.to(model_state.device) #move the UNet model to gpu
+    model_state.FS.to(model_state.device) #move the autoencoder to gpu
+    model_state.model.cuda()
+    model_state.FS.cuda()
+
+def move_FS_UN_to_cpu(model_state):
+    model_state.FS.to("cpu")
+    model_state.model.to("cpu")
 
 
 def generate_video (
@@ -357,8 +367,7 @@ def generate_video (
 
             C, uc = generate_embeddings(video_args.prompts, model_state)
 
-            model_state.model.to(model_state.device) #move the UNet model to gpu
-            model_state.FS.to(model_state.device) #move the autoencoder to gpu
+            move_FS_UN_to_gpu(model_state)
 
             # Init thread pool
             num_workers = 1
@@ -376,7 +385,7 @@ def generate_video (
                 progress_var.x = 1 / video_args.frames
 
             #=====================SUBSEQUENT_IMAGES_GENERATION=========================#
-            xform = make_xform_2d(  image_args.W, image_args.H, video_args.x, 
+            xform = make_xform_2d(  image_args.W, image_args.H, -video_args.x, 
                                     video_args.y, video_args.angle, video_args.zoom )
 
 
@@ -442,8 +451,7 @@ def generate_video (
                     progress_var.x = (i+1) / video_args.frames
 
             #Free some video memory by pushing the auto-encoder and the UNet to RAM 
-            model_state.FS.to("cpu")
-            model_state.model.to("cpu")
+            move_FS_UN_to_cpu
 
             # Wait for upscaling/saving to finish
             pool.shutdown()
@@ -475,7 +483,7 @@ def generate_walk_video(
 
             C, uc = generate_embeddings(video_args.prompts, model_state)
 
-            model_state.FS.to(model_state.device)
+            move_FS_UN_to_gpu(model_state)
 
             # Init thread pool
             num_workers = video_args.inter_frames + 1
@@ -507,7 +515,7 @@ def generate_walk_video(
                     progress_var.x = (i+1) / video_args.frames
 
             #Free some video memory by pushing the auto-encoder to RAM 
-            model_state.FS.to("cpu")
+            move_FS_UN_to_cpu(model_state)
 
             # Wait for upscaling/saving to finish
             pool.shutdown()
