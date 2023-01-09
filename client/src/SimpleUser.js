@@ -67,8 +67,8 @@ export default function SimpleUser() {
     setLoading(true);
     axios({
       method: "get",
-      // url: `https://stablediffusionvideoswebserver-production.up.railway.app/request`,
-      url: `http://localhost:3001/request`,
+      url: `https://stablediffusionvideoswebserver-production.up.railway.app/request`,
+      // url: `http://localhost:3001/request`,
       params: {
         prompts: (prompt.length === 0
           ? [...prompts]
@@ -134,8 +134,8 @@ export default function SimpleUser() {
     console.log(jobID);
     return axios({
       method: "get",
-      // url: `https://stablediffusionvideoswebserver-production.up.railway.app/status`,
-      url: `http://localhost:3001/status`,
+      url: `https://stablediffusionvideoswebserver-production.up.railway.app/status`,
+      // url: `http://localhost:3001/status`,
       params: {
         jobID: jobID,
       },
@@ -159,8 +159,8 @@ export default function SimpleUser() {
     }
     axios({
       method: "get",
-      // url: `https://stablediffusionvideoswebserver-production.up.railway.app/getCreatedVideo`,
-      url: `http://localhost:3001/getCreatedVideo`,
+      url: `https://stablediffusionvideoswebserver-production.up.railway.app/getCreatedVideo`,
+      // url: `http://localhost:3001/getCreatedVideo`,
       params: {
         jobID: jobID,
         fileName: fileName,
@@ -203,8 +203,8 @@ export default function SimpleUser() {
     setLoading(true);
     axios({
       method: "get",
-      // url: `https://stablediffusionvideoswebserver-production.up.railway.app/generate`,
-      url: `http://localhost:3001/generate`,
+      url: `https://stablediffusionvideoswebserver-production.up.railway.app/generate`,
+      // url: `http://localhost:3001/generate`,
       params: {
         prompts: [...prompts, prompt].join(";"),
         frames: frames,
