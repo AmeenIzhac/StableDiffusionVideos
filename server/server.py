@@ -90,5 +90,5 @@ def api():
 if __name__ == '__main__':
     # ssl_context = ('./certicates/server.crt', './certicates/server.key')
     app.run(
-        host='192.168.1.125', 
+        host='192.168.1.126', 
         port=8080)
