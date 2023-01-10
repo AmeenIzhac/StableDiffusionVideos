@@ -74,7 +74,7 @@ export default function Dropdown({
                         <div className="alignCenter">
                           <div className="tooltip checkBoxContainer">
                             <label htmlFor="upscale">Upscales? </label>
-                            <input type="checkbox" id="upscale" name="upscale" />
+                            <input type="checkbox" id="upscale" name="upscale" defaultChecked={true} />
                             <span class="tooltiptext">Whether to upscale the generated images. The image definition is doubled</span>
                           </div>
                         </div>

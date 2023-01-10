@@ -15,14 +15,14 @@ export default function SimpleUser() {
   const promptRef = useRef();
   const [isImg2Img, setisImg2Img] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [frames, setFrames] = useState("60");
-  const [width, setWidth] = useState("512");
-  const [height, setHeight] = useState("512");
+  const [frames, setFrames] = useState("15");
+  const [width, setWidth] = useState("640");
+  const [height, setHeight] = useState("640");
   const [angle, setAngle] = useState("0");
   const [fMult, setfMult] = useState("2");
   const [strength, setStrength] = useState("0.4");
   const [zoom, setZoom] = useState("1.1");
-  const [fps, setFps] = useState("20");
+  const [fps, setFps] = useState("24");
   const [xShift, setxShift] = useState("0");
   const [yShift, setyShift] = useState("0");
   const [noNoises, setNoNoises] = useState("1");
@@ -37,22 +37,10 @@ export default function SimpleUser() {
   var fileName = "";
 
   function resetParams() {
-    console.log(`strength is ${strength}`);
     setSrc("");
     setProgress(0);
     setPrompts([]);
     promptRef.current.value = "";
-    setisImg2Img(true);
-    setFrames("60");
-    setWidth("512");
-    setHeight("512");
-    setAngle("0");
-    setZoom("1.1");
-    setFps("20");
-    setxShift("0");
-    setyShift("0");
-    setNoNoises("1");
-    document.getElementById("upscale").checked = false;
   }
 
   // Create a new job on server and set the current jobID
@@ -86,7 +74,7 @@ export default function SimpleUser() {
         isImg2Img: isImg2Img,
         fMult: fMult,
         strength: strength,
-        upscale: document.getElementById("upscale").checked,
+        upscale: document.getElementById("upscale") === null ? false : document.getElementById("upscale").checked,
       },
       responseType: "application/json",
       timeout: 100000,
@@ -191,62 +179,6 @@ export default function SimpleUser() {
   };
   // end temp testing
 
-  function getVideo() {
-    console.log("get viddddddeo");
-    const prompt = promptRef.current.value;
-
-    if (prompt === "") {
-      alert("Please enter a prompt");
-      return;
-    }
-    setSrc("");
-    setLoading(true);
-    axios({
-      method: "get",
-      url: `https://stablediffusionvideoswebserver-production.up.railway.app/generate`,
-      // url: `http://localhost:3001/generate`,
-      params: {
-        prompts: [...prompts, prompt].join(";"),
-        frames: frames,
-        width: width,
-        height: height,
-        angle: angle,
-        zoom: zoom,
-        fps: fps,
-        xShift: xShift,
-        yShift: yShift,
-        noNoises: noNoises,
-        isImg2Img: isImg2Img,
-        upscale: document.getElementById("upscale").checked,
-      },
-      responseType: "blob",
-      timeout: 10000000,
-    })
-      .then((response) => {
-        console.log(response.data);
-        setSrc(URL.createObjectURL(response.data));
-        console.log(src);
-      })
-      .catch((error) => {
-        alert("Could not connect to server");
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-
-    setAngle("0");
-    setZoom("1");
-    setWidth("704");
-    setHeight("704");
-
-    promptRef.current.value = "";
-    setPrompts([]);
-    const dropdown = document.getElementById("dropdown");
-    const button = document.getElementById("button");
-    dropdown.classList.remove("open");
-    button.classList.remove("rotate");
-  }
-
   function addPrompt() {
     if (promptRef.current.value === "") {
       alert("Please enter a prompt");
@@ -270,7 +202,7 @@ export default function SimpleUser() {
 
   function handleKeyDown(event) {
     if (event.key === "Enter") {
-      getVideo();
+      createJob();
     }
   }
 
@@ -339,41 +271,47 @@ export default function SimpleUser() {
             </div>
           ) : null}
         </div>
-        <div className="promptContainerDiv">
-          <div className="promptDiv">
-            <input
-              className="prompt"
-              ref={promptRef}
-              placeholder="Enter Text Prompt..."
-              onSubmit={createJob}
-              onKeyDown={handleKeyDown}
-            ></input>
-            <button className="promptButton" onClick={addPrompt}>
-              +
-            </button>
-            <button className="promptButton" onClick={createJob}>
-              Generate Video
-            </button>
-            {/* <button className='promptButton' onClick={getVideo} onSubmit={logger}>Generate Video</button> */}
+        {
+          loading ? 
+          <></> : 
+          <div className="promptContainerDiv">
+            <div className="promptDiv">
+              <input
+                className="prompt"
+                ref={promptRef}
+                placeholder="Enter Text Prompt..."
+                onSubmit={createJob}
+                onKeyDown={handleKeyDown}
+              ></input>
+              <button className="promptButton tooltip" onClick={addPrompt}>
+                Add Prompt
+                <span class="tooltiptext">Add extra prompts for semantic interpolation</span>
+              </button>
+              <button className="promptButton" onClick={createJob}>
+                Generate Video
+              </button>
+              {/* <button className='promptButton' onClick={getVideo} onSubmit={logger}>Generate Video</button> */}
+            </div>
+            <div className="promptsContainer">
+              {prompts.map((prompt, index) => {
+                return (
+                  <div key={index} className="promptsList">
+                    <span> {prompt} </span>
+                    <button
+                      onClick={() => {
+                        setPrompts(prompts.filter((_, i) => i !== index));
+                      }}
+                      className="removePrompt"
+                    >
+                      <div className="horizontal"></div>
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-          <div className="promptsContainer">
-            {prompts.map((prompt, index) => {
-              return (
-                <div key={index} className="promptsList">
-                  <span> {prompt} </span>
-                  <button
-                    onClick={() => {
-                      setPrompts(prompts.filter((_, i) => i !== index));
-                    }}
-                    className="removePrompt"
-                  >
-                    <div className="horizontal"></div>
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        }
+        
         {/* <div className='frameDiv'>
           <FrameSelect srcs={frames} selectFunction={selectFunction} getNewFrame={getNewFrame}></FrameSelect>
         </div> */}
