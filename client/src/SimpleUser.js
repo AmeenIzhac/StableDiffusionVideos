@@ -9,6 +9,7 @@ import a from "./assets/a.jpg";
 import b from "./assets/b.jpg";
 import c from "./assets/c.jpg";
 import d from "./assets/d.jpg";
+import settings from './assets/settings_icon.svg'
 
 export default function SimpleUser() {
   const [src, setSrc] = useState("");
@@ -45,7 +46,7 @@ export default function SimpleUser() {
 
   // Create a new job on server and set the current jobID
   function createJob() {
-    if (promptRef.current.value === "") {
+    if (promptRef.current.value === "" && prompts.length === 0) {
       alert("Please enter a prompt");
       return;
     }
@@ -290,9 +291,6 @@ export default function SimpleUser() {
                 Add Prompt
                 <span class="tooltiptext">Add extra prompts for semantic interpolation</span>
               </button>
-              <button className="promptButton" onClick={createJob}>
-                Generate Video
-              </button>
               {/* <button className='promptButton' onClick={getVideo} onSubmit={logger}>Generate Video</button> */}
             </div>
             <div className="promptsContainer">
@@ -311,6 +309,14 @@ export default function SimpleUser() {
                   </div>
                 );
               })}
+            </div>
+            <div className="flexBelowSearch">
+              <button className="promptButton" onClick={createJob}>
+                Generate Video
+              </button>
+              <button className="settingsBtn" onClick={dropOptions}>
+                <img className="settingsImg" src={settings} />
+              </button>
             </div>
           </div>
         }
