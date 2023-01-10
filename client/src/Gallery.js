@@ -13,9 +13,9 @@ export default function Gallery() {
     }
     axios({
       method: "get",
-      url: `https://stablediffusionvideoswebserver-production.up.railway.app/getGalleryVideos`,
-      // url: `http://localhost:3001/getGalleryVideos`,
-      // responseType: "json",
+      // url: `https://stablediffusionvideoswebserver-production.up.railway.app/getGalleryVideos`,
+      url: `http://localhost:3001/getGalleryVideos`,
+      responseType: "json",
       params: {
         user: user,
       },
