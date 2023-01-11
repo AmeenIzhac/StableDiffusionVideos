@@ -1,0 +1,44 @@
+.Gallery .videos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+
+  /* border: solid red; */
+}
+
+.Gallery .vidBox {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  /* border: solid red; */
+}
+
+.Gallery .video {
+  min-height: 300px;
+  min-width: 300px;
+  margin: 20px;
+  border: 5px solid;
+  border-image-source: linear-gradient(90deg, #de93fa, #98a7f9);
+  border-image-slice: 1;
+}
+
+.goBack {
+  color: var(--main-bg-light);
+  border: none;
+  border-bottom: 3px solid var(--main-bg-light);
+  font-family: "Ubuntu Mono";
+  font-size: 0.9em;
+  margin: 5px 0 0 5px;
+  /* border-radius: 10px 10px 0 0; */
+}
+
+.goBack:hover {
+  background-color: var(--main-bg-light);
+  color: var(--main-bg-dark);
+}
+
+.Gallery .galleryTitle {
+  color: white;
+  font-size: 50px;
+  text-align: center;
+}

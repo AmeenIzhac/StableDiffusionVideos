@@ -4,15 +4,12 @@ from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import subprocess
 
-sys.path.append('../custom_scripts/')
-from txt2video import load_model, generate_video, ImageArgs, VideoArgs, PathArgs, FloatWrapper
+sys.path.append('custom_scripts/')
+from txt2video import load_model, generate_video, generate_walk_video, ImageArgs, VideoArgs, PathArgs, FloatWrapper
 
 # Load model
-cfg_path = '../stable-diffusion-2/configs/stable-diffusion/v1-inference.yaml'
-optimized_cfg_path = '../stable-diffusion-2/optimizedSD/v1-inference.yaml'
-ckpt_path = '../stable-diffusion-2/models/ldm/stable-diffusion-v1/model.ckpt'
-model = load_model(optimized_cfg_path, ckpt_path, optimized=True)
-
+path_args = PathArgs()
+model = load_model(path_args, optimized=True)
 
 app = Flask(__name__)
 cors = CORS(app)
@@ -29,7 +26,7 @@ def test():
 
 @app.route('/getProgress')
 def getProgress():
-    return jsonify({"progress": progress})
+    return jsonify({"progress": progress.x})
 
 @app.route('/getVideo')
 def getVideo():
@@ -44,7 +41,7 @@ def getVideo():
 @app.route('/api')
 def api():
     # reset progress
-    progress = 0
+    progress.x = 0
     
     # Extract options
     args = request.args
@@ -70,15 +67,20 @@ def api():
     video_args.frames = int(args.get('frames'))
     video_args.fps = int(args.get('fps'))
 
+    fMult = int(args.get('fMult'))
+    print(f'\n\n\n===================\nfMult is {fMult}\n===================\n\n\n')
+    video_args.interp_exp = fMult
+
+    video_args.strength = float(args.get('strength'))
+
     video_args.upscale = bool(args.get('upscale'))
     video_args.video_name = video_name
 
-    path_args = PathArgs()
     path_args.image_path = os.path.abspath('./outputs/frames/')
     path_args.video_path = os.path.abspath(f'./outputs/videos/{video_name}.mp4')
 
     # Generate video
-    if bool(args.get('isImg2Img')):
+    if args.get('isImg2Img') == 'true':
         generate_video(image_args, video_args, path_args, model, progress)
     else:
         generate_walk_video(image_args, video_args, path_args, model, int(args.get('noNoises')), progress)
@@ -90,5 +92,5 @@ def api():
 if __name__ == '__main__':
     # ssl_context = ('./certicates/server.crt', './certicates/server.key')
     app.run(
-        host='192.168.1.125', 
+        host='192.168.1.108', 
         port=8080)
