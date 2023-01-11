@@ -60,6 +60,7 @@ export default function SimpleUser({ loggedIn, setLoggedIn }) {
       // url: `http://localhost:3001/request`,
       url: "https://sdvidgenwebserver.online/request",
       params: {
+        fileName: fileName,
         prompts: (prompt.length === 0
           ? [...prompts]
           : [...prompts, prompt]
