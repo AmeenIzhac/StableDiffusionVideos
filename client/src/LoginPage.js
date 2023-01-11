@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 
-export default function LoginPage() {
+export default function LoginPage({ loggedIn, setLoggedIn }) {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,6 +24,7 @@ export default function LoginPage() {
         Cookies.set("loggedInUser", email, { expires: 7 }); // 7 days
         navigate("/");
         console.log(Cookies.get("loggedInUser"));
+        setLoggedIn(true);
       } else {
         console.log("no entry");
       }
@@ -32,7 +33,11 @@ export default function LoginPage() {
 
   return (
     <div className="LoginPage">
-      <h1><a href="/" className="back-to-search">&larr; Back To Video Generation</a></h1>
+      <h1>
+        <a href="/" className="back-to-search">
+          &larr; Back To Video Generation
+        </a>
+      </h1>
       <div className="container">
         <h1 className="header">Login</h1>
         <input

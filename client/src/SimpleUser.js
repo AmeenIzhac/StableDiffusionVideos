@@ -9,9 +9,9 @@ import a from "./assets/a.jpg";
 import b from "./assets/b.jpg";
 import c from "./assets/c.jpg";
 import d from "./assets/d.jpg";
-import settings from './assets/settings_icon.svg'
+import settings from "./assets/settings_icon.svg";
 
-export default function SimpleUser() {
+export default function SimpleUser({ loggedIn, setLoggedIn }) {
   const [src, setSrc] = useState("");
   const promptRef = useRef();
   const [isImg2Img, setisImg2Img] = useState(true);
@@ -27,7 +27,6 @@ export default function SimpleUser() {
   const [xShift, setxShift] = useState("0");
   const [yShift, setyShift] = useState("0");
   const [noNoises, setNoNoises] = useState("1");
-  const [loggedIn, setLoggedIn] = useState(Cookies.get("loggedInUser") != null);
 
   //we dont need a state to track the upscaling
   //just use document.getElementById('upscale').checked which will return a boolean
@@ -77,7 +76,10 @@ export default function SimpleUser() {
         isImg2Img: isImg2Img,
         fMult: fMult,
         strength: strength,
-        upscale: document.getElementById("upscale") === null ? false : document.getElementById("upscale").checked,
+        upscale:
+          document.getElementById("upscale") === null
+            ? false
+            : document.getElementById("upscale").checked,
       },
       responseType: "application/json",
       timeout: 100000,
@@ -278,9 +280,9 @@ export default function SimpleUser() {
             </div>
           ) : null}
         </div>
-        {
-          loading ? 
-          <></> : 
+        {loading ? (
+          <></>
+        ) : (
           <div className="promptContainerDiv">
             <div className="promptDiv">
               <input
@@ -292,7 +294,9 @@ export default function SimpleUser() {
               ></input>
               <button className="promptButton tooltip" onClick={addPrompt}>
                 Add Prompt
-                <span class="tooltiptext">Add extra prompts for semantic interpolation</span>
+                <span className="tooltiptext">
+                  Add extra prompts for semantic interpolation
+                </span>
               </button>
               {/* <button className='promptButton' onClick={getVideo} onSubmit={logger}>Generate Video</button> */}
             </div>
@@ -322,8 +326,8 @@ export default function SimpleUser() {
               </button>
             </div>
           </div>
-        }
-        
+        )}
+
         {/* <div className='frameDiv'>
           <FrameSelect srcs={frames} selectFunction={selectFunction} getNewFrame={getNewFrame}></FrameSelect>
         </div> */}
