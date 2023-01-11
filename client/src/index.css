@@ -58,10 +58,12 @@ ul {
 .prompt {
   width: 70vw;
   border: none;
-  border-bottom: 3px solid var(--main-bg-light);
-  border-top-left-radius: 10px;
   padding: 5px 20px;
   background-color: var(--main-bg-dark);
+  border-width: 0.3rem;
+  border-bottom-style: solid;
+  border-image-source: linear-gradient(to right, #de93fa, #98a7f9);
+  border-image-slice: 1;
   caret-color: var(--main-bg-light);
   font-family: "Ubuntu Mono";
   font-size: 2em;
@@ -87,6 +89,10 @@ ul {
   color: var(--main-bg-light);
   border: none;
   border-bottom: 3px solid var(--main-bg-light);
+  border-width: 0.3rem;
+  border-bottom-style: solid;
+  border-image-source: linear-gradient(to right, #de93fa, #98a7f9);
+  border-image-slice: 1;
   font-family: "Ubuntu Mono";
   font-size: 1.2em;
   margin-right: 5px;
@@ -98,19 +104,10 @@ ul {
   color: var(--main-bg-dark);
 }
 
-.video {
-  max-width: 1024px;
-  position: relative;
-  margin-top: 5vh;
-  width: 600px;
-}
-
 .promptsContainer {
-  display: grid;
-  grid-template-columns: auto auto auto auto;
-  grid-gap: 10px;
-  padding: 10px;
-  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 5px;
 }
 
 .promptsList {
@@ -121,9 +118,10 @@ ul {
   border: 1px solid var(--main-bg-light);
   border-radius: 100vmax;
   font-family: "Ubuntu Mono";
-  font-size: 1.2em;
+  font-size: 0.8em;
   padding: 10px;
-  grid-row: 1;
+  max-width: 80vw;
+  text-overflow: ellipsis;
 }
 
 .removePrompt {
@@ -133,8 +131,8 @@ ul {
   font-family: "Ubuntu Mono";
   font-size: 1.2em;
   border-radius: 100vmax;
-  width: 30px;
-  height: 30px;
+  width: 20px;
+  height: 20px;
   margin-left: 5px;
 }
 
@@ -214,6 +212,7 @@ ul {
   grid-template-columns: repeat(2, 1fr);
   gap: 1em;
   border-top: 1px solid var(--main-bg-dark);
+  margin-bottom: 10px;
 }
 
 .fullRow {
@@ -587,7 +586,6 @@ ul {
   align-items: center;
 }
 
-
 .tooltip {
   position: relative;
   display: inline-block;
@@ -596,16 +594,18 @@ ul {
 .tooltip .tooltiptext {
   visibility: hidden;
   width: 240px;
-  background-color: black;
+  background-color: var(--main-bg-dark);
+  border: 1px solid var(--main-bg-light);
   color: #fff;
   text-align: center;
   border-radius: 6px;
   padding: 5px 0;
   position: absolute;
   z-index: 1;
-  bottom: 150%;
-  left: 50%;
+  bottom: 120%;
+  left: -10%;
   margin-left: -60px;
+  padding: 5px 5px;
 }
 
 .tooltip .tooltiptext::after {
@@ -616,10 +616,39 @@ ul {
   margin-left: -5px;
   border-width: 5px;
   border-style: solid;
-  border-color: black transparent transparent transparent;
+  border-color: var(--main-bg-light) transparent transparent transparent;
 }
 
 .tooltip:hover .tooltiptext {
   visibility: visible;
   font-size: 0.8em;
 }
+
+.flexBelowSearch {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.settingsImg {
+  width: 2.5em;
+}
+
+.settingsBtn {
+  background-color: var(--main-bg-dark);
+  display: flex;
+  padding: 8px 5px 5px 5px;
+  border: none;
+  border-bottom: 3px solid var(--main-bg-light);
+  margin-top: 5px;
+  border-width: 0.3rem;
+  border-bottom-style: solid;
+  border-image-source: linear-gradient(to right, #de93fa, #98a7f9);
+  border-image-slice: 1;
+}
+
+.settingsBtn:hover {
+  background-color: rgba(154, 78, 174, 0.4);
+}
+
+
