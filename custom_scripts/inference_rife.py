@@ -104,10 +104,9 @@ def motion_interpolation(frames_dir, output_dir, fps, frames_count, exp=1, scale
     for f in os.listdir(frames_dir):
         if 'png' in f:
             videogen.append(f)
-    tot_images = len(videogen)
     videogen.sort(key= lambda x:int(x[:-4]))
     videogen = find_frames(videogen, starting_frame, frames_count)
-    tot_frame = frames_count
+    tot_frame = len(videogen)
     lastframe = cv2.imread(os.path.join(frames_dir, videogen[0]), cv2.IMREAD_UNCHANGED)[:, :, ::-1].copy()
     videogen = videogen[1:]
     h, w, _ = lastframe.shape
@@ -199,7 +198,7 @@ def motion_interpolation(frames_dir, output_dir, fps, frames_count, exp=1, scale
                 ssim = ssim_matlab(I0_small[:, :3], I1_small[:, :3])
                 frame = (I1[0] * 255).byte().cpu().numpy().transpose(1, 2, 0)[:h, :w]
 
-            if ssim < 0.2:
+            if ssim < 0.02:
                 output = []
                 for i in range((2 ** exp) - 1):
                     output.append(I0)
@@ -215,8 +214,7 @@ def motion_interpolation(frames_dir, output_dir, fps, frames_count, exp=1, scale
             else:
                 output = make_inference(I0, I1, 2**exp-1) if exp else []
 
-            I1.to("cpu")
-            I0.to("cpu")
+
             write_buffer.put(lastframe)
             for mid in output:
                 mid = (((mid[0] * 255.).byte().cpu().numpy().transpose(1, 2, 0)))
