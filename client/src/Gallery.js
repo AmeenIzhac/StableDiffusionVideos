@@ -16,7 +16,7 @@ export default function Gallery({ loggedIn, setLoggedIn }) {
       method: "get",
       // url: `https://stablediffusionvideoswebserver-production.up.railway.app/getGalleryVideos`,
       // url: `http://localhost:3001/getGalleryVideos`,
-      url: "http://18.134.171.110:3001/getGalleryVideos",
+      url: "https://sdvidgenwebserver.online/getGalleryVideos",
       responseType: "json",
       params: {
         user: user,
