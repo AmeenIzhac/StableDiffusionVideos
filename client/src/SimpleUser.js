@@ -58,7 +58,7 @@ export default function SimpleUser({ loggedIn, setLoggedIn }) {
       //url: `https://stablediffusionvideoswebserver-production.up.railway.app/request`,
       //url: 'https://cyan-hungry-pangolin.cyclic.app/request',
       // url: `http://localhost:3001/request`,
-  url: 'https://sdvidgenwebserver.online/request',   
+      url: "https://sdvidgenwebserver.online/request",
       params: {
         prompts: (prompt.length === 0
           ? [...prompts]
@@ -130,7 +130,7 @@ export default function SimpleUser({ loggedIn, setLoggedIn }) {
       //url: `https://stablediffusionvideoswebserver-production.up.railway.app/status`,
       //url: 'https://cyan-hungry-pangolin.cyclic.app/status',
       // url: `http://localhost:3001/status`,
-      url: 'https://sdvidgenwebserver.online/status',
+      url: "https://sdvidgenwebserver.online/status",
       params: {
         jobID: jobID,
       },
@@ -157,7 +157,7 @@ export default function SimpleUser({ loggedIn, setLoggedIn }) {
       //url: `https://stablediffusionvideoswebserver-production.up.railway.app/getCreatedVideo`,
       // url: `http://localhost:3001/getCreatedVideo`,
       //url: 'https://cyan-hungry-pangolin.cyclic.app/getCreatedVideo',
-      url: 'https://sdvidgenwebserver.online/getCreatedVideo',
+      url: "https://sdvidgenwebserver.online/getCreatedVideo",
       params: {
         jobID: jobID,
         fileName: fileName,

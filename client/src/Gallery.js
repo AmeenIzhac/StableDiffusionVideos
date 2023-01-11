@@ -102,6 +102,21 @@ export default function Gallery({ loggedIn, setLoggedIn }) {
             </div>
           );
         })}
+        <div className="vidBox">
+          <video className="video" controls src="test.mp4" />
+        </div>
+        <div className="vidBox">
+          <video className="video" controls src="test.mp4" />
+        </div>
+        <div className="vidBox">
+          <video className="video" controls src="test.mp4" />
+        </div>
+        <div className="vidBox">
+          <video className="video" controls src="test.mp4" />
+        </div>
+        <div className="vidBox">
+          <video className="video" controls src="test.mp4" />
+        </div>
       </div>
     </div>
   );

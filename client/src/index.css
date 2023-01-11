@@ -58,10 +58,12 @@ ul {
 .prompt {
   width: 70vw;
   border: none;
-  border-bottom: 3px solid var(--main-bg-light);
-  border-top-left-radius: 10px;
   padding: 5px 20px;
   background-color: var(--main-bg-dark);
+  border-width: 0.3rem;
+  border-bottom-style: solid;
+  border-image-source: linear-gradient(to right, #de93fa, #98a7f9);
+  border-image-slice: 1;
   caret-color: var(--main-bg-light);
   font-family: "Ubuntu Mono";
   font-size: 2em;
@@ -87,6 +89,10 @@ ul {
   color: var(--main-bg-light);
   border: none;
   border-bottom: 3px solid var(--main-bg-light);
+  border-width: 0.3rem;
+  border-bottom-style: solid;
+  border-image-source: linear-gradient(to right, #de93fa, #98a7f9);
+  border-image-slice: 1;
   font-family: "Ubuntu Mono";
   font-size: 1.2em;
   margin-right: 5px;
@@ -642,6 +648,10 @@ ul {
   border: none;
   border-bottom: 3px solid var(--main-bg-light);
   margin-top: 5px;
+  border-width: 0.3rem;
+  border-bottom-style: solid;
+  border-image-source: linear-gradient(to right, #de93fa, #98a7f9);
+  border-image-slice: 1;
 }
 
 .settingsBtn:hover {
