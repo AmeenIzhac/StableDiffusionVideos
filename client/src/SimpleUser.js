@@ -52,6 +52,10 @@ export default function SimpleUser({ loggedIn, setLoggedIn }) {
     const prompt = promptRef.current.value;
     console.log(`prompt is ${prompt}`);
     fileName = [...prompts, prompt][0].replace(" ", "_");
+    var user = "undefined";
+    if (typeof Cookies.get("loggedInUser") != "undefined") {
+      user = Cookies.get("loggedInUser");
+    }
     setLoading(true);
     axios({
       method: "get",
@@ -61,6 +65,7 @@ export default function SimpleUser({ loggedIn, setLoggedIn }) {
       url: "https://sdvidgenwebserver.online/request",
       params: {
         fileName: fileName,
+        user: user,
         prompts: (prompt.length === 0
           ? [...prompts]
           : [...prompts, prompt]
