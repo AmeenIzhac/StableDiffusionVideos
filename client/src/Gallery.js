@@ -23,7 +23,6 @@ export default function Gallery({ loggedIn, setLoggedIn }) {
       },
       timeout: 100000,
     }).then((res) => {
-      console.log(res.data.files);
       // setVideo(res.data.files[0]);
       setVideos(res.data.files);
       // setVideo(URL.createObjectURL(vid));
@@ -33,40 +32,6 @@ export default function Gallery({ loggedIn, setLoggedIn }) {
     getGalleryVideos();
   }, []);
 
-  // function getGalleryVideos() {
-  //   var user = "undefined";
-  //   if (typeof Cookies.get("loggedInUser") != "undefined") {
-  //     user = Cookies.get("loggedInUser");
-  //   }
-  //   axios({
-  //     method: "get",
-  //     // url: `https://stablediffusionvideoswebserver-production.up.railway.app/getCreatedVideo`,
-  //     url: `http://localhost:3001/getGalleryVideos`,
-  //     params: {
-  //       user: user,
-  //     },
-  //     timeout: 100000,
-  //   }).then((res) => {
-  //     console.log("res");
-  //     console.log(res);
-  //     console.log("res.data");
-  //     console.log(res.data);
-  //     console.log("res.data[1]");
-  //     console.log(res.data[1]);
-  //     console.log("res.data[1][0]");
-  //     console.log(res.data[1][0]);
-  //     console.log("res.data[1][0].data");
-  //     console.log(res.data[1][0].data);
-
-  //     const vid = new Blob(res.data[1][0].data, { type: "video/mp4" });
-
-  //     console.log("vid");
-  //     console.log(vid);
-  //     console.log("url");
-  //     console.log(URL.createObjectURL(vid));
-  //     setVideo(URL.createObjectURL(vid));
-  //   });
-  // }
   const navigate = useNavigate();
   const logout = () => {
     Cookies.remove("loggedInUser");
@@ -97,7 +62,7 @@ export default function Gallery({ loggedIn, setLoggedIn }) {
       <div className="videos">
         {videos.map((videoSrc) => {
           return (
-            <div className="vidBox">
+            <div className="vidBox" key={videoSrc}>
               <video className="video" width='40' controls src={videoSrc} />
             </div>
           );

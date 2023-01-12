@@ -4,11 +4,6 @@ import axios from "axios";
 import loadingAnimation from "./assets/loading.gif";
 import Cookies from "js-cookie";
 import Dropdown from "./Dropdown";
-import FrameSelect from "./components/FrameSelect";
-import a from "./assets/a.jpg";
-import b from "./assets/b.jpg";
-import c from "./assets/c.jpg";
-import d from "./assets/d.jpg";
 import settings from "./assets/settings_icon.svg";
 
 export default function SimpleUser({ loggedIn, setLoggedIn }) {
@@ -16,6 +11,8 @@ export default function SimpleUser({ loggedIn, setLoggedIn }) {
   const promptRef = useRef();
   const [isImg2Img, setisImg2Img] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [queuePos, setQueuePos] = useState(0);
   const [frames, setFrames] = useState("15");
   const [width, setWidth] = useState("640");
   const [height, setHeight] = useState("640");
@@ -50,7 +47,6 @@ export default function SimpleUser({ loggedIn, setLoggedIn }) {
       return;
     }
     const prompt = promptRef.current.value;
-    console.log(`prompt is ${prompt}`);
     fileName = [...prompts, prompt][0].replace(" ", "_");
     var user = "undefined";
     if (typeof Cookies.get("loggedInUser") != "undefined") {
@@ -92,7 +88,6 @@ export default function SimpleUser({ loggedIn, setLoggedIn }) {
     })
       .then((res) => {
         jobID = JSON.parse(res.data).id;
-        console.log(jobID);
         poll();
       })
       .catch((err) => {
@@ -105,17 +100,20 @@ export default function SimpleUser({ loggedIn, setLoggedIn }) {
   async function poll() {
     while (true) {
       const status = await getJobStatus();
-      console.log(status);
       switch (status.status) {
         case "pending":
           // setProgress(status.progress)
+          setQueuePos(status.position);
+          setPending(true);
           break;
         case "generating":
+          setPending(false);
           setProgress(status.progress.progress);
           // setProgress(status.progress)
           break;
         case "done":
           getCreatedVideo();
+          setLoading(false);
           return;
         case "error":
           setLoading(false);
@@ -130,7 +128,6 @@ export default function SimpleUser({ loggedIn, setLoggedIn }) {
 
   // get status of job
   async function getJobStatus() {
-    console.log(jobID);
     return axios({
       method: "get",
       //url: `https://stablediffusionvideoswebserver-production.up.railway.app/status`,
@@ -144,7 +141,6 @@ export default function SimpleUser({ loggedIn, setLoggedIn }) {
       timeout: 10000,
     })
       .then((res) => {
-        console.log(JSON.parse(res.data));
         return JSON.parse(res.data);
       })
       .catch((err) => {
@@ -173,8 +169,6 @@ export default function SimpleUser({ loggedIn, setLoggedIn }) {
       timeout: 10000,
     })
       .then((res) => {
-        console.log("res.data");
-        console.log(res.data);
         setSrc(URL.createObjectURL(res.data));
         setLoading(false);
       })
@@ -183,16 +177,6 @@ export default function SimpleUser({ loggedIn, setLoggedIn }) {
         setLoading(false);
       });
   }
-
-  // temp for testing
-  const framesT = [a, b, c, d];
-  const selectFunction = (index) => {
-    console.log(`Frame ${index} Selected`);
-  };
-  const getNewFrame = () => {
-    console.log("Get new frame");
-  };
-  // end temp testing
 
   function addPrompt() {
     if (promptRef.current.value === "") {
@@ -273,67 +257,71 @@ export default function SimpleUser({ loggedIn, setLoggedIn }) {
                 src={loadingAnimation}
                 alt="loading thingy"
               />
-              <div className="progress-bar">
-                <div
-                  className="progress"
-                  style={{ width: `${progress * 100}%` }}
-                ></div>
-              </div>
-              <p style={{ color: `var(--main-bg-light)` }}>
-                {" "}
-                Progress: {Math.round(progress * 10000) / 100}%
-              </p>
-            </div>
-          ) : null}
-        </div>
-        {loading ? (
-          <></>
-        ) : (
-          <div className="promptContainerDiv">
-            <div className="promptDiv">
-              <input
-                className="prompt"
-                ref={promptRef}
-                placeholder="Enter Text Prompt..."
-                onSubmit={createJob}
-                onKeyDown={handleKeyDown}
-              ></input>
-              <button className="promptButton tooltip" onClick={addPrompt}>
-                Add Prompt
-                <span className="tooltiptext">
-                  Add extra prompts for semantic interpolation
-                </span>
-              </button>
-              {/* <button className='promptButton' onClick={getVideo} onSubmit={logger}>Generate Video</button> */}
-            </div>
-            <div className="promptsContainer">
-              {prompts.map((prompt, index) => {
-                return (
-                  <div key={index} className="promptsList">
-                    <span> {prompt} </span>
-                    <button
-                      onClick={() => {
-                        setPrompts(prompts.filter((_, i) => i !== index));
-                      }}
-                      className="removePrompt"
-                    >
-                      <div className="horizontal"></div>
-                    </button>
+              {pending ?
+                (<div>
+                  <p style={{ color: `var(--main-bg-light)`, textAlign: 'center', width: '50vw  ' }}>Waiting for an available GPU machine...</p>
+                  <p style={{ color: `var(--main-bg-light)`, textAlign: 'center', width: '50vw  ' }}>Your position in queue: {queuePos + 1}</p>
+                </div>) :
+                (<>
+                  <div className="progress-bar">
+                    <div
+                      className="progress"
+                      style={{ width: `${progress * 100}%` }}
+                    ></div>
                   </div>
-                );
-              })}
+                  <p style={{ color: `var(--main-bg-light)` }}>
+                    {" "}
+                    Progress: {Math.round(progress * 10000) / 100}%
+                  </p>
+                </>)}
             </div>
-            <div className="flexBelowSearch">
-              <button className="promptButton" onClick={createJob}>
-                Generate Video
-              </button>
-              <button className="settingsBtn" onClick={dropOptions}>
-                <img className="settingsImg" src={settings} />
-              </button>
-            </div>
-          </div>
-        )}
-
+          ) :
+            (
+              <div className="promptContainerDiv">
+                <div className="promptDiv">
+                  <input
+                    className="prompt"
+                    ref={promptRef}
+                    placeholder="Enter Text Prompt..."
+                    onSubmit={createJob}
+                    onKeyDown={handleKeyDown}
+                  ></input>
+                  <button className="promptButton tooltip" onClick={addPrompt}>
+                    Add Prompt
+                    <span className="tooltiptext">
+                      Add extra prompts for semantic interpolation
+                    </span>
+                  </button>
+                </div>
+                <div className="promptsContainer">
+                  {prompts.map((prompt, index) => {
+                    return (
+                      <div key={index} className="promptsList">
+                        <span> {prompt} </span>
+                        <button
+                          onClick={() => {
+                            setPrompts(prompts.filter((_, i) => i !== index));
+                          }}
+                          className="removePrompt"
+                        >
+                          <div className="horizontal"></div>
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="flexBelowSearch">
+                  <button className="promptButton" onClick={createJob}>
+                    Generate Video
+                  </button>
+                  <button className="settingsBtn" onClick={dropOptions}>
+                    <img className="settingsImg" src={settings} />
+                  </button>
+                </div>
+              </div>
+            )
+          }
+        </div>
         {/* <div className='frameDiv'>
           <FrameSelect srcs={frames} selectFunction={selectFunction} getNewFrame={getNewFrame}></FrameSelect>
         </div> */}
