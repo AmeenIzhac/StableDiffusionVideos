@@ -9,6 +9,8 @@ from txt2video import load_model, generate_video, generate_walk_video, ImageArgs
 
 # Load model
 path_args = PathArgs()
+path_args.image_path = './outputs/frames'
+path_args.video_path = './outputs/videos'
 model = load_model(path_args, optimized=True)
 
 app = Flask(__name__)
@@ -33,8 +35,9 @@ def getVideo():
     args = request.args
     for arg in args:
         print(arg, args[arg])
-    file_name = args.get('fileName').replace(' ', '_')
-    file_path = os.path.abspath(f'./outputs/videos/{file_name}.mp4')
+    file_name = args.get('fileName').replace(' ', '_') + '.mp4'
+    file_path = os.path.abspath(os.path.join(path_args.video_path, file_name))
+    print(f'file_path is {file_path}')
     return send_file(file_path, mimetype='video/mp4')
 
 
@@ -47,15 +50,16 @@ def api():
     args = request.args
     
     prompts = args.get('prompts').split(';')
-    video_name = str(prompts[0]).replace(" ", "_")
+    video_name = str(prompts[0]).replace(" ", "_") + '.mp4'
     
     # Prepare options
     image_args = ImageArgs()
-    image_args.steps = 50
+    image_args.steps = 30
     image_args.W = int(args.get('width')) 
     image_args.H = int(args.get('height')) 
 
     video_args = VideoArgs()
+    video_args.video_name = video_name
 
     video_args.prompts = prompts
 
@@ -74,10 +78,14 @@ def api():
     video_args.strength = float(args.get('strength'))
 
     video_args.upscale = bool(args.get('upscale'))
-    video_args.video_name = video_name
 
-    path_args.image_path = os.path.abspath('./outputs/frames/')
-    path_args.video_path = os.path.abspath(f'./outputs/videos/{video_name}.mp4')
+    def empty_dir(dir):
+        for file in os.listdir(dir):
+            os.remove(os.path.join(dir, file))
+
+    #delete the previous one
+    empty_dir(path_args.image_path)
+    empty_dir(path_args.video_path)
 
     # Generate video
     if args.get('isImg2Img') == 'true':
@@ -85,9 +93,9 @@ def api():
     else:
         generate_walk_video(image_args, video_args, path_args, model, int(args.get('noNoises')), progress)
 
+    file_path = os.path.abspath(os.path.join(path_args.video_path, video_name))
     # Respond with the video contents
-    return send_file(path_args.video_path, mimetype='video/mp4')
-
+    return send_file(file_path, mimetype='video/mp4')
 
 if __name__ == '__main__':
     # ssl_context = ('./certicates/server.crt', './certicates/server.key')

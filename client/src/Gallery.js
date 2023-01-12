@@ -98,25 +98,10 @@ export default function Gallery({ loggedIn, setLoggedIn }) {
         {videos.map((videoSrc) => {
           return (
             <div className="vidBox">
-              <video className="video" controls src={videoSrc} />
+              <video className="video" width='40' controls src={videoSrc} />
             </div>
           );
         })}
-        <div className="vidBox">
-          <video className="video" controls src="test.mp4" />
-        </div>
-        <div className="vidBox">
-          <video className="video" controls src="test.mp4" />
-        </div>
-        <div className="vidBox">
-          <video className="video" controls src="test.mp4" />
-        </div>
-        <div className="vidBox">
-          <video className="video" controls src="test.mp4" />
-        </div>
-        <div className="vidBox">
-          <video className="video" controls src="test.mp4" />
-        </div>
       </div>
     </div>
   );

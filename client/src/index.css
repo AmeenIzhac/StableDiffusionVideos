@@ -104,13 +104,6 @@ ul {
   color: var(--main-bg-dark);
 }
 
-.video {
-  max-width: 1024px;
-  position: relative;
-  margin-top: 5vh;
-  width: 600px;
-}
-
 .promptsContainer {
   display: flex;
   flex-wrap: wrap;
@@ -658,17 +651,4 @@ ul {
   background-color: rgba(154, 78, 174, 0.4);
 }
 
-.goBack {
-  color: var(--main-bg-light);
-  border: none;
-  border-bottom: 3px solid var(--main-bg-light);
-  font-family: "Ubuntu Mono";
-  font-size: 0.9em;
-  margin: 5px 0 0 5px;
-  /* border-radius: 10px 10px 0 0; */
-}
 
-.goBack:hover {
-  background-color: var(--main-bg-light);
-  color: var(--main-bg-dark);
-}
