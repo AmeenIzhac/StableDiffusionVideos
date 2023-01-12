@@ -7,13 +7,15 @@ export default function DropdownOptions({
   const dark = '#181818'
   const light = '#9A4EAE'
   const defaultStyle = {
-      backgroundColor: light,
-      color: dark
+      backgroundColor: 'transparent',
+      color: light,
+      borderTop: '1px solid ' + light
   }
   const chosenStyle = {
-      backgroundColor: 'rgba(24,24,24,0.8)',
-      color:light,
-      borderTop: '1px solid ' + light
+      backgroundColor: 'transparent',
+      color: light,
+      borderTop: '1px solid ' + light,
+      borderBottom: '3px solid ' + light
   }
 
   const img2imgStyle = isImg2Img ? chosenStyle : defaultStyle 
