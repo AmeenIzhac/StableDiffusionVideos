@@ -12,6 +12,7 @@ export default function SimpleUser({ loggedIn, setLoggedIn }) {
   const [isImg2Img, setisImg2Img] = useState(true);
   const [loading, setLoading] = useState(false);
   const [pending, setPending] = useState(false);
+  const [queuePos, setQueuePos] = useState(0);
   const [frames, setFrames] = useState("15");
   const [width, setWidth] = useState("640");
   const [height, setHeight] = useState("640");
@@ -96,6 +97,7 @@ export default function SimpleUser({ loggedIn, setLoggedIn }) {
       switch (status.status) {
         case "pending":
           // setProgress(status.progress)
+          setQueuePos(status.position);
           setPending(true);
           break;
         case "generating":
@@ -251,7 +253,8 @@ export default function SimpleUser({ loggedIn, setLoggedIn }) {
               />
               {pending ?
                 (<div>
-                  <p style={{ color: `var(--main-bg-light)`, textAlign: 'center', width: '50vw  ' }}>Waiting for machine...</p>
+                  <p style={{ color: `var(--main-bg-light)`, textAlign: 'center', width: '50vw  ' }}>Waiting for an available GPU machine...</p>
+                  <p style={{ color: `var(--main-bg-light)`, textAlign: 'center', width: '50vw  ' }}>Your position in queue: {queuePos + 1}</p>
                 </div>) :
                 (<>
                   <div className="progress-bar">
