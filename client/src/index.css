@@ -86,7 +86,7 @@ ul {
   background-color: transparent;
   padding: 12px;
   font-size: 20px;
-  color: var(--main-bg-light);
+  /* color: var(--main-bg-light); */
   border: none;
   border-bottom: 3px solid var(--main-bg-light);
   border-width: 0.3rem;
