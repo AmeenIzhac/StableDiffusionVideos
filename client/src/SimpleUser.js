@@ -45,7 +45,6 @@ export default function SimpleUser({ loggedIn, setLoggedIn }) {
       return;
     }
     const prompt = promptRef.current.value;
-    console.log(`prompt is ${prompt}`);
     fileName = [...prompts, prompt][0].replace(" ", "_");
     setLoading(true);
     axios({
@@ -81,7 +80,6 @@ export default function SimpleUser({ loggedIn, setLoggedIn }) {
     })
       .then((res) => {
         jobID = JSON.parse(res.data).id;
-        console.log(jobID);
         poll();
       })
       .catch((err) => {
@@ -94,7 +92,6 @@ export default function SimpleUser({ loggedIn, setLoggedIn }) {
   async function poll() {
     while (true) {
       const status = await getJobStatus();
-      console.log(status);
       switch (status.status) {
         case "pending":
           // setProgress(status.progress)
@@ -119,7 +116,6 @@ export default function SimpleUser({ loggedIn, setLoggedIn }) {
 
   // get status of job
   async function getJobStatus() {
-    console.log(jobID);
     return axios({
       method: "get",
       //url: `https://stablediffusionvideoswebserver-production.up.railway.app/status`,
@@ -133,7 +129,6 @@ export default function SimpleUser({ loggedIn, setLoggedIn }) {
       timeout: 10000,
     })
       .then((res) => {
-        console.log(JSON.parse(res.data));
         return JSON.parse(res.data);
       })
       .catch((err) => {
@@ -162,8 +157,6 @@ export default function SimpleUser({ loggedIn, setLoggedIn }) {
       timeout: 10000,
     })
       .then((res) => {
-        console.log("res.data");
-        console.log(res.data);
         setSrc(URL.createObjectURL(res.data));
         setLoading(false);
       })
