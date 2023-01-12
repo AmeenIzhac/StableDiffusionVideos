@@ -4,11 +4,6 @@ import axios from "axios";
 import loadingAnimation from "./assets/loading.gif";
 import Cookies from "js-cookie";
 import Dropdown from "./Dropdown";
-import FrameSelect from "./components/FrameSelect";
-import a from "./assets/a.jpg";
-import b from "./assets/b.jpg";
-import c from "./assets/c.jpg";
-import d from "./assets/d.jpg";
 import settings from "./assets/settings_icon.svg";
 
 export default function SimpleUser({ loggedIn, setLoggedIn }) {
@@ -178,16 +173,6 @@ export default function SimpleUser({ loggedIn, setLoggedIn }) {
       });
   }
 
-  // temp for testing
-  const framesT = [a, b, c, d];
-  const selectFunction = (index) => {
-    console.log(`Frame ${index} Selected`);
-  };
-  const getNewFrame = () => {
-    console.log("Get new frame");
-  };
-  // end temp testing
-
   function addPrompt() {
     if (promptRef.current.value === "") {
       alert("Please enter a prompt");
@@ -286,7 +271,7 @@ export default function SimpleUser({ loggedIn, setLoggedIn }) {
           <div className="promptContainerDiv">
             <div className="promptDiv">
               <input
-                className="prompt"
+                className="prompt"  
                 ref={promptRef}
                 placeholder="Enter Text Prompt..."
                 onSubmit={createJob}
@@ -298,7 +283,6 @@ export default function SimpleUser({ loggedIn, setLoggedIn }) {
                   Add extra prompts for semantic interpolation
                 </span>
               </button>
-              {/* <button className='promptButton' onClick={getVideo} onSubmit={logger}>Generate Video</button> */}
             </div>
             <div className="promptsContainer">
               {prompts.map((prompt, index) => {
