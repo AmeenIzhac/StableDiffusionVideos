@@ -40,10 +40,15 @@ def getVideo():
     print(f'file_path is {file_path}')
     return send_file(file_path, mimetype='video/mp4')
 
-def empty_dir(dir):
+def empty_dir(dir, video_name=None):
     if os.path.isdir(dir):
-        for file in os.listdir(dir):
-            os.remove(os.path.join(dir, file))
+        if video_name is None: #deleting images
+            for file in os.listdir(dir):
+                os.remove(os.path.join(dir, file))
+        else:
+            joined = os.path.join(dir, video_name)
+            if os.path.isfile(joined):
+                os.remove(joined)
 
 
 @app.route('/api')
@@ -87,9 +92,8 @@ def api():
 
     #delete the previous one
     empty_dir(path_args.image_path)
-    empty_dir(path_args.video_path)
+    empty_dir(path_args.video_path, video_name)
 
-    video_args.seed = 1000
     # Generate video
     if args.get('isImg2Img') == 'true':
         generate_video(image_args, video_args, path_args, model, progress)
