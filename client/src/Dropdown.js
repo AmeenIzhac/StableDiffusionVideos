@@ -33,8 +33,6 @@ export default function Dropdown({
 }) {
   return (
     <div className="slideOptions">
-      {Cookies.get("loggedInUser") ? (
-        <>
           <div className="dropdownOption" id="dropdown">
             <DropdownOptions
               isImg2Img={isImg2Img}
@@ -173,10 +171,6 @@ export default function Dropdown({
             onClick={dropOptions}
             id="button"
           ></button>
-        </>
-      ) : (
-        <></>
-      )}
     </div>
   );
 }
