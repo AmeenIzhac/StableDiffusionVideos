@@ -40,6 +40,11 @@ def getVideo():
     print(f'file_path is {file_path}')
     return send_file(file_path, mimetype='video/mp4')
 
+def empty_dir(dir):
+    if os.path.isdir(dir):
+        for file in os.listdir(dir):
+            os.remove(os.path.join(dir, file))
+
 
 @app.route('/api')
 def api():
@@ -79,9 +84,6 @@ def api():
 
     video_args.upscale = bool(args.get('upscale'))
 
-    def empty_dir(dir):
-        for file in os.listdir(dir):
-            os.remove(os.path.join(dir, file))
 
     #delete the previous one
     empty_dir(path_args.image_path)
@@ -100,5 +102,5 @@ def api():
 if __name__ == '__main__':
     # ssl_context = ('./certicates/server.crt', './certicates/server.key')
     app.run(
-        host='192.168.1.108', 
+        host='192.168.1.126', 
         port=8080)
