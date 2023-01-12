@@ -324,7 +324,7 @@ def compile_video(video_args, path_args, base_count, model_state):
     else:
         video_name = video_args.video_name
 
-    video_save_path = os.path.join(path_args.video_path, f"{video_name}.mp4")
+    video_save_path = os.path.join(path_args.video_path, video_name)
     if video_args.interp_exp > 0: #we perform motion interpolation
         #TODO make the interp_exp a interp_factor parameter, ensure it is a multiple of 2 and do some log to get it (probably bit shift)
         motion_interpolation(path_args.image_path, video_save_path, video_args.fps, frames_count=video_args.frames, exp=video_args.interp_exp, starting_frame=base_count, ms=model_state, scale=1.0, codec='avc1') #TODO add the feature to start at some image

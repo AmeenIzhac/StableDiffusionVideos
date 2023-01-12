@@ -35,8 +35,9 @@ def getVideo():
     args = request.args
     for arg in args:
         print(arg, args[arg])
-    file_name = args.get('fileName').replace(' ', '_')
-    file_path = os.path.abspath(f'{os.path.join(path_args.video_path, file_name)}.mp4')
+    file_name = args.get('fileName').replace(' ', '_') + '.mp4'
+    file_path = os.path.abspath(os.path.join(path_args.video_path, file_name))
+    print(f'file_path is {file_path}')
     return send_file(file_path, mimetype='video/mp4')
 
 
@@ -49,11 +50,11 @@ def api():
     args = request.args
     
     prompts = args.get('prompts').split(';')
-    video_name = str(prompts[0]).replace(" ", "_")
+    video_name = str(prompts[0]).replace(" ", "_") + '.mp4'
     
     # Prepare options
     image_args = ImageArgs()
-    image_args.steps = 50
+    image_args.steps = 30
     image_args.W = int(args.get('width')) 
     image_args.H = int(args.get('height')) 
 
@@ -92,8 +93,9 @@ def api():
     else:
         generate_walk_video(image_args, video_args, path_args, model, int(args.get('noNoises')), progress)
 
+    file_path = os.path.abspath(os.path.join(path_args.video_path, video_name))
     # Respond with the video contents
-    return send_file(path_args.video_path, mimetype='video/mp4')
+    return send_file(file_path, mimetype='video/mp4')
 
 if __name__ == '__main__':
     # ssl_context = ('./certicates/server.crt', './certicates/server.key')
