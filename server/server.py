@@ -82,7 +82,7 @@ def api():
 
     video_args.strength = float(args.get('strength'))
 
-    video_args.upscale = True if args.get('upscale') is == 'true' else False
+    video_args.upscale = True if args.get('upscale') == 'true' else False
 
 
     #delete the previous one
