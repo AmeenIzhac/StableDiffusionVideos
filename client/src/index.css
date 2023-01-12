@@ -476,7 +476,7 @@ ul {
 }
 
 .input {
-  background-color: var(--main-bg-dark);
+  background-color: transparent;
   border: none;
   border-bottom: 2px solid var(--main-bg-light);
   margin-bottom: 20px;
@@ -538,18 +538,6 @@ ul {
   min-width: 300px;
   width: 35vw;
   height: 50vh;
-}
-
-.input {
-  background-color: var(--main-bg-dark);
-  border: none;
-  border-bottom: 2px solid var(--main-bg-light);
-  margin-bottom: 20px;
-  text-align: center;
-  font-size: large;
-  font-family: "Ubuntu Mono";
-  caret-color: var(--main-bg-light);
-  width: 60%;
 }
 
 .input:focus {
