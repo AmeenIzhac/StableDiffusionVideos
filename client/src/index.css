@@ -6,6 +6,9 @@ body {
     "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: var(--main-bg-dark);
+  background-image: url('./assets/background.jpg');
+  background-size: 200vw 100vh ;
 }
 
 :root {
@@ -14,9 +17,6 @@ body {
   --main-bg-light: #9a4eae;
 }
 
-body {
-  background-color: var(--main-bg-dark);
-}
 
 input:focus::placeholder {
   color: transparent;
@@ -59,7 +59,7 @@ ul {
   width: 70vw;
   border: none;
   padding: 5px 20px;
-  background-color: var(--main-bg-dark);
+  background-color: transparent;
   border-width: 0.3rem;
   border-bottom-style: solid;
   border-image-source: linear-gradient(to right, #de93fa, #98a7f9);
@@ -83,7 +83,7 @@ ul {
 }
 
 .promptButton {
-  background-color: var(--main-bg-dark);
+  background-color: transparent;
   padding: 12px;
   font-size: 20px;
   color: var(--main-bg-light);
@@ -175,7 +175,7 @@ ul {
 
 .dropArrow {
   background-image: url("./assets/drop-arrow.svg");
-  background-color: var(--main-bg-dark);
+  background-color: transparent;
   width: 30px;
   height: 12px;
   margin-top: 10px;
@@ -239,7 +239,19 @@ ul {
   font-family: "Ubuntu Mono";
 }
 
+@media screen and (max-width: 900px) {
+  body {
+    background-size: 200vw 100vh;
+    background-repeat: no-repeat;
+  }
+}
+
 @media screen and (min-width: 900px) {
+  body {
+    background-size: 100vw 100vh;
+    background-repeat: no-repeat;
+  }
+
   .dropdownOption {
     grid-template-columns: repeat(3, 1fr);
     gap: 1em;
@@ -257,6 +269,11 @@ ul {
 }
 
 @media screen and (max-width: 700px) {
+  body {
+    background-size: 300vw 100vh;
+    background-repeat: no-repeat;
+  }
+
   .dropdownOption {
     grid-template-columns: repeat(1, 1fr);
     gap: 1em;
@@ -635,7 +652,7 @@ ul {
 }
 
 .settingsBtn {
-  background-color: var(--main-bg-dark);
+  background-color: transparent;
   display: flex;
   padding: 8px 5px 5px 5px;
   border: none;
