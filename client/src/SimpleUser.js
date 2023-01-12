@@ -11,6 +11,7 @@ export default function SimpleUser({ loggedIn, setLoggedIn }) {
   const promptRef = useRef();
   const [isImg2Img, setisImg2Img] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [pending, setPending] = useState(false);
   const [frames, setFrames] = useState("15");
   const [width, setWidth] = useState("640");
   const [height, setHeight] = useState("640");
@@ -98,13 +99,16 @@ export default function SimpleUser({ loggedIn, setLoggedIn }) {
       switch (status.status) {
         case "pending":
           // setProgress(status.progress)
+          setPending(true);
           break;
         case "generating":
+          setPending(false);
           setProgress(status.progress.progress);
           // setProgress(status.progress)
           break;
         case "done":
           getCreatedVideo();
+          setLoading(false);
           return;
         case "error":
           setLoading(false);
@@ -252,66 +256,70 @@ export default function SimpleUser({ loggedIn, setLoggedIn }) {
                 src={loadingAnimation}
                 alt="loading thingy"
               />
-              <div className="progress-bar">
-                <div
-                  className="progress"
-                  style={{ width: `${progress * 100}%` }}
-                ></div>
-              </div>
-              <p style={{ color: `var(--main-bg-light)` }}>
-                {" "}
-                Progress: {Math.round(progress * 10000) / 100}%
-              </p>
-            </div>
-          ) : null}
-        </div>
-        {loading ? (
-          <></>
-        ) : (
-          <div className="promptContainerDiv">
-            <div className="promptDiv">
-              <input
-                className="prompt"  
-                ref={promptRef}
-                placeholder="Enter Text Prompt..."
-                onSubmit={createJob}
-                onKeyDown={handleKeyDown}
-              ></input>
-              <button className="promptButton tooltip" onClick={addPrompt}>
-                Add Prompt
-                <span className="tooltiptext">
-                  Add extra prompts for semantic interpolation
-                </span>
-              </button>
-            </div>
-            <div className="promptsContainer">
-              {prompts.map((prompt, index) => {
-                return (
-                  <div key={index} className="promptsList">
-                    <span> {prompt} </span>
-                    <button
-                      onClick={() => {
-                        setPrompts(prompts.filter((_, i) => i !== index));
-                      }}
-                      className="removePrompt"
-                    >
-                      <div className="horizontal"></div>
-                    </button>
+              {pending ?
+                (<div>
+                  <p style={{ color: `var(--main-bg-light)`, textAlign: 'center', width: '50vw  ' }}>Waiting for machine...</p>
+                </div>) :
+                (<>
+                  <div className="progress-bar">
+                    <div
+                      className="progress"
+                      style={{ width: `${progress * 100}%` }}
+                    ></div>
                   </div>
-                );
-              })}
+                  <p style={{ color: `var(--main-bg-light)` }}>
+                    {" "}
+                    Progress: {Math.round(progress * 10000) / 100}%
+                  </p>
+                </>)}
             </div>
-            <div className="flexBelowSearch">
-              <button className="promptButton" onClick={createJob}>
-                Generate Video
-              </button>
-              <button className="settingsBtn" onClick={dropOptions}>
-                <img className="settingsImg" src={settings} />
-              </button>
-            </div>
-          </div>
-        )}
-
+          ) :
+            (
+              <div className="promptContainerDiv">
+                <div className="promptDiv">
+                  <input
+                    className="prompt"
+                    ref={promptRef}
+                    placeholder="Enter Text Prompt..."
+                    onSubmit={createJob}
+                    onKeyDown={handleKeyDown}
+                  ></input>
+                  <button className="promptButton tooltip" onClick={addPrompt}>
+                    Add Prompt
+                    <span className="tooltiptext">
+                      Add extra prompts for semantic interpolation
+                    </span>
+                  </button>
+                </div>
+                <div className="promptsContainer">
+                  {prompts.map((prompt, index) => {
+                    return (
+                      <div key={index} className="promptsList">
+                        <span> {prompt} </span>
+                        <button
+                          onClick={() => {
+                            setPrompts(prompts.filter((_, i) => i !== index));
+                          }}
+                          className="removePrompt"
+                        >
+                          <div className="horizontal"></div>
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="flexBelowSearch">
+                  <button className="promptButton" onClick={createJob}>
+                    Generate Video
+                  </button>
+                  <button className="settingsBtn" onClick={dropOptions}>
+                    <img className="settingsImg" src={settings} />
+                  </button>
+                </div>
+              </div>
+            )
+          }
+        </div>
         {/* <div className='frameDiv'>
           <FrameSelect srcs={frames} selectFunction={selectFunction} getNewFrame={getNewFrame}></FrameSelect>
         </div> */}
