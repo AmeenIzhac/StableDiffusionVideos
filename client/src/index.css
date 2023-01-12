@@ -86,7 +86,7 @@ ul {
   background-color: var(--main-bg-dark);
   padding: 12px;
   font-size: 20px;
-  /* color: var(--main-bg-light); */
+  color: white;
   border: none;
   border-bottom: 3px solid var(--main-bg-light);
   border-width: 0.3rem;
@@ -650,5 +650,3 @@ ul {
 .settingsBtn:hover {
   background-color: rgba(154, 78, 174, 0.4);
 }
-
-
