@@ -82,13 +82,14 @@ def api():
 
     video_args.strength = float(args.get('strength'))
 
-    video_args.upscale = bool(args.get('upscale'))
+    video_args.upscale = True if args.get('upscale') == 'true' else False
 
 
     #delete the previous one
     empty_dir(path_args.image_path)
     empty_dir(path_args.video_path)
 
+    video_args.seed = 1000
     # Generate video
     if args.get('isImg2Img') == 'true':
         generate_video(image_args, video_args, path_args, model, progress)
