@@ -9,6 +9,7 @@ body {
   background-color: var(--main-bg-dark);
   background-image: url('./assets/background.jpg');
   background-size: 200vw 100vh ;
+  background-attachment: fixed;
 }
 
 :root {
