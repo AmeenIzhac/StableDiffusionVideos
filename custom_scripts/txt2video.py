@@ -276,8 +276,6 @@ def init_video_gen(video_args, model_state, path_args):
     if seed < 0 :
         seed = random.randint(0, 10 ** 6)
     seed_everything(seed)
-    
-    model_state.sampler = KDiffusionSampler(model_state.model, video_args.sampler)
 
     #
     # Place here DIR variables if necessary
@@ -327,7 +325,7 @@ def compile_video(video_args, path_args, base_count, model_state):
 
     video_save_path = os.path.abspath(os.path.join(path_args.video_path, video_name))
     print(f'\n\n\n\nCOMPILING VIDEO WITH PATH {video_save_path} \n\n\n\n')
-    if video_args.interp_exp > 0: #we perform motion interpolation
+    if True or video_args.interp_exp > 0: #we perform motion interpolation
         #TODO make the interp_exp a interp_factor parameter, ensure it is a multiple of 2 and do some log to get it (probably bit shift)
         motion_interpolation(path_args.image_path, video_save_path, video_args.fps, frames_count=video_args.frames, exp=video_args.interp_exp, starting_frame=base_count, ms=model_state, scale=1.0, codec='avc1') #TODO add the feature to start at some image
     else:
@@ -340,15 +338,15 @@ def frame_path(frame_number, path_args):
     return os.path.join(path_args.image_path, f"{frame_number:05}.png")
 
 def move_FS_UN_to_gpu(model_state):
-    model_state.model.to(model_state.device, non_blocking=False) #move the UNet model to gpu
-    model_state.FS.to(model_state.device, non_blocking=False) #move the autoencoder to gpu
-    time.sleep(0.5)
+    model_state.model = model_state.model.to(model_state.device, non_blocking=False) #move the UNet model to gpu
+    model_state.FS = model_state.FS.to(model_state.device, non_blocking=False) #move the autoencoder to gpu
+    #time.sleep(10)
 
 def move_FS_UN_to_cpu(model_state):
     if model_state.device != "cpu":
         mem = torch.cuda.memory_allocated() / 1e6
-        model_state.FS.to("cpu", non_blocking=False)
-        model_state.model.to("cpu", non_blocking=False)
+        model_state.FS = model_state.FS.to("cpu", non_blocking=False)
+        model_state.model = model_state.model.to("cpu", non_blocking=False)
         while torch.cuda.memory_allocated() / 1e6 >= mem:
             time.sleep(0.1)
 
@@ -374,6 +372,7 @@ def generate_video (
             C, uc = generate_embeddings(video_args.prompts, model_state)
 
             move_FS_UN_to_gpu(model_state)
+            model_state.sampler = KDiffusionSampler(model_state.model, video_args.sampler)
 
             # Init thread pool
             num_workers = 1
