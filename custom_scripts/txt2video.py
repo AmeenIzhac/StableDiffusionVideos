@@ -11,6 +11,7 @@ from pytorch_lightning import seed_everything
 from torch import autocast
 import random
 from concurrent.futures import ThreadPoolExecutor
+import time
 
 #repo imports
 from sd_video_utils import *
@@ -255,7 +256,7 @@ def generate_image (
 ) :
     if x is None: #doing txt2img with noise to be generated
         shape = [batch_size, ia.C, ia.H // ia.f, ia.W // ia.f]
-        x = torch.randn(shape, device=ms.device)
+        x = torch.randn(shape, device=ms.device) #if this happens before the movement to the gpu of the model, we're screwed
         samples, _ = ms.sampler.sample(S=ia.steps, conditioning=c, unconditional_guidance_scale=ia.scale,
                                 unconditional_conditioning=uc, x_T=x)
     else:
@@ -341,6 +342,7 @@ def frame_path(frame_number, path_args):
 def move_FS_UN_to_gpu(model_state):
     model_state.model.to(model_state.device, non_blocking=False) #move the UNet model to gpu
     model_state.FS.to(model_state.device, non_blocking=False) #move the autoencoder to gpu
+    time.sleep(0.5)
 
 def move_FS_UN_to_cpu(model_state):
     if model_state.device != "cpu":
@@ -455,7 +457,7 @@ def generate_video (
                     progress_var.x = (i+1) / video_args.frames
 
             #Free some video memory by pushing the auto-encoder and the UNet to RAM 
-            move_FS_UN_to_cpu
+            move_FS_UN_to_cpu(model_state)
 
             # Wait for upscaling/saving to finish
             pool.shutdown()
